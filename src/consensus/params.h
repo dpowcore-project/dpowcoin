@@ -118,6 +118,8 @@ struct Params {
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
     int64_t nPowTargetTimespan;
+    /**LWMA3 diff algo */
+    int64_t lwmaAveragingWindow;
     std::chrono::seconds PowTargetSpacing() const
     {
         return std::chrono::seconds{nPowTargetSpacing};
@@ -129,7 +131,7 @@ struct Params {
     uint256 defaultAssumeValid;
 
     /**
-     * If true, witness commitments contain a payload equal to a Bitcoin Script solution
+     * If true, witness commitments contain a payload equal to a Dpowcoin Script solution
      * to the signet challenge. See BIP325.
      */
     bool signet_blocks{false};

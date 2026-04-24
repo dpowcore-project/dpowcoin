@@ -139,7 +139,15 @@ static bool GenerateBlock(ChainstateManager& chainman, CBlock&& block, uint64_t&
     block_out.reset();
     block.hashMerkleRoot = BlockMerkleRoot(block);
 
-    while (max_tries > 0 && block.nNonce < std::numeric_limits<uint32_t>::max() && !CheckProofOfWork(block.GetHash(), block.nBits, chainman.GetConsensus()) && !chainman.m_interrupt) {
+    // Dual PoW (SECURITY-FIXES.md C3): yespower first (cheap), argon2id second
+    // (expensive). Both must pass; short-circuit on yespower for mining loop
+    // throughput.
+    auto dual_pow_ok = [&]() {
+        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, chainman.GetConsensus())) return false;
+        if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, chainman.GetConsensus())) return false;
+        return true;
+    };
+    while (max_tries > 0 && block.nNonce < std::numeric_limits<uint32_t>::max() && !dual_pow_ok() && !chainman.m_interrupt) {
         ++block.nNonce;
         --max_tries;
     }

@@ -2281,8 +2281,9 @@ DisconnectResult Chainstate::DisconnectBlock(const CBlock& block, const CBlockIn
     // Note: the blocks specified here are different than the ones used in ConnectBlock because DisconnectBlock
     // unwinds the blocks in reverse. As a result, the inconsistency is not discovered until the earlier
     // blocks with the duplicate coinbase transactions are disconnected.
-    bool fEnforceBIP30 = !((pindex->nHeight==91722 && pindex->GetBlockHash() == uint256{"00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"}) ||
-                           (pindex->nHeight==91812 && pindex->GetBlockHash() == uint256{"00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"}));
+    // Dpowcoin: BIP30 historical exceptions (Bitcoin blocks 91722/91812) don't
+    // exist on our chain, so always enforce BIP30. See dpowcoin fork rationale.
+    bool fEnforceBIP30 = true;
 
     // undo transactions in reverse order
     for (int i = block.vtx.size() - 1; i >= 0; i--) {
@@ -2473,7 +2474,10 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // Now that the whole chain is irreversibly beyond that time it is applied to all blocks except the
     // two in the chain that violate it. This prevents exploiting the issue against nodes during their
     // initial block download.
-    bool fEnforceBIP30 = !IsBIP30Repeat(*pindex);
+    // We don have that blocks so skip BIP30 tx's
+    //bool fEnforceBIP30 = !IsBIP30Repeat(*pindex);
+
+    bool fEnforceBIP30 = true;
 
     // Once BIP34 activated it was not possible to create new duplicate coinbases and thus other than starting
     // with the 2 existing duplicate coinbase pairs, not possible to create overwriting txs.  But by the
@@ -2501,7 +2505,11 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // future consensus change to do a new and improved version of BIP34 that
     // will actually prevent ever creating any duplicate coinbases in the
     // future.
+
+    // We don have that blocks so skip BIP30 tx's
+    /*
     static constexpr int BIP34_IMPLIES_BIP30_LIMIT = 1983702;
+    */
 
     // There is no potential to create a duplicate coinbase at block 209,921
     // because this is still before the BIP34 height and so explicit BIP30
@@ -2538,7 +2546,14 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // TODO: Remove BIP30 checking from block height 1,983,702 on, once we have a
     // consensus change that ensures coinbases at those heights cannot
     // duplicate earlier coinbases.
+
+    // We don have that blocks so skip BIP30 tx's
+
+    /*
     if (fEnforceBIP30 || pindex->nHeight >= BIP34_IMPLIES_BIP30_LIMIT) {
+    */
+
+    if (fEnforceBIP30) {
         for (const auto& tx : block.vtx) {
             for (size_t o = 0; o < tx->vout.size(); o++) {
                 if (view.HaveCoin(COutPoint(tx->GetHash(), o))) {
@@ -3923,9 +3938,20 @@ void ChainstateManager::ReceivedBlockTransactions(const CBlock& block, CBlockInd
 
 static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
-        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
+    // Dual PoW: yespower AND argon2id must both satisfy nBits.
+    //
+    // SECURITY-FIXES.md C1 — short-circuit order is consensus-preserving (AND
+    // is commutative) but DoS-critical: yespower is ~1–5 ms / 2–4 MB while
+    // Argon2id is ~50–200 ms / 32 MB. Peers flooding us with headers that fail
+    // yespower must NOT be able to force Argon2id evaluation.
+    if (fCheckPOW) {
+        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash-yespower", "proof of work failed (yespower)");
+        }
+        if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, consensusParams)) {
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash-argon2id", "proof of work failed (argon2id)");
+        }
+    }
 
     return true;
 }
@@ -4119,8 +4145,15 @@ std::vector<unsigned char> ChainstateManager::GenerateCoinbaseCommitment(CBlock&
 
 bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams)
 {
+    // Dual PoW short-circuit (SECURITY-FIXES.md C1): yespower first as a cheap
+    // rate-limiter so peers cannot force Argon2id (~32 MB, ~100 ms) over whole
+    // batches of junk headers during anti-DoS headers-sync.
     return std::all_of(headers.cbegin(), headers.cend(),
-            [&](const auto& header) { return CheckProofOfWork(header.GetHash(), header.nBits, consensusParams);});
+            [&](const auto& header) {
+                if (!CheckProofOfWork(header.GetYespowerPoWHash(), header.nBits, consensusParams)) return false;
+                if (!CheckProofOfWork(header.GetArgon2idPoWHash(), header.nBits, consensusParams)) return false;
+                return true;
+            });
 }
 
 bool IsBlockMutated(const CBlock& block, bool check_witness_root)
@@ -6316,6 +6349,10 @@ Chainstate& ChainstateManager::ActivateExistingSnapshot(uint256 base_blockhash)
     return *m_snapshot_chainstate;
 }
 
+// Dpowcoin: BIP30 historical exception blocks from Bitcoin mainnet (91722,
+// 91812, 91842, 91880) don't exist on our chain. The helpers below are kept
+// as commented reference so any future backport from upstream is easy to map.
+/*
 bool IsBIP30Repeat(const CBlockIndex& block_index)
 {
     return (block_index.nHeight==91842 && block_index.GetBlockHash() == uint256{"00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"}) ||
@@ -6327,6 +6364,7 @@ bool IsBIP30Unspendable(const uint256& block_hash, int block_height)
     return (block_height==91722 && block_hash == uint256{"00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"}) ||
            (block_height==91812 && block_hash == uint256{"00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"});
 }
+*/
 
 static fs::path GetSnapshotCoinsDBPath(Chainstate& cs) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
 {
