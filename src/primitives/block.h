@@ -53,6 +53,10 @@ public:
 
     uint256 GetHash() const;
 
+    uint256 GetYespowerPoWHash() const; // Yespower
+
+    uint256 GetArgon2idPoWHash() const; // Argon2id
+
     NodeSeconds Time() const
     {
         return NodeSeconds{std::chrono::seconds{nTime}};
