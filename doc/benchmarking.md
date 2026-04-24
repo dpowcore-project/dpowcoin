@@ -1,7 +1,7 @@
 Benchmarking
 ============
 
-Bitcoin Core has an internal benchmarking framework, with benchmarks
+Dpowcoin Core has an internal benchmarking framework, with benchmarks
 for cryptographic algorithms (e.g. SHA1, SHA256, SHA512, RIPEMD160, Poly1305, ChaCha20), rolling bloom filter, coins selection,
 thread queue, wallet balance.
 
@@ -16,7 +16,7 @@ and lock analysis.
     cmake -B build -DBUILD_BENCH=ON
     cmake --build build -t bench_bitcoin
 
-After compiling bitcoin-core, the benchmarks can be run with:
+After compiling dpowcoin-core, the benchmarks can be run with:
 
     build/bin/bench_bitcoin
 
@@ -74,4 +74,4 @@ specifically aimed at exploring the possible input space.
 Going Further
 --------------------
 
-To monitor Bitcoin Core performance more in depth (like reindex or IBD): https://github.com/bitcoin-dev-tools/benchcoin
+To monitor Dpowcoin Core performance more in depth (like reindex or IBD): https://github.com/dpowcoin-dev-tools/benchcoin

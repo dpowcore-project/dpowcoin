@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (c) 2015-2022 The Bitcoin Core developers
+# Copyright (c) 2015-2022 The Dpowcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test decoding scripts via decodescript RPC command."""
@@ -275,7 +275,7 @@ class DecodeScriptTest(BitcoinTestFramework):
 
     def decodescript_miniscript(self):
         """Check that a Miniscript is decoded when possible under P2WSH context."""
-        # Sourced from https://github.com/bitcoin/bitcoin/pull/27037#issuecomment-1416151907.
+        # Sourced from https://github.com/dpowcoin/dpowcoin/pull/27037#issuecomment-1416151907.
         # Miniscript-compatible offered HTLC
         res = self.nodes[0].decodescript("82012088a914ffffffffffffffffffffffffffffffffffffffff88210250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0ad51b2")
         assert res["segwit"]["desc"] == "wsh(and_v(and_v(v:hash160(ffffffffffffffffffffffffffffffffffffffff),v:pk(0250929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0)),older(1)))#gm8xz4fl"

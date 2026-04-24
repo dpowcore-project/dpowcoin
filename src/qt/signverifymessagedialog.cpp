@@ -1,4 +1,4 @@
-// Copyright (c) 2011-present The Bitcoin Core developers
+// Copyright (c) 2011-present The Dpowcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,7 +11,7 @@
 #include <qt/walletmodel.h>
 
 #include <common/signmessage.h>
-#include <bitcoin-build-config.h> // IWYU pragma: keep
+#include <dpowcoin-build-config.h> // IWYU pragma: keep
 #include <key_io.h>
 #include <wallet/wallet.h>
 

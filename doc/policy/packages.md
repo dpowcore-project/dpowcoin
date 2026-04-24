@@ -117,7 +117,7 @@ Note: Package feerate cannot be used to meet the minimum relay feerate (`-minrel
 requirement. For example, if the mempool minimum feerate is 5sat/vB and the minimum relay feerate is
 set to 5sat/vB, a 1sat/vB parent transaction with a high-feerate child will not be accepted, even if
 submitted as a package. Note that this rule does not apply to
-[TRUC transactions](https://github.com/bitcoin/bips/blob/master/bip-0431.mediawiki) as an individual
+[TRUC transactions](https://github.com/dpowcoin/bips/blob/master/bip-0431.mediawiki) as an individual
 TRUC transaction is permitted to be below the mempool min relay feerate, assuming it is considered within
 a package that meets the mempool's feerate requirements.
 

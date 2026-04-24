@@ -1,12 +1,12 @@
-Bitcoin Core version 0.17.0.1 is now available from:
+Dpowcoin Core version 0.17.0.1 is now available from:
 
-  <https://bitcoincore.org/bin/bitcoin-core-0.17.0.1/>
+  <https://bitcoincore.org/bin/dpowcoin-core-0.17.0.1/>
 
 This release provides a minor bug fix for 0.17.0.
 
 Please report bugs using the issue tracker at GitHub:
 
-  <https://github.com/bitcoin/bitcoin/issues>
+  <https://github.com/dpowcoin/dpowcoin/issues>
 
 To receive security and update notifications, please subscribe to:
 

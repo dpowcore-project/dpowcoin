@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2014 BitPay Inc.
-# Copyright 2016-present The Bitcoin Core developers
+# Copyright 2016-present The Dpowcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or https://opensource.org/license/mit.
 """Exercise the utils via json-defined tests."""
@@ -28,7 +28,7 @@ class ToolUtils(BitcoinTestFramework):
     def run_test(self):
         self.testcase_dir = Path(self.config["environment"]["SRCDIR"]) / "test" / "functional" / "data" / "util"
         self.bins = self.get_binaries()
-        with open(self.testcase_dir / "bitcoin-util-test.json", encoding="utf8") as f:
+        with open(self.testcase_dir / "dpowcoin-util-test.json", encoding="utf8") as f:
             input_data = json.loads(f.read())
 
         for i, test_obj in enumerate(input_data):
@@ -42,9 +42,9 @@ class ToolUtils(BitcoinTestFramework):
         are not as expected. Error is caught by bctester() and reported.
         """
         # Get the exec names and arguments
-        if testObj["exec"] == "./bitcoin-util":
+        if testObj["exec"] == "./dpowcoin-util":
             execrun = self.bins.util_argv() + testObj["args"]
-        elif testObj["exec"] == "./bitcoin-tx":
+        elif testObj["exec"] == "./dpowcoin-tx":
             execrun = self.bins.tx_argv() + testObj["args"]
 
         # Read the input data (if there is any)

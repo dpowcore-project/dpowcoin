@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Bitcoin Developers
+// Copyright (c) 2023 Dpowcoin Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,11 +12,11 @@ class BitcoinModule final : public clang::tidy::ClangTidyModule
 public:
     void addCheckFactories(clang::tidy::ClangTidyCheckFactories& CheckFactories) override
     {
-        CheckFactories.registerCheck<bitcoin::NonTrivialThreadLocal>("bitcoin-nontrivial-threadlocal");
+        CheckFactories.registerCheck<dpowcoin::NonTrivialThreadLocal>("dpowcoin-nontrivial-threadlocal");
     }
 };
 
 static clang::tidy::ClangTidyModuleRegistry::Add<BitcoinModule>
-    X("bitcoin-module", "Adds bitcoin checks.");
+    X("dpowcoin-module", "Adds dpowcoin checks.");
 
 volatile int BitcoinModuleAnchorSource = 0;

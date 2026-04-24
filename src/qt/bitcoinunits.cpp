@@ -1,4 +1,4 @@
-// Copyright (c) 2011-2021 The Bitcoin Core developers
+// Copyright (c) 2011-2021 The Dpowcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -21,7 +21,7 @@ BitcoinUnits::BitcoinUnits(QObject *parent):
 QList<BitcoinUnit> BitcoinUnits::availableUnits()
 {
     QList<BitcoinUnit> unitlist;
-    unitlist.append(Unit::BTC);
+    unitlist.append(Unit::DPC);
     unitlist.append(Unit::mBTC);
     unitlist.append(Unit::uBTC);
     unitlist.append(Unit::SAT);
@@ -31,7 +31,7 @@ QList<BitcoinUnit> BitcoinUnits::availableUnits()
 QString BitcoinUnits::longName(Unit unit)
 {
     switch (unit) {
-    case Unit::BTC: return QString("BTC");
+    case Unit::DPC: return QString("DPC");
     case Unit::mBTC: return QString("mBTC");
     case Unit::uBTC: return QString::fromUtf8("µBTC (bits)");
     case Unit::SAT: return QString("Satoshi (sat)");
@@ -42,7 +42,7 @@ QString BitcoinUnits::longName(Unit unit)
 QString BitcoinUnits::shortName(Unit unit)
 {
     switch (unit) {
-    case Unit::BTC: return longName(unit);
+    case Unit::DPC: return longName(unit);
     case Unit::mBTC: return longName(unit);
     case Unit::uBTC: return QString("bits");
     case Unit::SAT: return QString("sat");
@@ -53,7 +53,7 @@ QString BitcoinUnits::shortName(Unit unit)
 QString BitcoinUnits::description(Unit unit)
 {
     switch (unit) {
-    case Unit::BTC: return QString("Bitcoins");
+    case Unit::DPC: return QString("Bitcoins");
     case Unit::mBTC: return QString("Milli-Bitcoins (1 / 1" THIN_SP_UTF8 "000)");
     case Unit::uBTC: return QString("Micro-Bitcoins (bits) (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
     case Unit::SAT: return QString("Satoshi (sat) (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
@@ -64,7 +64,7 @@ QString BitcoinUnits::description(Unit unit)
 qint64 BitcoinUnits::factor(Unit unit)
 {
     switch (unit) {
-    case Unit::BTC: return 100'000'000;
+    case Unit::DPC: return 100'000'000;
     case Unit::mBTC: return 100'000;
     case Unit::uBTC: return 100;
     case Unit::SAT: return 1;
@@ -75,7 +75,7 @@ qint64 BitcoinUnits::factor(Unit unit)
 int BitcoinUnits::decimals(Unit unit)
 {
     switch (unit) {
-    case Unit::BTC: return 8;
+    case Unit::DPC: return 8;
     case Unit::mBTC: return 5;
     case Unit::uBTC: return 2;
     case Unit::SAT: return 0;
@@ -232,7 +232,7 @@ namespace {
 qint8 ToQint8(BitcoinUnit unit)
 {
     switch (unit) {
-    case BitcoinUnit::BTC: return 0;
+    case BitcoinUnit::DPC: return 0;
     case BitcoinUnit::mBTC: return 1;
     case BitcoinUnit::uBTC: return 2;
     case BitcoinUnit::SAT: return 3;
@@ -243,7 +243,7 @@ qint8 ToQint8(BitcoinUnit unit)
 BitcoinUnit FromQint8(qint8 num)
 {
     switch (num) {
-    case 0: return BitcoinUnit::BTC;
+    case 0: return BitcoinUnit::DPC;
     case 1: return BitcoinUnit::mBTC;
     case 2: return BitcoinUnit::uBTC;
     case 3: return BitcoinUnit::SAT;
