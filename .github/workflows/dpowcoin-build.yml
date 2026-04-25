@@ -64,7 +64,7 @@ jobs:
             -DBUILD_FUZZ_BINARY=OFF \
             -DBUILD_TESTS=ON \
             -DENABLE_WALLET=ON \
-            -DWITH_BDB=OFF \
+            -DENABLE_IPC=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache 2>&1 | tee cmake-configure.log
           tail -50 cmake-configure.log
