@@ -83,23 +83,23 @@ class Binaries:
     def rpc_argv(self):
         "Return argv array that should be used to invoke dpowcoin-cli"
         # Add -nonamed because "dpowcoin rpc" enables -named by default, but dpowcoin-cli doesn't
-        return self._argv("rpc", self.paths.bitcoincli) + ["-nonamed"]
+        return self._argv("rpc", self.paths.dpowcoincli) + ["-nonamed"]
 
     def tx_argv(self):
         "Return argv array that should be used to invoke dpowcoin-tx"
-        return self._argv("tx", self.paths.bitcointx)
+        return self._argv("tx", self.paths.dpowcointx)
 
     def util_argv(self):
         "Return argv array that should be used to invoke dpowcoin-util"
-        return self._argv("util", self.paths.bitcoinutil)
+        return self._argv("util", self.paths.dpowcoinutil)
 
     def wallet_argv(self):
         "Return argv array that should be used to invoke dpowcoin-wallet"
-        return self._argv("wallet", self.paths.bitcoinwallet)
+        return self._argv("wallet", self.paths.dpowcoinwallet)
 
     def chainstate_argv(self):
         "Return argv array that should be used to invoke dpowcoin-chainstate"
-        return self._argv("chainstate", self.paths.bitcoinchainstate)
+        return self._argv("chainstate", self.paths.dpowcoinchainstate)
 
     def _argv(self, command, bin_path, need_ipc=False):
         """Return argv array that should be used to invoke the command. It
@@ -112,7 +112,7 @@ class Binaries:
         elif self.paths.bitcoin_cmd is not None or need_ipc:
             # If the current test needs IPC functionality, use the dpowcoin
             # wrapper binary and append -m so it calls multiprocess binaries.
-            bitcoin_cmd = self.paths.bitcoin_cmd or [self.paths.bitcoin_bin]
+            bitcoin_cmd = self.paths.bitcoin_cmd or [self.paths.dpowcoin_bin]
             return bitcoin_cmd + (["-m"] if need_ipc else []) + [command]
         else:
             return [bin_path]
@@ -282,13 +282,13 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
 
         paths = types.SimpleNamespace()
         binaries = {
-            "dpowcoin": "BITCOIN_BIN",
-            "dpowcoind": "BITCOIND",
-            "dpowcoin-cli": "BITCOINCLI",
-            "dpowcoin-util": "BITCOINUTIL",
-            "dpowcoin-tx": "BITCOINTX",
-            "dpowcoin-chainstate": "BITCOINCHAINSTATE",
-            "dpowcoin-wallet": "BITCOINWALLET",
+            "dpowcoin": "DPOWCOIN_BIN",
+            "dpowcoind": "DPOWCOIND",
+            "dpowcoin-cli": "DPOWCOINCLI",
+            "dpowcoin-util": "DPOWCOINUTIL",
+            "dpowcoin-tx": "DPOWCOINTX",
+            "dpowcoin-chainstate": "DPOWCOINCHAINSTATE",
+            "dpowcoin-wallet": "DPOWCOINWALLET",
         }
         # Set paths to dpowcoin core binaries allowing overrides with environment
         # variables.
