@@ -53,7 +53,6 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             build-essential cmake ninja-build pkg-config ccache \
             libboost-dev libevent-dev libsqlite3-dev \
-            libssl-dev libdb5.3++-dev systemtap-sdt-dev \
             python3
 
       - name: Configure (cmake)
@@ -65,8 +64,10 @@ jobs:
             -DBUILD_FUZZ_BINARY=OFF \
             -DBUILD_TESTS=ON \
             -DENABLE_WALLET=ON \
+            -DWITH_BDB=OFF \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache 2>&1 | tee cmake-configure.log
+          tail -50 cmake-configure.log
 
       - name: Build
         run: cmake --build build -j"$(nproc)"
