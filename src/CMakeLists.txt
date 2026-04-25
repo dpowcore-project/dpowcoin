@@ -75,6 +75,7 @@ target_link_libraries(bitcoin_consensus
   PRIVATE
     core_interface
     bitcoin_crypto
+    dpowcoin_crypto_dualpow
     secp256k1
 )
 
@@ -289,31 +290,31 @@ target_link_libraries(bitcoin_node
 
 # Bitcoin wrapper executable that can call other executables.
 if(BUILD_BITCOIN_BIN)
-  add_executable(bitcoin bitcoin.cpp)
-  add_windows_resources(bitcoin bitcoin-res.rc)
-  add_windows_application_manifest(bitcoin)
-  target_link_libraries(bitcoin core_interface bitcoin_common bitcoin_util)
-  install_binary_component(bitcoin HAS_MANPAGE)
+  add_executable(dpowcoin dpowcoin.cpp)
+  add_windows_resources(dpowcoin bitcoin-res.rc)
+  add_windows_application_manifest(dpowcoin)
+  target_link_libraries(dpowcoin core_interface bitcoin_common bitcoin_util)
+  install_binary_component(dpowcoin HAS_MANPAGE)
 endif()
 
 # Bitcoin Core bitcoind.
 if(BUILD_DAEMON)
-  add_executable(bitcoind
-    bitcoind.cpp
-    init/bitcoind.cpp
+  add_executable(dpowcoind
+    dpowcoind.cpp
+    init/dpowcoind.cpp
   )
-  add_windows_resources(bitcoind bitcoind-res.rc)
-  add_windows_application_manifest(bitcoind)
-  target_link_libraries(bitcoind
+  add_windows_resources(dpowcoind dpowcoind-res.rc)
+  add_windows_application_manifest(dpowcoind)
+  target_link_libraries(dpowcoind
     core_interface
     bitcoin_node
     $<TARGET_NAME_IF_EXISTS:bitcoin_wallet>
   )
-  install_binary_component(bitcoind HAS_MANPAGE)
+  install_binary_component(dpowcoind HAS_MANPAGE)
 endif()
 if(ENABLE_IPC AND BUILD_DAEMON)
   add_executable(bitcoin-node
-    bitcoind.cpp
+    dpowcoind.cpp
     init/bitcoin-node.cpp
   )
   target_link_libraries(bitcoin-node
@@ -355,10 +356,10 @@ target_link_libraries(bitcoin_cli
 
 # Bitcoin Core RPC client
 if(BUILD_CLI)
-  add_executable(bitcoin-cli bitcoin-cli.cpp)
-  add_windows_resources(bitcoin-cli bitcoin-cli-res.rc)
-  add_windows_application_manifest(bitcoin-cli)
-  target_link_libraries(bitcoin-cli
+  add_executable(dpowcoin-cli dpowcoin-cli.cpp)
+  add_windows_resources(dpowcoin-cli dpowcoin-cli-res.rc)
+  add_windows_application_manifest(dpowcoin-cli)
+  target_link_libraries(dpowcoin-cli
     core_interface
     bitcoin_cli
     bitcoin_common
@@ -366,21 +367,21 @@ if(BUILD_CLI)
     libevent::core
     libevent::extra
   )
-  install_binary_component(bitcoin-cli HAS_MANPAGE)
+  install_binary_component(dpowcoin-cli HAS_MANPAGE)
 endif()
 
 
 if(BUILD_TX)
-  add_executable(bitcoin-tx bitcoin-tx.cpp)
-  add_windows_resources(bitcoin-tx bitcoin-tx-res.rc)
-  add_windows_application_manifest(bitcoin-tx)
-  target_link_libraries(bitcoin-tx
+  add_executable(dpowcoin-tx dpowcoin-tx.cpp)
+  add_windows_resources(dpowcoin-tx dpowcoin-tx-res.rc)
+  add_windows_application_manifest(dpowcoin-tx)
+  target_link_libraries(dpowcoin-tx
     core_interface
     bitcoin_common
     bitcoin_util
     univalue
   )
-  install_binary_component(bitcoin-tx HAS_MANPAGE)
+  install_binary_component(dpowcoin-tx HAS_MANPAGE)
 endif()
 
 
