@@ -574,7 +574,7 @@ static RPCHelpMan getblockhash()
 static RPCHelpMan getyespowerpowhash()
 {
     return RPCHelpMan{"getyespowerpowhash",
-                "\nReturns hash of block in best-block-chain at height provided.\n",
+                "Returns the yespower PoW hash of the block in best-block-chain at the height provided.",
                 {
                     {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
                 },
@@ -603,7 +603,7 @@ static RPCHelpMan getyespowerpowhash()
 static RPCHelpMan getargon2idpowhash()
 {
     return RPCHelpMan{"getargon2idpowhash",
-                "\nReturns hash of block in best-block-chain at height provided.\n",
+                "Returns the chained Argon2id PoW hash of the block in best-block-chain at the height provided.",
                 {
                     {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
                 },

@@ -136,6 +136,10 @@ public:
 
         genesis = CreateGenesisBlock(1713510000, 8808588, 0x1f1fffff, 1, 50 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
+        // SECURITY-FIXES.md H1 — Genesis is exempt from runtime Dual PoW
+        // checks (see CheckProofOfWork short-circuit, C1). The genesis nonce
+        // (8808588) was mined under BOTH yespower and chained-Argon2id at
+        // height=0; the immutable hash assertion below pins that result.
         assert(consensus.hashGenesisBlock == uint256{"d86f8a0582e779830f182befeaaabc8c73a159b6b06530910758daf17ce31e36"});
         assert(genesis.hashMerkleRoot == uint256{"10f5376e5169449acf540bb89615fb337319bb5e31de16f792665bf6e3518eb3"});
 
