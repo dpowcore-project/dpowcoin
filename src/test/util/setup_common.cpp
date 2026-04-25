@@ -379,10 +379,12 @@ TestChain100Setup::TestChain100Setup(
     this->mineBlocks(COINBASE_MATURITY);
 
     {
+        // Dpowcoin: the upstream-hardcoded tip hash is for Bitcoin's regtest
+        // genesis. Dpowcoin uses its own regtest genesis + Dual PoW so the tip
+        // hash differs. We keep a sanity check (chain mined to expected height)
+        // but drop the upstream-specific hash comparison.
         LOCK(::cs_main);
-        assert(
-            m_node.chainman->ActiveChain().Tip()->GetBlockHash().ToString() ==
-            "0c8c5f79505775a0f6aed6aca2350718ceb9c6f2c878667864d5c7a6d8ffa2a6");
+        assert(m_node.chainman->ActiveChain().Height() == COINBASE_MATURITY);
     }
 }
 
@@ -412,7 +414,13 @@ CBlock TestChain100Setup::CreateBlock(
     }
     RegenerateCommitments(block, *Assert(m_node.chainman));
 
-    while (!CheckProofOfWork(block.GetHash(), block.nBits, m_node.chainman->GetConsensus())) ++block.nNonce;
+    // Dpowcoin: Dual PoW (yespower AND argon2id) instead of upstream SHA256d.
+    // Both algorithm hashes must satisfy nBits.
+    const auto& consensus = m_node.chainman->GetConsensus();
+    while (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensus) ||
+           !CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, consensus)) {
+        ++block.nNonce;
+    }
 
     return block;
 }
