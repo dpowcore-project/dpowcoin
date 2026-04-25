@@ -186,7 +186,7 @@ bool PermittedDifficultyTransition(const Consensus::Params& params, int64_t heig
     // stays well within ±30 % per block, so K=4 never fires on a real chain
     // but kills cheap header-flood DoS dead.
     static constexpr int K = 4;
-    const arith_uint256 max_up   = (old_target <= pow_limit / K) ? old_target * K : pow_limit;
+    const arith_uint256 max_up   = (old_target <= pow_limit / K) ? arith_uint256(old_target * K) : pow_limit;
     const arith_uint256 max_down = old_target / K;
     if (new_target > max_up)   return false;
     if (new_target < max_down) return false;

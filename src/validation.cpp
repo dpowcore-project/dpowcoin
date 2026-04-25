@@ -6352,7 +6352,9 @@ Chainstate& ChainstateManager::ActivateExistingSnapshot(uint256 base_blockhash)
 // Dpowcoin: BIP30 historical exception blocks from Bitcoin mainnet (91722,
 // 91812, 91842, 91880) don't exist on our chain. The helpers below are kept
 // as commented reference so any future backport from upstream is easy to map.
-/*
+// dpowcoin: BIP30 helpers — kept active for v30.2 ABI compatibility
+// (coinstatsindex.cpp references IsBIP30Unspendable). The hash/height
+// pairs are Bitcoin mainnet-only so they never match a Dpowcoin block.
 bool IsBIP30Repeat(const CBlockIndex& block_index)
 {
     return (block_index.nHeight==91842 && block_index.GetBlockHash() == uint256{"00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"}) ||
@@ -6364,7 +6366,6 @@ bool IsBIP30Unspendable(const uint256& block_hash, int block_height)
     return (block_height==91722 && block_hash == uint256{"00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"}) ||
            (block_height==91812 && block_hash == uint256{"00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"});
 }
-*/
 
 static fs::path GetSnapshotCoinsDBPath(Chainstate& cs) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
 {

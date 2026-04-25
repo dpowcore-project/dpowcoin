@@ -595,7 +595,7 @@ static RPCHelpMan getyespowerpowhash()
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     const CBlockIndex* pblockindex = active_chain[nHeight];
-    return pblockindex->GetBlockYespowerPoWHash().GetHex();
+    return pblockindex->GetBlockHeader().GetYespowerPoWHash().GetHex();
 },
     };
 }
@@ -624,7 +624,7 @@ static RPCHelpMan getargon2idpowhash()
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     const CBlockIndex* pblockindex = active_chain[nHeight];
-    return pblockindex->GetBlockArgon2idPoWHash().GetHex();
+    return pblockindex->GetBlockHeader().GetArgon2idPoWHash().GetHex();
 },
     };
 }
