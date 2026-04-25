@@ -75,11 +75,17 @@ jobs:
       - name: Verify Dual PoW symbols
         run: |
           # The dpowcoin_crypto_dualpow archive must export both PoW hashes.
-          ar t build/src/crypto/libdpowcoin_crypto_dualpow.a | sort
-          nm -A build/src/crypto/libdpowcoin_crypto_dualpow.a 2>/dev/null \
-            | grep -E "yespower_tls|argon2id_hash_raw" \
-            | head -n 5
-          echo "OK: yespower + argon2id linked into static lib"
+          AR_FILE=build/lib/libdpowcoin_crypto_dualpow.a
+          ar t "$AR_FILE" | sort
+          echo "--- exported text symbols (yespower / argon2d) ---"
+          nm -A "$AR_FILE" 2>/dev/null \
+            | awk '$2=="T"' \
+            | grep -E "yespower_tls|argon2d_hash_raw|argon2d_ctx" \
+            | head -n 10
+          # Fail loudly if either family is missing.
+          nm "$AR_FILE" 2>/dev/null | awk '$2=="T"' | grep -q yespower_tls
+          nm "$AR_FILE" 2>/dev/null | awk '$2=="T"' | grep -q argon2d_ctx
+          echo "OK: yespower + argon2d linked into static lib"
 
       - name: Verify daemon version
         run: |
