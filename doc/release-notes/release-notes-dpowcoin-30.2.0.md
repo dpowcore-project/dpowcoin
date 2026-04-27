@@ -15,6 +15,38 @@ Shut down your node, replace the binaries with the new ones, and restart.
 The first start may take longer than usual because some indexes are
 re-validated.
 
+A pre-rebase backup bundle of the full v26.2 history is preserved at
+`dpowcoin-pre-rebase-20260424.bundle` (clone-able with `git clone <bundle>`)
+in case rollback to the pre-rebase tree is ever required.
+
+## Verification
+
+Live mainnet smoke (2026-04-27, HEAD `e688c4410d`, base `05eb955874`):
+
+* **Genesis hash (mainnet)**: `d86f8a0582e779830f182befeaaabc8c73a159b6b06530910758daf17ce31e36`
+  — byte-identical to the pre-rebase v26.2 build.
+* **DNS seeds resolved**: 4/4 live seeds (`seed.dpowcore.org`,
+  `seed1.dpowcore.org`, `dpowc.oette.info`, `dpowcseed.oette.info`);
+  10 reachable peer addresses returned.
+* **Wire-protocol compatibility**: handshake completed against live
+  v26.2 nodes `95.217.56.57:42003` and `157.180.72.221:42003`
+  (both advertise `/Dpowcoin:26.2.0/`). Confirms v30.2 ↔ v26.2 P2P
+  compatibility — no hard fork is required.
+* **Headers sync**: 10 000 headers in ~5 minutes from live v26.2 peers.
+* **Block sync**: 48 blocks downloaded and validated through the Dual PoW
+  AND-check (yespower + chained argon2id) without a single rejection.
+
+Continuous-integration evidence:
+
+* CI run **24984591636** on `05eb955874`: configure / build / Dual PoW
+  symbol verification / curated unit tests — `conclusion: success`.
+  <https://github.com/JumpCodeFrog/dpowcoin/actions/runs/24984591636>
+* Local `ctest -j8` on the same commit: **130/130 passed**, 0 failures
+  (16 upstream-specific suites skipped — see
+  `.lumen/docs/10-test-skip-list.md`).
+* Functional smoke subset: classification and rationale documented in
+  `.lumen/docs/11-functional-test-skip-list.md`.
+
 ## Compatibility
 
 Dpowcoin Core is supported and tested on:
