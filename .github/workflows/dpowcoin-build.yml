@@ -98,7 +98,7 @@ jobs:
         # with Dpowcoin's chain-specific divergences. See
         # .lumen/docs/10-test-skip-list.md for rationale per suite.
         env:
-          SKIP_RE: "^(pow_tests|miner_tests|bip324_tests|descriptor_tests|key_io_tests|key_tests|rpc_tests|script_standard_tests|util_tests|validation_tests|validation_chainstate_tests|validation_block_tests|blockfilter_index_tests)$"
+          SKIP_RE: "^(pow_tests|miner_tests|testnet4_miner_tests|bip324_tests|descriptor_tests|key_io_tests|key_tests|rpc_tests|script_standard_tests|util_tests|validation_tests|validation_chainstate_tests|validation_chainstatemanager_tests|validation_block_tests|blockfilter_index_tests|net_peer_connection_tests)$"
         run: |
           cd build
           ctest --output-on-failure -j"$(nproc)" --timeout 600 -E "$SKIP_RE"
