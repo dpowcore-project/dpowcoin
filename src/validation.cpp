@@ -3946,10 +3946,10 @@ static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& st
     // yespower must NOT be able to force Argon2id evaluation.
     if (fCheckPOW) {
         if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
-            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash-yespower", "proof of work failed (yespower)");
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed (yespower)");
         }
         if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, consensusParams)) {
-            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash-argon2id", "proof of work failed (argon2id)");
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed (argon2id)");
         }
     }
 
