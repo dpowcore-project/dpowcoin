@@ -129,6 +129,24 @@ verify the Dual PoW property of an arbitrary block.
   `pow_tests` target the 2016-block retargeting algorithm and is not
   applicable to Dpowcoin's LWMA DAA).
 
+### Reproducible builds (Guix)
+
+* A static audit of `contrib/guix/` was performed for this release.
+  Two Dpowcoin-specific rebrands were applied
+  (commit `e688c4410d`):
+  * `contrib/guix/libexec/prelude.bash` — default `DISTNAME` is now
+    `dpowcoin-${VERSION}` (was `bitcoin-${VERSION}`), so guix-built
+    archives are named `dpowcoin-30.2.0-*.tar.gz`.
+  * `contrib/guix/libexec/build.sh` — installs `share/examples/dpowcoin.conf`
+    instead of the upstream `bitcoin.conf` example.
+* The remaining Bitcoin-branded paths under `contrib/guix/` (NSIS
+  installer name, `Bitcoin-Qt.app` bundle, `Bitcoin-Core.zip`) are
+  inherited from the upstream CMake/`macdeploy` conventions and were
+  intentionally **not** rebranded in this release. They are tracked as a
+  follow-up and require an actual Guix daemon run to verify end-to-end
+  reproducibility — a full `guix-build` was not executed in this rebase
+  cycle.
+
 ## Tests known to be incompatible with Dpowcoin
 
 The functional tests below assume Bitcoin's PoW algorithm and 2016-block
@@ -139,6 +157,40 @@ retargeting and are intentionally skipped on Dpowcoin. See
 * `feature_dersig.py` and similar BIP9-via-block-version tests that
   reuse upstream golden block hashes
 * `feature_minchainwork.py`
+
+## Commits
+
+Full chronological list of Dpowcoin-specific commits applied on top of
+`bitcoin-v30.2` (24 commits, all authored by JumpCodeFrog):
+
+| # | sha | subject |
+|--:|-----|---------|
+|  1 | `31143bc2ec` | scripts: add apply-custom-layer + rebrand helpers |
+|  2 | `e51884f81c` | crypto: vendor yespower and argon2d libraries |
+|  3 | `4c91a5246d` | pow: add Dual PoW hashing (yespower + argon2id) |
+|  4 | `3c8bb4e284` | consensus: LWMA-1 DAA + dual-hash validation |
+|  5 | `0e85b9ba68` | chainparams: port dpowcoin mainnet/testnet/signet/regtest to v30.2 API |
+|  6 | `33b14d0efe` | rpc: add getyespowerpowhash/getargon2idpowhash, dual-check mining loop |
+|  7 | `2b739742ae` | brand: rebrand bitcoin->dpowcoin across Qt/docs/tests/contrib |
+|  8 | `dc3f972d3c` | build: integrate yespower and argon2d into CMake build system |
+|  9 | `f75bed11c7` | build: adapt remaining call sites to v30.2 API |
+| 10 | `faea66af56` | rpc: fix Dual PoW help format and CLI param coercion for v30.2 |
+| 11 | `697295d8c3` | ci: add focused Dpowcoin GitHub Actions workflow |
+| 12 | `06ba232a61` | test: fix functional test framework after rebrand |
+| 13 | `4bbc5cd6b5` | ci: drop unneeded BDB/OpenSSL/USDT deps, use sqlite-only wallet |
+| 14 | `1dc9ce77b0` | release: brand 30.2.0 and document genesis + skip list |
+| 15 | `7ddcc21aa2` | ci: disable multiprocess IPC (no capnproto on runner) |
+| 16 | `8389cfa4ad` | ci: fix Dual PoW symbol verification |
+| 17 | `a165e5f88a` | test: fix TestChain100Setup mining for Dual PoW |
+| 18 | `e7e381c740` | ci: skip upstream-only test suites in unit-test stage |
+| 19 | `a9341598d5` | ci: fix unit-test skip-regex truncation in workflow |
+| 20 | `9036fb9c02` | test: fix Dual PoW mining in peerman/blockencodings/util |
+| 21 | `f17fe69bb0` | ci: add testnet4_miner/chainstatemanager/net_peer_connection to skip-list |
+| 22 | `3e0b0cf65c` | rebrand: fix EXE_NAME constants and wallet/util binary names |
+| 23 | `05eb955874` | net: comment out dead DNS seeds (2026-04 audit) |
+| 24 | `e688c4410d` | contrib/guix: rebrand DISTNAME and example conf to dpowcoin |
+
+Plus this release-notes commit on top of the list above.
 
 ## Credits
 
