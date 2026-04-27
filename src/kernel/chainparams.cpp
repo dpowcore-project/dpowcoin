@@ -148,17 +148,19 @@ public:
         // This is fine at runtime as we'll fall back to using them as an addrfetch if they don't support the
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
-        vSeeds.emplace_back("seed.dpowcore.org."); //active
-        vSeeds.emplace_back("seed1.dpowcore.org."); //actvie
-        vSeeds.emplace_back("dpowc.oette.info."); //active
-        vSeeds.emplace_back("dpowcseed.oette.info."); //active
-        vSeeds.emplace_back("seed2.dpowcore.org."); //reserved
-        vSeeds.emplace_back("seed3.dpowcore.org."); //reserved
-        vSeeds.emplace_back("seed4.dpowcore.org."); //reserved
-        vSeeds.emplace_back("seed5.dpowcore.org."); //reserved
-        vSeeds.emplace_back("seed6.dpowcore.org."); //reserved
-        vSeeds.emplace_back("seeddpowcoin1.bitwebcore.net.");
-        vSeeds.emplace_back("seeddpowcoin2.bitwebcore.net.");
+        vSeeds.emplace_back("seed.dpowcore.org.");  // active
+        vSeeds.emplace_back("seed1.dpowcore.org."); // active
+        vSeeds.emplace_back("dpowc.oette.info.");    // active
+        vSeeds.emplace_back("dpowcseed.oette.info.");// active
+        // reserved — not yet resolving (2026-04):
+        // vSeeds.emplace_back("seed2.dpowcore.org.");
+        // vSeeds.emplace_back("seed3.dpowcore.org.");
+        // vSeeds.emplace_back("seed4.dpowcore.org.");
+        // vSeeds.emplace_back("seed5.dpowcore.org.");
+        // vSeeds.emplace_back("seed6.dpowcore.org.");
+        // dead — no DNS resolution (2026-04):
+        // vSeeds.emplace_back("seeddpowcoin1.bitwebcore.net.");
+        // vSeeds.emplace_back("seeddpowcoin2.bitwebcore.net.");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,55);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,28);
@@ -245,10 +247,11 @@ public:
         vFixedSeeds.clear();
         vSeeds.clear();
         // nodes with support for servicebits filtering should be at the top
-        vSeeds.emplace_back("testnet-seed.dpowcore.org.");
-        vSeeds.emplace_back("testnet1-seed.dpowcore.org.");
-        vSeeds.emplace_back("testnet-seeddpowcoin.bitwebcore.net.");
-        vSeeds.emplace_back("testnet-seeddpowcoin.bitwebcore.net.");
+        // all testnet seeds dead as of 2026-04:
+        // vSeeds.emplace_back("testnet-seed.dpowcore.org.");
+        // vSeeds.emplace_back("testnet1-seed.dpowcore.org.");
+        // vSeeds.emplace_back("testnet-seeddpowcoin.bitwebcore.net.");
+        // vSeeds.emplace_back("testnet-seeddpowcoin.bitwebcore.net.");
 
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,111);
         base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,196);
