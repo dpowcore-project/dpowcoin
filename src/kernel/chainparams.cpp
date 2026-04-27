@@ -148,10 +148,10 @@ public:
         // This is fine at runtime as we'll fall back to using them as an addrfetch if they don't support the
         // service bits we want, but we should get them updated to support all service bits wanted by any
         // release ASAP to avoid it where possible.
-        vSeeds.emplace_back("seed.dpowcore.org.");  // active
-        vSeeds.emplace_back("seed1.dpowcore.org."); // active
-        vSeeds.emplace_back("dpowc.oette.info.");    // active
-        vSeeds.emplace_back("dpowcseed.oette.info.");// active
+        vSeeds.emplace_back("seed.dpowcore.org.");  // active (verified 2026-04-27: 157.180.72.221)
+        vSeeds.emplace_back("seed1.dpowcore.org."); // active (verified 2026-04-27: 212.164.221.206, 157.180.72.221)
+        vSeeds.emplace_back("dpowc.oette.info.");    // active (verified 2026-04-27: 172.67.169.141, 104.21.46.251)
+        vSeeds.emplace_back("dpowcseed.oette.info.");// active (verified 2026-04-27: 104.21.46.251, 172.67.169.141)
         // reserved — not yet resolving (2026-04):
         // vSeeds.emplace_back("seed2.dpowcore.org.");
         // vSeeds.emplace_back("seed3.dpowcore.org.");
