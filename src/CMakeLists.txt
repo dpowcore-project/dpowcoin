@@ -156,21 +156,21 @@ if(ENABLE_WALLET)
   add_subdirectory(wallet)
 
   if(BUILD_WALLET_TOOL)
-    add_executable(bitcoin-wallet
+    add_executable(dpowcoin-wallet
       bitcoin-wallet.cpp
       init/bitcoin-wallet.cpp
       wallet/wallettool.cpp
     )
-    add_windows_resources(bitcoin-wallet bitcoin-wallet-res.rc)
-    add_windows_application_manifest(bitcoin-wallet)
-    target_link_libraries(bitcoin-wallet
+    add_windows_resources(dpowcoin-wallet bitcoin-wallet-res.rc)
+    add_windows_application_manifest(dpowcoin-wallet)
+    target_link_libraries(dpowcoin-wallet
       core_interface
       bitcoin_wallet
       bitcoin_common
       bitcoin_util
       Boost::headers
     )
-    install_binary_component(bitcoin-wallet HAS_MANPAGE)
+    install_binary_component(dpowcoin-wallet HAS_MANPAGE)
   endif()
 endif()
 
@@ -386,15 +386,15 @@ endif()
 
 
 if(BUILD_UTIL)
-  add_executable(bitcoin-util bitcoin-util.cpp)
-  add_windows_resources(bitcoin-util bitcoin-util-res.rc)
-  add_windows_application_manifest(bitcoin-util)
-  target_link_libraries(bitcoin-util
+  add_executable(dpowcoin-util bitcoin-util.cpp)
+  add_windows_resources(dpowcoin-util bitcoin-util-res.rc)
+  add_windows_application_manifest(dpowcoin-util)
+  target_link_libraries(dpowcoin-util
     core_interface
     bitcoin_common
     bitcoin_util
   )
-  install_binary_component(bitcoin-util HAS_MANPAGE)
+  install_binary_component(dpowcoin-util HAS_MANPAGE)
 endif()
 
 
