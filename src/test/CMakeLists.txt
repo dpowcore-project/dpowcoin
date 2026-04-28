@@ -76,6 +76,7 @@ add_executable(test_bitcoin
   pool_tests.cpp
   pow_tests.cpp
   dpowcoin_pow_tests.cpp
+  pow_cache_tests.cpp
   prevector_tests.cpp
   raii_event_tests.cpp
   random_tests.cpp

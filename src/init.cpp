@@ -62,6 +62,7 @@
 #include <policy/fees_args.h>
 #include <policy/policy.h>
 #include <policy/settings.h>
+#include <pow_cache.h>
 #include <protocol.h>
 #include <rpc/blockchain.h>
 #include <rpc/register.h>
@@ -404,6 +405,8 @@ void Shutdown(NodeContext& node)
     node.scheduler.reset();
     node.ecc_context.reset();
     node.kernel.reset();
+
+    pow_cache::Shutdown();
 
     RemovePidFile(*node.args);
 
@@ -1742,6 +1745,17 @@ bool AppInitMain(NodeContext& node, interfaces::BlockAndHeaderTipInfo* tip_info)
                   index_cache_sizes.filter_index * (1.0 / 1024 / 1024), BlockFilterTypeName(filter_type));
     }
     LogInfo("* Using %.1f MiB for chain state database", kernel_cache_sizes.coins_db * (1.0 / 1024 / 1024));
+
+    // Initialize Dual PoW hash cache (Yespower + Argon2id memoization).
+    // -powcachesize=<n>: capacity per algorithm in entries. 0 disables.
+    const int64_t pow_cache_capacity = args.GetIntArg("-powcachesize", pow_cache::DEFAULT_CAPACITY);
+    pow_cache::Init(pow_cache_capacity > 0 ? static_cast<size_t>(pow_cache_capacity) : 0);
+    if (pow_cache_capacity > 0) {
+        LogInfo("* Using PoW hash cache: %d entries × 2 algos (~%.1f MiB)",
+                pow_cache_capacity, (pow_cache_capacity * 88.0 * 2) / (1024.0 * 1024.0));
+    } else {
+        LogInfo("* PoW hash cache disabled (-powcachesize=0)");
+    }
 
     assert(!node.mempool);
     assert(!node.chainman);
