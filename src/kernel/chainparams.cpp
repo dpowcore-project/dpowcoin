@@ -117,8 +117,10 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].min_activation_height = 0; // No activation delay
 
-        consensus.nMinimumChainWork = uint256{"00000000000000000000000000000000000000000000000000000000001ec9a2"}; //700
-        consensus.defaultAssumeValid = uint256{"2005b7aa8f35f4f38677c11fb336b04c038835dc60b259246491e0652110da0e"}; //700
+        // Sprint-1 §A3 (roadmap 13): обновлено до блока 150000 (mainnet).
+        // Source: explorer.dpowcore.org getblock @ height=150000 (2025-09-28).
+        consensus.nMinimumChainWork = uint256{"000000000000000000000000000000000000000000000000000000005d118579"}; // 150000
+        consensus.defaultAssumeValid = uint256{"977c8dc1420f3590a27bfd4bb8764c930d861bb600ce5bf1c97fe54b5673f202"}; // 150000
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
