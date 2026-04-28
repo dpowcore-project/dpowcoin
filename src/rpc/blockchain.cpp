@@ -33,6 +33,7 @@
 #include <node/utxo_snapshot.h>
 #include <node/warnings.h>
 #include <primitives/transaction.h>
+#include <pow_cache.h>
 #include <rpc/server.h>
 #include <rpc/server_util.h>
 #include <rpc/util.h>
@@ -595,7 +596,7 @@ static RPCHelpMan getyespowerpowhash()
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     const CBlockIndex* pblockindex = active_chain[nHeight];
-    return pblockindex->GetBlockHeader().GetYespowerPoWHash().GetHex();
+    return pow_cache::GetYespower(pblockindex->GetBlockHeader()).GetHex();
 },
     };
 }
@@ -624,7 +625,7 @@ static RPCHelpMan getargon2idpowhash()
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
 
     const CBlockIndex* pblockindex = active_chain[nHeight];
-    return pblockindex->GetBlockHeader().GetArgon2idPoWHash().GetHex();
+    return pow_cache::GetArgon2id(pblockindex->GetBlockHeader()).GetHex();
 },
     };
 }

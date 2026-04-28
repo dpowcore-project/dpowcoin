@@ -17,6 +17,7 @@
 #include <kernel/notifications_interface.h>
 #include <logging.h>
 #include <pow.h>
+#include <pow_cache.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <random.h>
@@ -138,8 +139,8 @@ bool BlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, s
                 // both hash variants. Called once per block at block-index load,
                 // so the Argon2id cost is a one-time startup tax, not per-block.
                 const CBlockHeader header = pindexNew->GetBlockHeader();
-                if (!CheckProofOfWork(header.GetYespowerPoWHash(), pindexNew->nBits, consensusParams) ||
-                    !CheckProofOfWork(header.GetArgon2idPoWHash(), pindexNew->nBits, consensusParams)) {
+                if (!CheckProofOfWork(pow_cache::GetYespower(header), pindexNew->nBits, consensusParams) ||
+                    !CheckProofOfWork(pow_cache::GetArgon2id(header), pindexNew->nBits, consensusParams)) {
                     LogError("%s: CheckProofOfWork failed: %s\n", __func__, pindexNew->ToString());
                     return false;
                 }
@@ -1023,8 +1024,8 @@ bool BlockManager::ReadBlock(CBlock& block, const FlatFilePos& pos, const std::o
     const auto block_hash{block.GetHash()};
 
     // Check the header — Dual PoW (SECURITY-FIXES.md C3).
-    if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, GetConsensus()) ||
-        !CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, GetConsensus())) {
+    if (!CheckProofOfWork(pow_cache::GetYespower(block), block.nBits, GetConsensus()) ||
+        !CheckProofOfWork(pow_cache::GetArgon2id(block), block.nBits, GetConsensus())) {
         LogError("Errors in block header at %s while reading block", pos.ToString());
         return false;
     }

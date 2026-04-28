@@ -38,6 +38,7 @@
 #include <policy/settings.h>
 #include <policy/truc_policy.h>
 #include <pow.h>
+#include <pow_cache.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <random.h>
@@ -3945,10 +3946,10 @@ static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& st
     // Argon2id is ~50–200 ms / 32 MB. Peers flooding us with headers that fail
     // yespower must NOT be able to force Argon2id evaluation.
     if (fCheckPOW) {
-        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
+        if (!CheckProofOfWork(pow_cache::GetYespower(block), block.nBits, consensusParams)) {
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed (yespower)");
         }
-        if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, consensusParams)) {
+        if (!CheckProofOfWork(pow_cache::GetArgon2id(block), block.nBits, consensusParams)) {
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed (argon2id)");
         }
     }
@@ -4150,8 +4151,8 @@ bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consens
     // batches of junk headers during anti-DoS headers-sync.
     return std::all_of(headers.cbegin(), headers.cend(),
             [&](const auto& header) {
-                if (!CheckProofOfWork(header.GetYespowerPoWHash(), header.nBits, consensusParams)) return false;
-                if (!CheckProofOfWork(header.GetArgon2idPoWHash(), header.nBits, consensusParams)) return false;
+                if (!CheckProofOfWork(pow_cache::GetYespower(header), header.nBits, consensusParams)) return false;
+                if (!CheckProofOfWork(pow_cache::GetArgon2id(header), header.nBits, consensusParams)) return false;
                 return true;
             });
 }

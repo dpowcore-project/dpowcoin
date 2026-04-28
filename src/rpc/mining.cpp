@@ -25,6 +25,7 @@
 #include <node/warnings.h>
 #include <policy/ephemeral_policy.h>
 #include <pow.h>
+#include <pow_cache.h>
 #include <rpc/blockchain.h>
 #include <rpc/mining.h>
 #include <rpc/server.h>
@@ -133,8 +134,8 @@ static bool GenerateBlock(ChainstateManager& chainman, CBlock&& block, uint64_t&
     // (expensive). Both must pass; short-circuit on yespower for mining loop
     // throughput.
     auto dual_pow_ok = [&]() {
-        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, chainman.GetConsensus())) return false;
-        if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, chainman.GetConsensus())) return false;
+        if (!CheckProofOfWork(pow_cache::GetYespower(block), block.nBits, chainman.GetConsensus())) return false;
+        if (!CheckProofOfWork(pow_cache::GetArgon2id(block), block.nBits, chainman.GetConsensus())) return false;
         return true;
     };
     while (max_tries > 0 && block.nNonce < std::numeric_limits<uint32_t>::max() && !dual_pow_ok() && !chainman.m_interrupt) {
