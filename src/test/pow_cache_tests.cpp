@@ -7,6 +7,10 @@
 #include <test/util/setup_common.h>
 #include <uint256.h>
 
+#include <atomic>
+#include <thread>
+#include <vector>
+
 #include <boost/test/unit_test.hpp>
 
 //! Coverage for src/pow_cache.{h,cpp}.
@@ -148,6 +152,50 @@ BOOST_AUTO_TEST_CASE(shutdown_then_reinit_resets_state)
     auto si = pow_cache::GetYespowerStats();
     BOOST_CHECK_EQUAL(si.size,     0u);
     BOOST_CHECK_EQUAL(si.capacity, 64u);
+
+    pow_cache::Shutdown();
+}
+
+//! 6) Concurrent Lookup/Insert from many threads must not race or corrupt
+//!    state, and must yield correct results. Yespower is fast enough to
+//!    keep the test under a second on CI.
+BOOST_AUTO_TEST_CASE(concurrent_lookup_is_thread_safe)
+{
+    pow_cache::Init(64);
+
+    constexpr int kThreads = 8;
+    constexpr int kIters   = 50;
+
+    // Pre-build a small fixed working set so threads collide on keys.
+    std::vector<CBlockHeader> headers;
+    headers.reserve(8);
+    for (uint32_t i = 0; i < 8; ++i) headers.push_back(MakeHeader(1000 + i));
+
+    // Reference values computed single-threaded.
+    std::vector<uint256> ref;
+    ref.reserve(headers.size());
+    for (auto& h : headers) ref.push_back(h.GetYespowerPoWHash());
+
+    std::atomic<int> mismatches{0};
+    std::vector<std::thread> ts;
+    ts.reserve(kThreads);
+    for (int t = 0; t < kThreads; ++t) {
+        ts.emplace_back([&, t] {
+            for (int i = 0; i < kIters; ++i) {
+                const size_t idx = (t + i) % headers.size();
+                const uint256 v = pow_cache::GetYespower(headers[idx]);
+                if (v != ref[idx]) ++mismatches;
+            }
+        });
+    }
+    for (auto& th : ts) th.join();
+
+    BOOST_CHECK_EQUAL(mismatches.load(), 0);
+
+    auto s = pow_cache::GetYespowerStats();
+    // Total accesses == hits + misses, and size never exceeds capacity.
+    BOOST_CHECK_EQUAL(s.hits + s.misses, static_cast<uint64_t>(kThreads * kIters));
+    BOOST_CHECK_LE(s.size, s.capacity);
 
     pow_cache::Shutdown();
 }
