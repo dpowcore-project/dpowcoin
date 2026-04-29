@@ -122,3 +122,20 @@ block rate so kvB demand per minute is doubled) is filed for Stage 5.
   `src/kernel/chainparams.cpp`, `src/crypto/yespower-1.0.1/`,
   `src/crypto/argon2d/`) was modified by Stage 3 — this stage is *purely
   additive verification* of existing consensus rules.
+
+
+## Stage-3 Test Fixups (2026-04)
+
+After the initial Stage-3 commit, three unit suites remained red because
+upstream Bitcoin Core fixtures clash with Dpowcoin chainparams. The fixes
+are test-only — no consensus or protocol change.
+
+| Suite | Root cause | Fix |
+|-------|-----------|-----|
+| `blockfilter_index_tests` | `BuildChain` mining loop hashed `block.GetHash()` (sha256d) but the validator requires Dual PoW (Yespower + chained Argon2id) | Loop now mines until *both* `GetYespowerPoWHash()` and `GetArgon2idPoWHash()` satisfy `nBits` (`src/test/blockfilter_index_tests.cpp:87-93`) |
+| `bip324_tests/packet_test_vectors` | BIP324 v2 transport HKDF salt = `Params().MessageStart()` (`src/bip324.cpp:37`); upstream vectors are bound to Bitcoin mainnet magic `0xf9beb4d9`, Dpowcoin uses `0xf29f4afb` | Skip with explicit `BOOST_TEST_MESSAGE` reason; vector regeneration tracked separately |
+| `validation_tests/test_assumeutxo` | Hardcoded Bitcoin regtest snapshot hash mismatched Dpowcoin's `m_assumeutxo_data` | Updated expected `hash_serialized=6657b736…` and `blockhash=d15210e4…` per `src/kernel/chainparams.cpp:603-608` |
+
+Holy files (`src/primitives/block.cpp`, `src/pow.cpp`,
+`src/kernel/chainparams.cpp` consensus fields, `src/crypto/yespower-1.0.1/`,
+`src/crypto/argon2d/`) remain untouched.
