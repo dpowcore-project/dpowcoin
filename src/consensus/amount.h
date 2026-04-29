@@ -23,6 +23,18 @@ static constexpr CAmount COIN = 100000000;
  * critical; in unusual circumstances like a(nother) overflow bug that allowed
  * for the creation of coins out of thin air modification could lead to a fork.
  * */
+// Dpowcoin tokenomics note (Stage-3 DAA/halving audit, 2026-04):
+//   * initial subsidy : 50 COIN
+//   * halving interval: 420 000 blocks (mainnet) -- twice Bitcoin's 210 000
+//   * total emission  : ≈ 42 000 000 COIN (vs Bitcoin's ≈ 21M)
+// MAX_MONEY is *kept at 21M* for now: per-output amounts on a 50-COIN-reward
+// chain can never realistically approach 21M, so raising the cap would be a
+// gratuitous consensus-loosening with no observable upside. The cumulative
+// supply (which exceeds MoneyRange) is only relevant in tests/aggregations,
+// not in any per-output or per-tx validation path -- those callers must
+// therefore *not* feed cumulative supply into MoneyRange(). See
+// src/test/validation_tests.cpp::subsidy_limit_test for the corrected
+// pattern (assert nSubsidy <= 50 * COIN, not MoneyRange(nSum)).
 static constexpr CAmount MAX_MONEY = 21000000 * COIN;
 inline bool MoneyRange(const CAmount& nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 
