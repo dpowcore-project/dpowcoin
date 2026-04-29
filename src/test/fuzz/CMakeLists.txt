@@ -16,8 +16,10 @@ add_executable(fuzz
   bip324.cpp
   bitdeque.cpp
   bitset.cpp
+  argon2_chained.cpp
   block.cpp
   block_header.cpp
+  dpowcoin_pow.cpp
   block_index.cpp
   blockfilter.cpp
   bloom_filter.cpp

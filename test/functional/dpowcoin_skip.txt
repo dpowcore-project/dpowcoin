@@ -19,3 +19,12 @@ feature_cltv.py
 # --- Block reward / halving schedule tests (Dpowcoin keeps Bitcoin schedule, but
 #     timewarp/BIP94 tests assume bitcoin testnet4 which Dpowcoin doesn't ship) ---
 feature_signet.py
+
+# --- Tests building raw blocks via MiniNode SHA256d-only path (incompatible with
+#     Dpowcoin Dual PoW: Yespower + chained Argon2id required for header acceptance) ---
+p2p_unrequested_blocks.py
+
+# --- DAA-sensitive tests: Dpowcoin uses LWMA per-block retargeting instead of
+#     Bitcoin's 2016-block window. These tests probe the boundary directly. ---
+feature_minchainwork.py
+feature_pruning.py

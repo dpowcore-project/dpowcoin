@@ -22,10 +22,14 @@ The reasons fall into two categories:
 |------|----------|--------|
 | `feature_block.py` | PoW | Builds raw blocks expecting SHA256d-only validation. |
 | `feature_dersig.py` | PoW + golden hashes | Replays upstream pinned block hashes. |
-| `feature_minchainwork.py` | DAA | Assumes fixed-difficulty regtest chain depth. |
-| `mining_basic.py` (subset) | PoW | Specific subtests that submit minimally-mined blocks. |
+| `feature_cltv.py` | PoW + golden hashes | Same as `feature_dersig.py` — pinned bitcoin testnet hashes. |
+| `feature_signet.py` | Network | Dpowcoin does not ship a signet; bitcoin testnet4/BIP94 assumptions. |
+| `feature_minchainwork.py` | DAA | Assumes fixed-difficulty regtest chain depth (2016-block window). |
+| `feature_pruning.py` | DAA + timing | Relies on Bitcoin's 2016-block retarget boundary. |
+| `mining_basic.py` | PoW | Asserts on `"high-hash"` literal; Dpowcoin emits `"high-hash-yespower"` / `"-argon2id"`. |
+| `mining_template_verification.py` | PoW | Submits MiniNode-mined templates that fail Dual PoW. |
+| `interface_http.py` | PoW | Embeds expected error strings tied to single-PoW path. |
 | `p2p_unrequested_blocks.py` | PoW | Crafts orphans validated only against SHA256d. |
-| `feature_pruning.py` (timing) | DAA | Relies on 2016-block retarget boundary. |
 
 ## Tests that pass unchanged
 

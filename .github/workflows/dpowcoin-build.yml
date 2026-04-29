@@ -102,3 +102,75 @@ jobs:
         run: |
           cd build
           ctest --output-on-failure -j"$(nproc)" --timeout 600 -E "$SKIP_RE"
+
+      - name: Run Dpowcoin Dual PoW unit suites (must always pass)
+        run: |
+          ./build/bin/test_bitcoin \
+            -t dpowcoin_pow_tests -t pow_cache_tests \
+            --log_level=test_suite
+
+  fuzz-smoke:
+    name: Fuzz smoke (Dual PoW + Argon2 chain)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      MAKEFLAGS: -j4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-fuzz-${{ github.sha }}
+          restore-keys: |
+            ccache-fuzz-
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake ninja-build pkg-config ccache \
+            libboost-dev libevent-dev libsqlite3-dev clang python3
+
+      - name: Configure (fuzz, libFuzzer + ASAN/UBSAN)
+        run: |
+          cmake -B build -S . -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_FOR_FUZZING=ON \
+            -DBUILD_FUZZ_BINARY=ON \
+            -DBUILD_TESTS=OFF \
+            -DBUILD_GUI=OFF \
+            -DBUILD_BENCH=OFF \
+            -DENABLE_WALLET=OFF \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DSANITIZERS=fuzzer,address,undefined \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build fuzz binary
+        run: cmake --build build --target fuzz -j"$(nproc)"
+
+      - name: Smoke-run dpowcoin_pow target (90s, libFuzzer)
+        env:
+          FUZZ: dpowcoin_pow
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          mkdir -p corpus/dpowcoin_pow
+          timeout 95 ./build/bin/fuzz -runs=2000 -max_total_time=90 corpus/dpowcoin_pow || rc=$?
+          # libFuzzer returns 0 on -max_total_time exit; we tolerate 124 (timeout race) too.
+          test "${rc:-0}" -eq 0 -o "${rc:-0}" -eq 124
+
+      - name: Smoke-run argon2_chained target (90s, libFuzzer)
+        env:
+          FUZZ: argon2_chained
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+          ASAN_OPTIONS: detect_leaks=0
+        run: |
+          mkdir -p corpus/argon2_chained
+          timeout 95 ./build/bin/fuzz -runs=2000 -max_total_time=90 corpus/argon2_chained || rc=$?
+          test "${rc:-0}" -eq 0 -o "${rc:-0}" -eq 124
