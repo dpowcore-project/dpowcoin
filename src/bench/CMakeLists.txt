@@ -22,6 +22,7 @@ add_executable(bench_bitcoin
   connectblock.cpp
   crypto_hash.cpp
   descriptors.cpp
+  dpowcoin_pow.cpp
   disconnected_transactions.cpp
   duplicate_inputs.cpp
   ellswift.cpp
