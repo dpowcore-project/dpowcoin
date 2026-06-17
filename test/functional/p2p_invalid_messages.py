@@ -15,6 +15,7 @@ from test_framework.messages import (
     MAX_INV_SIZE,
     MAX_PROTOCOL_MESSAGE_LENGTH,
     MSG_TX,
+    calc_pow_hashes,
     from_hex,
     msg_getdata,
     msg_headers,
@@ -22,6 +23,7 @@ from test_framework.messages import (
     msg_ping,
     msg_version,
     ser_string,
+    uint256_from_compact,
 )
 from test_framework.p2p import (
     P2PDataStore,
@@ -267,7 +269,11 @@ class InvalidMessagesTest(BitcoinTestFramework):
         blockheader.nTime = int(time.time())
         blockheader.nBits = blockheader_tip.nBits
         blockheader.rehash()
-        while not blockheader.hash.startswith('0'):
+        target = uint256_from_compact(blockheader.nBits)
+        while True:
+            yespower, argon2id = calc_pow_hashes(blockheader)
+            if yespower <= target and argon2id is not None and argon2id <= target:
+                break
             blockheader.nNonce += 1
             blockheader.rehash()
         peer = self.nodes[0].add_p2p_connection(P2PInterface())
@@ -277,8 +283,11 @@ class InvalidMessagesTest(BitcoinTestFramework):
         assert_equal(chaintips[0]['status'], 'headers-only')
         assert_equal(chaintips[0]['hash'], blockheader.hash)
 
-        # invalidate PoW
-        while not blockheader.hash.startswith('f'):
+        # invalidate PoW: find a nonce where at least one algorithm (yespower or argon2id) fails
+        while True:
+            yespower, argon2id = calc_pow_hashes(blockheader)
+            if yespower > target or argon2id is None or argon2id > target:
+                break
             blockheader.nNonce += 1
             blockheader.rehash()
         with self.nodes[0].assert_debug_log(['Misbehaving', 'header with invalid proof of work']):

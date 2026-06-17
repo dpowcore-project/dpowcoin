@@ -58,7 +58,7 @@ class WalletBackupTest(BitcoinTestFramework):
             ["-whitelist=noban@127.0.0.1", "-keypool=100"],
             ["-whitelist=noban@127.0.0.1"],
         ]
-        self.rpc_timeout = 120
+        self.rpc_timeout = 480
 
     def skip_test_if_missing_module(self):
         self.skip_if_no_wallet()

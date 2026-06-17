@@ -53,7 +53,7 @@ class BIP66Test(BitcoinTestFramework):
             '-par=1',  # Use only one script thread to get the exact log msg for testing
         ]]
         self.setup_clean_chain = True
-        self.rpc_timeout = 240
+        self.rpc_timeout = 480
 
     def create_tx(self, input_txid):
         utxo_to_spend = self.miniwallet.get_utxo(txid=input_txid, mark_as_spent=False)

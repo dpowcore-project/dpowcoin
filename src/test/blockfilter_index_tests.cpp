@@ -71,7 +71,6 @@ CBlock BuildChainTestingSetup::CreateBlock(const CBlockIndex* prev,
     CBlock& block = pblocktemplate->block;
     block.hashPrevBlock = prev->GetBlockHash();
     block.nTime = prev->nTime + 1;
-
     // Replace mempool-selected txns with just coinbase plus passed-in txns:
     block.vtx.resize(1);
     for (const CMutableTransaction& tx : txns) {
@@ -83,9 +82,13 @@ CBlock BuildChainTestingSetup::CreateBlock(const CBlockIndex* prev,
         block.vtx.at(0) = MakeTransactionRef(std::move(tx_coinbase));
         block.hashMerkleRoot = BlockMerkleRoot(block);
     }
-
-    while (!(CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, m_node.chainman->GetConsensus()) && CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus()))) ++block.nNonce;
-
+    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
+    while (true) {
+        if (CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, m_node.chainman->GetConsensus())) {
+            if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus())) break;
+        }
+        ++block.nNonce;
+    }
     return block;
 }
 

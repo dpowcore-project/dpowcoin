@@ -13,11 +13,11 @@
 // contrib/devtools/headerssync-params.py.
 
 //! Store one header commitment per HEADER_COMMITMENT_PERIOD blocks.
-constexpr size_t HEADER_COMMITMENT_PERIOD{201};
+constexpr size_t HEADER_COMMITMENT_PERIOD{541};
 
 //! Only feed headers to validation once this many headers on top have been
 //! received and validated against commitments.
-constexpr size_t REDOWNLOAD_BUFFER_SIZE{6247}; // 6247/201 = ~31.1 commitments
+constexpr size_t REDOWNLOAD_BUFFER_SIZE{4503}; // 4503/541 = ~8.3 commitments
 
 // Our memory analysis assumes 48 bytes for a CompressedHeader (so we should
 // re-calculate parameters if we compress further)

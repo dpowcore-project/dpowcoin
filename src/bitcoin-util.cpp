@@ -92,21 +92,23 @@ static void grind_task(uint32_t nBits, CBlockHeader header, uint32_t offset, uin
     target.SetCompact(nBits, &neg, &over);
     if (target == 0 || neg || over) return;
     header.nNonce = offset;
-
     uint32_t finish = std::numeric_limits<uint32_t>::max() - step;
     finish = finish - (finish % step) + offset;
-
     while (!found && header.nNonce < finish) {
         const uint32_t next = (finish - header.nNonce < 5000*step) ? finish : header.nNonce + 5000*step;
         do {
-            if (UintToArith256(header.GetHash()) <= target) {
-                if (!found.exchange(true)) {
-                    proposed_nonce = header.nNonce;
+            /* Bitweb Dual PoW: cheap Yespower first as a filter,
+               expensive Argon2id is only computed if Yespower passes */
+            if (UintToArith256(header.GetYespowerPoWHash()) <= target) {
+                if (UintToArith256(header.GetArgon2idPoWHash()) <= target) {
+                    if (!found.exchange(true)) {
+                        proposed_nonce = header.nNonce;
+                    }
+                    return;
                 }
-                return;
             }
             header.nNonce += step;
-        } while(header.nNonce != next);
+        } while (header.nNonce != next);
     }
 }
 

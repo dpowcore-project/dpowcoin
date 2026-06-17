@@ -308,15 +308,18 @@ CBlock TestChain100Setup::CreateBlock(
     Chainstate& chainstate)
 {
     CBlock block = BlockAssembler{chainstate, nullptr}.CreateNewBlock(scriptPubKey)->block;
-
     Assert(block.vtx.size() == 1);
     for (const CMutableTransaction& tx : txns) {
         block.vtx.push_back(MakeTransactionRef(tx));
     }
     RegenerateCommitments(block, *Assert(m_node.chainman));
-
-    while (!(CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, m_node.chainman->GetConsensus()) && CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus()))) ++block.nNonce;
-
+    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
+    while (true) {
+        if (CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, m_node.chainman->GetConsensus())) {
+            if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus())) break;
+        }
+        ++block.nNonce;
+    }
     return block;
 }
 

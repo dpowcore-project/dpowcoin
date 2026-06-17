@@ -35,7 +35,6 @@ std::vector<std::shared_ptr<CBlock>> CreateBlockChain(size_t total_height, const
     auto time{params.GenesisBlock().nTime};
     for (size_t height{0}; height < total_height; ++height) {
         CBlock& block{*(ret.at(height) = std::make_shared<CBlock>())};
-
         CMutableTransaction coinbase_tx;
         coinbase_tx.vin.resize(1);
         coinbase_tx.vin[0].prevout.SetNull();
@@ -44,15 +43,17 @@ std::vector<std::shared_ptr<CBlock>> CreateBlockChain(size_t total_height, const
         coinbase_tx.vout[0].nValue = GetBlockSubsidy(height + 1, params.GetConsensus());
         coinbase_tx.vin[0].scriptSig = CScript() << (height + 1) << OP_0;
         block.vtx = {MakeTransactionRef(std::move(coinbase_tx))};
-
         block.nVersion = VERSIONBITS_LAST_OLD_BLOCK_VERSION;
         block.hashPrevBlock = (height >= 1 ? *ret.at(height - 1) : params.GenesisBlock()).GetHash();
         block.hashMerkleRoot = BlockMerkleRoot(block);
         block.nTime = ++time;
         block.nBits = params.GenesisBlock().nBits;
         block.nNonce = 0;
-
-        while (!(CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, params.GetConsensus()) && CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, params.GetConsensus()))){
+        // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
+        while (true) {
+            if (CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, params.GetConsensus())) {
+                if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, params.GetConsensus())) break;
+            }
             ++block.nNonce;
             assert(block.nNonce);
         }
@@ -86,11 +87,14 @@ protected:
 
 COutPoint MineBlock(const NodeContext& node, std::shared_ptr<CBlock>& block)
 {
-    while (!(CheckProofOfWork(block->GetYespowerPoWHash(), block->nBits, Params().GetConsensus()) && CheckProofOfWork(block->GetArgon2idPoWHash(), block->nBits, Params().GetConsensus()))) {
+    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
+    while (true) {
+        if (CheckProofOfWork(block->GetYespowerPoWHash(), block->nBits, Params().GetConsensus())) {
+            if (CheckProofOfWork(block->GetArgon2idPoWHash(), block->nBits, Params().GetConsensus())) break;
+        }
         ++block->nNonce;
         assert(block->nNonce);
     }
-
     auto& chainman{*Assert(node.chainman)};
     const auto old_height = WITH_LOCK(chainman.GetMutex(), return chainman.ActiveHeight());
     bool new_block;
@@ -103,7 +107,6 @@ COutPoint MineBlock(const NodeContext& node, std::shared_ptr<CBlock>& block)
     SyncWithValidationInterfaceQueue();
     const bool was_valid{bvsc.m_state && bvsc.m_state->IsValid()};
     assert(old_height + was_valid == WITH_LOCK(chainman.GetMutex(), return chainman.ActiveHeight()));
-
     if (was_valid) return {block->vtx[0]->GetHash(), 0};
     return {};
 }

@@ -81,12 +81,12 @@ public:
         consensus.BIP66Height = 2;
         consensus.CSVHeight = 2;
         consensus.SegwitHeight = 2;
-        consensus.MinBIP9WarningHeight = 4033; // segwit activation height + miner confirmation window
+        consensus.MinBIP9WarningHeight = 4032; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256S("001fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 5 * 60;
+        // consensus.nPowTargetTimespan = 5 * 60;
         consensus.nPowTargetSpacing = 5 * 60;
         consensus.lwmaAveragingWindow = 576;
-        consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 3628; // ~ 90% of 4032
         consensus.nMinerConfirmationWindow = 4032; //two weeks
@@ -101,8 +101,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].nTimeout = Consensus::BIP9Deployment::NO_TIMEOUT;
         consensus.vDeployments[Consensus::DEPLOYMENT_TAPROOT].min_activation_height = 0; // No activation delay
 
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000000000000000001ec9a2"); //700
-        consensus.defaultAssumeValid = uint256S("0x2005b7aa8f35f4f38677c11fb336b04c038835dc60b259246491e0652110da0e"); //700
+        consensus.nMinimumChainWork = uint256S("0000000000000000000000000000000000000000000000000000000063114378"); //190000
+        consensus.defaultAssumeValid = uint256S("0x6765d4aa5d8858349ca8901046690079b8d38a034eaf8515d4479d0be98904fb"); //190000
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -156,8 +156,8 @@ public:
         checkpointData = {
             {
                 { 0, uint256S("0xd86f8a0582e779830f182befeaaabc8c73a159b6b06530910758daf17ce31e36")},
-                { 2, uint256S("0xd18a3f4ac8aab7647e2b06771cb389dba4a6ec8b107b5ea786e0e3eca0af0373")},
                 { 700, uint256S("0x2005b7aa8f35f4f38677c11fb336b04c038835dc60b259246491e0652110da0e")},
+                { 190000, uint256S("0x6765d4aa5d8858349ca8901046690079b8d38a034eaf8515d4479d0be98904fb")},
             }
         };
 
@@ -166,10 +166,10 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Data from RPC: getchaintxstats 699 2005b7aa8f35f4f38677c11fb336b04c038835dc60b259246491e0652110da0e
-            .nTime    = 1713620152,
-            .nTxCount = 704,
-            .dTxRate  = 0.006891690813689404,
+            // Data from RPC: getchaintxstats 8192 6765d4aa5d8858349ca8901046690079b8d38a034eaf8515d4479d0be98904fb
+            .nTime    = 1774692439,
+            .nTxCount = 201043,
+            .dTxRate  = 0.003334446442436871,
         };
     }
 };
@@ -184,18 +184,18 @@ public:
         consensus.signet_blocks = false;
         consensus.signet_challenge.clear();
         consensus.nSubsidyHalvingInterval = 420000;
-        consensus.BIP34Height = 2;
+        consensus.BIP34Height = 1;
         consensus.BIP34Hash = uint256{};
-        consensus.BIP65Height = 2;
-        consensus.BIP66Height = 2;
-        consensus.CSVHeight = 2;
-        consensus.SegwitHeight = 2;
-        consensus.MinBIP9WarningHeight = 4033;
+        consensus.BIP65Height = 1;
+        consensus.BIP66Height = 1;
+        consensus.CSVHeight = 1;
+        consensus.SegwitHeight = 1;
+        consensus.MinBIP9WarningHeight = 4032;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 5 * 60;
+        // consensus.nPowTargetTimespan = 5 * 60;
         consensus.nPowTargetSpacing = 5 * 60;
         consensus.lwmaAveragingWindow = 576;
-        consensus.fPowAllowMinDifficultyBlocks = true;
+        // consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 3024; // 75% for testchains
         consensus.nMinerConfirmationWindow = 4032; // two weeks
@@ -330,10 +330,10 @@ public:
         consensus.BIP66Height = 1;
         consensus.CSVHeight = 1;
         consensus.SegwitHeight = 1;
-        consensus.nPowTargetTimespan = 5 * 60;
+        // consensus.nPowTargetTimespan = 5 * 60;
         consensus.nPowTargetSpacing = 5 * 60;
         consensus.lwmaAveragingWindow = 576;
-        consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 3628; // ~90% of 4032
         consensus.nMinerConfirmationWindow = 4032; // two weeks
@@ -411,10 +411,10 @@ public:
         consensus.SegwitHeight = 0; // Always active unless overridden
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.nPowTargetTimespan = 5 * 60; // two weeks
+        // consensus.nPowTargetTimespan = 5 * 60; // two weeks
         consensus.nPowTargetSpacing = 5 * 60;
-        consensus.lwmaAveragingWindow = 576;
-        consensus.fPowAllowMinDifficultyBlocks = true;
+        consensus.lwmaAveragingWindow = 144;
+        // consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 4032)

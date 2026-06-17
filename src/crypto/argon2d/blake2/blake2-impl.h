@@ -15,11 +15,11 @@
  * software. If not, they may be obtained at the above URLs.
  */
 
-#ifndef PORTABLE_BLAKE2_IMPL_H
-#define PORTABLE_BLAKE2_IMPL_H
+#ifndef BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_IMPL_H
+#define BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_IMPL_H
 
-#include <stdint.h>
-#include <string.h>
+#include <cstdint>
+#include <cstring>
 
 #ifdef _WIN32
 #define BLAKE2_INLINE __inline
@@ -151,6 +151,4 @@ static BLAKE2_INLINE uint64_t rotr64(const uint64_t w, const unsigned c) {
     return (w >> c) | (w << (64 - c));
 }
 
-void clear_internal_memory(void *v, size_t n);
-
-#endif
+#endif // BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_IMPL_H

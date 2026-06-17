@@ -16,6 +16,10 @@ from collections import OrderedDict
 from decimal import Decimal
 from itertools import product
 
+from test_framework.authproxy import ( 
+    JSONRPCException,
+)
+
 from test_framework.messages import (
     MAX_BIP125_RBF_SEQUENCE,
     COIN,
@@ -96,7 +100,6 @@ class RawTransactionsTest(BitcoinTestFramework):
             self.raw_multisig_transaction_legacy_tests()
         self.getrawtransaction_verbosity_tests()
 
-
     def getrawtransaction_tests(self):
         tx = self.wallet.send_self_transfer(from_node=self.nodes[0])
         self.generate(self.nodes[0], 1)
@@ -105,6 +108,17 @@ class RawTransactionsTest(BitcoinTestFramework):
             "No such mempool transaction. Use -txindex or provide a block hash to enable"
             " blockchain transaction queries. Use gettransaction for wallet transactions."
         )
+
+        # Wait until txindex is ready on node 0
+        def wait_for_txindex_1():
+            try:
+                self.nodes[0].getrawtransaction(txId)
+                return True
+            except JSONRPCException as e:
+                if e.error['code'] == -5 and 'still in the process of being indexed' in e.error['message']:
+                    return False
+                raise
+        self.wait_until(wait_for_txindex_1, timeout=60)
 
         for n in [0, 2]:
             self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex")
@@ -146,6 +160,18 @@ class RawTransactionsTest(BitcoinTestFramework):
         # Make a tx by sending, then generate 2 blocks; block1 has the tx in it
         tx = self.wallet.send_self_transfer(from_node=self.nodes[2])['txid']
         block1, block2 = self.generate(self.nodes[2], 2)
+
+        # Wait until txindex is ready on node 0 for the new tx
+        def wait_for_txindex_2():
+            try:
+                self.nodes[0].getrawtransaction(txid=tx, verbose=True, blockhash=block1)
+                return True
+            except JSONRPCException as e:
+                if e.error['code'] == -5 and 'still in the process of being indexed' in e.error['message']:
+                    return False
+                raise
+        self.wait_until(wait_for_txindex_2, timeout=60)
+
         for n in [0, 2]:
             self.log.info(f"Test getrawtransaction {'with' if n == 0 else 'without'} -txindex, with blockhash")
             # We should be able to get the raw transaction by providing the correct block

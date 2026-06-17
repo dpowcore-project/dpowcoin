@@ -62,9 +62,15 @@ static UniValue GetNetworkHashPS(int lookup, int height, const CChain& active_ch
     if (pb == nullptr || !pb->nHeight)
         return 0;
 
-    // If lookup is -1, then use blocks since last difficulty change.
+    /*
     if (lookup <= 0)
         lookup = pb->nHeight % Params().GetConsensus().DifficultyAdjustmentInterval() + 1;
+    */
+
+    /* Dpowcoin Params */
+    // If lookup is -1, then use blocks since last difficulty change.
+    if (lookup <= 0)
+        lookup = Params().GetConsensus().lwmaAveragingWindow;
 
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pb->nHeight)
@@ -119,26 +125,37 @@ static bool GenerateBlock(ChainstateManager& chainman, CBlock& block, uint64_t& 
 {
     block_out.reset();
     block.hashMerkleRoot = BlockMerkleRoot(block);
-    // dual pow logic
-    while (max_tries > 0 && block.nNonce < std::numeric_limits<uint32_t>::max() && !(CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, chainman.GetConsensus()) && CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, chainman.GetConsensus())) && !ShutdownRequested()) {
+
+    // Dual PoW: cheap Yespower is checked first on every nonce,
+    // expensive Argon2id is only computed when Yespower passes
+    while (max_tries > 0 &&
+           block.nNonce < std::numeric_limits<uint32_t>::max() &&
+           !ShutdownRequested())
+    {
+        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, chainman.GetConsensus())) {
+            ++block.nNonce;
+            --max_tries;
+            continue;
+        }
+        // Yespower passed — now check Argon2id
+        if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, chainman.GetConsensus())) {
+            break; // Both PoW checks passed — block found
+        }
         ++block.nNonce;
         --max_tries;
     }
+
     if (max_tries == 0 || ShutdownRequested()) {
         return false;
     }
     if (block.nNonce == std::numeric_limits<uint32_t>::max()) {
         return true;
     }
-
     block_out = std::make_shared<const CBlock>(block);
-
     if (!process_new_block) return true;
-
     if (!chainman.ProcessNewBlock(block_out, /*force_processing=*/true, /*min_pow_checked=*/true, nullptr)) {
         throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
     }
-
     return true;
 }
 

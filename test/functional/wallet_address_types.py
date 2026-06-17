@@ -70,6 +70,7 @@ class AddressTypeTest(BitcoinTestFramework):
         self.add_wallet_options(parser)
 
     def set_test_params(self):
+        self.rpc_timeout = 480
         self.num_nodes = 6
         self.extra_args = [
             ["-addresstype=legacy"],

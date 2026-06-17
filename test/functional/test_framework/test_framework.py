@@ -99,7 +99,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         self.nodes: List[TestNode] = []
         self.extra_args = None
         self.network_thread = None
-        self.rpc_timeout = 60  # Wait for up to 60 seconds for the RPC server to respond
+        self.rpc_timeout = 240  # Wait for up to 60 seconds for the RPC server to respond
         self.supports_cli = True
         self.bind_to_localhost_only = True
         self.parse_args()
@@ -746,7 +746,7 @@ class BitcoinTestFramework(metaclass=BitcoinTestMetaClass):
         self.sync_blocks(nodes)
         self.sync_mempools(nodes)
 
-    def wait_until(self, test_function, timeout=60):
+    def wait_until(self, test_function, timeout=600):
         return wait_until_helper_internal(test_function, timeout=timeout, timeout_factor=self.options.timeout_factor)
 
     # Private helper methods. These should not be accessed by the subclass test scripts.

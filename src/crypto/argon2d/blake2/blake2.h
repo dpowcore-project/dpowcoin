@@ -15,14 +15,10 @@
  * software. If not, they may be obtained at the above URLs.
  */
 
-#ifndef PORTABLE_BLAKE2_H
-#define PORTABLE_BLAKE2_H
+#ifndef BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_H
+#define BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_H
 
-#include <crypto/argon2d/argon2.h>
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#include <crypto/argon2d/argon2_types.h>
 
 enum blake2b_constant {
     BLAKE2B_BLOCKBYTES = 128,
@@ -61,29 +57,25 @@ typedef struct __blake2b_state {
 /* Ensure param structs have not been wrongly padded */
 /* Poor man's static_assert */
 enum {
-    blake2_size_check_0 = 1 / !!(CHAR_BIT == 8),
+    blake2_size_check_0 = 1 / (int)!!(CHAR_BIT == 8),
     blake2_size_check_2 =
-        1 / !!(sizeof(blake2b_param) == sizeof(uint64_t) * CHAR_BIT)
+        1 / (int)!!(sizeof(blake2b_param) == sizeof(uint64_t) * CHAR_BIT)
 };
 
 /* Streaming API */
-ARGON2_LOCAL int blake2b_init(blake2b_state *S, size_t outlen);
-ARGON2_LOCAL int blake2b_init_key(blake2b_state *S, size_t outlen, const void *key,
+ARGON2_LOCAL int argon2d_blake2b_init(blake2b_state *S, size_t outlen);
+ARGON2_LOCAL int argon2d_blake2b_init_key(blake2b_state *S, size_t outlen, const void *key,
                      size_t keylen);
-ARGON2_LOCAL int blake2b_init_param(blake2b_state *S, const blake2b_param *P);
-ARGON2_LOCAL int blake2b_update(blake2b_state *S, const void *in, size_t inlen);
-ARGON2_LOCAL int blake2b_final(blake2b_state *S, void *out, size_t outlen);
+ARGON2_LOCAL int argon2d_blake2b_init_param(blake2b_state *S, const blake2b_param *P);
+ARGON2_LOCAL int argon2d_blake2b_update(blake2b_state *S, const void *in, size_t inlen);
+ARGON2_LOCAL int argon2d_blake2b_final(blake2b_state *S, void *out, size_t outlen);
 
 /* Simple API */
-ARGON2_LOCAL int blake2b(void *out, size_t outlen, const void *in, size_t inlen,
+ARGON2_LOCAL int argon2d_blake2b(void *out, size_t outlen, const void *in, size_t inlen,
                          const void *key, size_t keylen);
 
 /* Argon2 Team - Begin Code */
-ARGON2_LOCAL int blake2b_long(void *out, size_t outlen, const void *in, size_t inlen);
+ARGON2_LOCAL int argon2d_blake2b_long(void *out, size_t outlen, const void *in, size_t inlen);
 /* Argon2 Team - End Code */
 
-#if defined(__cplusplus)
-}
-#endif
-
-#endif
+#endif // BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAKE2_H

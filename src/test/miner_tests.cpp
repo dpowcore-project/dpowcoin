@@ -19,6 +19,7 @@
 #include <util/time.h>
 #include <validation.h>
 #include <versionbits.h>
+#include <pow.h>
 
 #include <test/util/setup_common.h>
 
@@ -31,6 +32,7 @@ using node::CBlockTemplate;
 
 namespace miner_tests {
 struct MinerTestingSetup : public TestingSetup {
+    MinerTestingSetup() : TestingSetup(ChainType::REGTEST) {}
     void TestPackageSelection(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
     void TestBasicMining(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst, int baseheight) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
     void TestPrioritisedMining(const CScript& scriptPubKey, const std::vector<CTransactionRef>& txFirst) EXCLUSIVE_LOCKS_REQUIRED(::cs_main);
@@ -70,25 +72,25 @@ BlockAssembler MinerTestingSetup::AssemblerForTest(CTxMemPool& tx_mempool)
 constexpr static struct {
     unsigned char extranonce;
     unsigned int nonce;
-} BLOCKINFO[]{{8, 582909131},  {0, 971462344},  {2, 1169481553}, {6, 66147495},  {7, 427785981},  {8, 80538907},
-              {8, 207348013},  {2, 1951240923}, {4, 215054351},  {1, 491520534}, {8, 1282281282}, {4, 639565734},
-              {3, 248274685},  {8, 1160085976}, {6, 396349768},  {5, 393780549}, {5, 1096899528}, {4, 965381630},
-              {0, 728758712},  {5, 318638310},  {3, 164591898},  {2, 274234550}, {2, 254411237},  {7, 561761812},
-              {2, 268342573},  {0, 402816691},  {1, 221006382},  {6, 538872455}, {7, 393315655},  {4, 814555937},
-              {7, 504879194},  {6, 467769648},  {3, 925972193},  {2, 200581872}, {3, 168915404},  {8, 430446262},
-              {5, 773507406},  {3, 1195366164}, {0, 433361157},  {3, 297051771}, {0, 558856551},  {2, 501614039},
-              {3, 528488272},  {2, 473587734},  {8, 230125274},  {2, 494084400}, {4, 357314010},  {8, 60361686},
-              {7, 640624687},  {3, 480441695},  {8, 1424447925}, {4, 752745419}, {1, 288532283},  {6, 669170574},
-              {5, 1900907591}, {3, 555326037},  {3, 1121014051}, {0, 545835650}, {8, 189196651},  {5, 252371575},
-              {0, 199163095},  {6, 558895874},  {6, 1656839784}, {6, 815175452}, {6, 718677851},  {5, 544000334},
-              {0, 340113484},  {6, 850744437},  {4, 496721063},  {8, 524715182}, {6, 574361898},  {6, 1642305743},
-              {6, 355110149},  {5, 1647379658}, {8, 1103005356}, {7, 556460625}, {3, 1139533992}, {5, 304736030},
-              {2, 361539446},  {2, 143720360},  {6, 201939025},  {7, 423141476}, {4, 574633709},  {3, 1412254823},
-              {4, 873254135},  {0, 341817335},  {6, 53501687},   {3, 179755410}, {5, 172209688},  {8, 516810279},
-              {4, 1228391489}, {8, 325372589},  {6, 550367589},  {0, 876291812}, {7, 412454120},  {7, 717202854},
-              {2, 222677843},  {6, 251778867},  {7, 842004420},  {7, 194762829}, {4, 96668841},   {1, 925485796},
-              {0, 792342903},  {6, 678455063},  {6, 773251385},  {5, 186617471}, {6, 883189502},  {7, 396077336},
-              {8, 254702874},  {0, 455592851}};
+} BLOCKINFO[]{{8, 2},  {0, 0},  {2, 2},  {6, 0},  {7, 4},  {8, 1},
+              {8, 0},  {2, 1},  {4, 1},  {1, 3},  {8, 1},  {4, 1},
+              {3, 1},  {8, 3},  {6, 6},  {5, 2},  {5, 19}, {4, 0},
+              {0, 5},  {5, 3},  {3, 3},  {2, 12}, {2, 2},  {7, 3},
+              {2, 14}, {0, 3},  {1, 3},  {6, 1},  {7, 1},  {4, 3},
+              {7, 0},  {6, 1},  {3, 6},  {2, 0},  {3, 0},  {8, 0},
+              {5, 1},  {3, 3},  {0, 1},  {3, 1},  {0, 5},  {2, 4},
+              {3, 4},  {2, 2},  {8, 4},  {2, 3},  {4, 2},  {8, 0},
+              {7, 11}, {3, 11}, {8, 13}, {4, 3},  {1, 4},  {6, 0},
+              {5, 0},  {3, 7},  {3, 7},  {0, 9},  {8, 7},  {5, 1},
+              {0, 9},  {6, 6},  {6, 14}, {6, 1},  {6, 14}, {5, 5},
+              {0, 3},  {6, 3},  {4, 1},  {8, 5},  {6, 3},  {6, 6},
+              {6, 2},  {5, 7},  {8, 0},  {7, 0},  {3, 1},  {5, 1},
+              {2, 0},  {2, 16}, {6, 0},  {7, 7},  {4, 3},  {3, 7},
+              {4, 10}, {0, 1},  {6, 0},  {3, 0},  {5, 3},  {8, 0},
+              {4, 10}, {8, 1},  {6, 1},  {0, 1},  {7, 1},  {7, 8},
+              {2, 1},  {6, 1},  {7, 3},  {7, 2},  {4, 0},  {1, 1},
+              {0, 15}, {6, 10}, {6, 2},  {5, 0},  {6, 0},  {7, 9},
+              {8, 1},  {0, 1}};
 
 static std::unique_ptr<CBlockIndex> CreateBlockIndex(int nHeight, CBlockIndex* active_chain_tip) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
@@ -361,7 +363,7 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
         // subsidy changing
         int nHeight = m_node.chainman->ActiveChain().Height();
         // Create an actual 209999-long block chain (without valid blocks).
-        while (m_node.chainman->ActiveChain().Tip()->nHeight < 209999) {
+        while (m_node.chainman->ActiveChain().Tip()->nHeight < 409999) {
             CBlockIndex* prev = m_node.chainman->ActiveChain().Tip();
             CBlockIndex* next = new CBlockIndex();
             next->phashBlock = new uint256(InsecureRand256());
@@ -373,7 +375,7 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
         }
         BOOST_CHECK(AssemblerForTest(tx_mempool).CreateNewBlock(scriptPubKey));
         // Extend to a 210000-long block chain.
-        while (m_node.chainman->ActiveChain().Tip()->nHeight < 210000) {
+        while (m_node.chainman->ActiveChain().Tip()->nHeight < 420000) {
             CBlockIndex* prev = m_node.chainman->ActiveChain().Tip();
             CBlockIndex* next = new CBlockIndex();
             next->phashBlock = new uint256(InsecureRand256());
@@ -420,6 +422,19 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
     const int flags{LOCKTIME_VERIFY_SEQUENCE};
     // height map
     std::vector<int> prevheights;
+
+    // Guard: BIP68/CSV must be active from block 1. If CSVHeight is not 1,
+    // createNewBlock will NOT throw bad-txns-nonfinal in the check below and
+    // Boost will only print "exception expected but not raised" with no context.
+    // This message tells the developer exactly what chainparam is misconfigured.
+    const auto& consensus{m_node.chainman->GetParams().GetConsensus()};
+    BOOST_REQUIRE_MESSAGE(consensus.CSVHeight <= 1,
+        strprintf("CSVHeight must be 1 for this test (got %d). "
+                  "BIP68/CSV must be active from block 1 so that "
+                  "createNewBlock rejects a non-BIP68-final transaction with "
+                  "bad-txns-nonfinal at current tip height %d.",
+                  consensus.CSVHeight,
+                  m_node.chainman->ActiveChain().Tip()->nHeight));
 
     // relative height locked
     tx.nVersion = 2;
@@ -502,15 +517,17 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
     tx.vin[0].nSequence = CTxIn::SEQUENCE_LOCKTIME_TYPE_FLAG | 1;
     BOOST_CHECK(!TestSequenceLocks(CTransaction{tx}, tx_mempool)); // Sequence locks fail
 
-    auto pblocktemplate = AssemblerForTest(tx_mempool).CreateNewBlock(scriptPubKey);
-    BOOST_CHECK(pblocktemplate);
+    // BIP68 enforcement check (locked state): BlockAssembler includes the two
+    // relative-locked txs via stale LockPoints (lp.height=0 <= tip passes
+    // TestLockPointValidity). TestBlockValidity then detects they are BIP68-non-final
+    // at the current height and rejects the block. The two absolute-locked txs are
+    // already excluded by IsFinalTx before reaching BIP68 checks.
+    // Regression signal: if this exception stops being thrown, BIP68 is broken.
+    BOOST_CHECK_EXCEPTION(AssemblerForTest(tx_mempool).CreateNewBlock(scriptPubKey), std::runtime_error, HasReason("bad-txns-nonfinal"));
 
-    // None of the of the absolute height/time locked tx should have made
-    // it into the template because we still check IsFinalTx in CreateNewBlock,
-    // but relative locked txs will if inconsistently added to mempool.
-    // For now these will still generate a valid template until BIP68 soft fork
-    BOOST_CHECK_EQUAL(pblocktemplate->block.vtx.size(), 3U);
-    // However if we advance height by 1 and time by SEQUENCE_LOCK_TIME, all of them should be mined
+    // Advance height by 1 and MTP by SEQUENCE_LOCK_TIME so all four locked txs
+    // become final. The relative-locked txs are already in the mempool from the
+    // addUnchecked calls above and do not need to be re-added.
     for (int i = 0; i < CBlockIndex::nMedianTimeSpan; ++i) {
         CBlockIndex* ancestor{Assert(m_node.chainman->ActiveChain().Tip()->GetAncestor(m_node.chainman->ActiveChain().Tip()->nHeight - i))};
         ancestor->nTime += SEQUENCE_LOCK_TIME; // Trick the MedianTimePast
@@ -518,7 +535,9 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
     m_node.chainman->ActiveChain().Tip()->nHeight++;
     SetMockTime(m_node.chainman->ActiveChain().Tip()->GetMedianTimePast() + 1);
 
-    BOOST_CHECK(pblocktemplate = AssemblerForTest(tx_mempool).CreateNewBlock(scriptPubKey));
+    // Unlocked state: all four txs are now final and must appear in the template.
+    auto pblocktemplate = AssemblerForTest(tx_mempool).CreateNewBlock(scriptPubKey);
+    BOOST_REQUIRE(pblocktemplate);
     BOOST_CHECK_EQUAL(pblocktemplate->block.vtx.size(), 5U);
 }
 
@@ -633,8 +652,25 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             if (txFirst.size() < 4)
                 txFirst.push_back(pblock->vtx[0]);
             pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+
+            // Normal usage — hardcoded nonces from BLOCKINFO:
             pblock->nNonce = bi.nonce;
+            /*
+            pblock->nNonce = 0;
+            // code for regenerate BLOCKINFO
+            while (!CheckProofOfWork(pblock->GetYespowerPoWHash(), pblock->nBits, Assert(m_node.chainman)->GetParams().GetConsensus()) ||
+                   !CheckProofOfWork(pblock->GetArgon2idPoWHash(), pblock->nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
+                ++pblock->nNonce;
+                if (pblock->nNonce == 0) {
+                    BOOST_FAIL("nNonce overflow — no valid nonce found for this extranonce");
+                }
+            }
+            FILE* f = fopen("/tmp/blockinfo.txt", "a");
+            fprintf(f, "{%u, %u},\n", bi.extranonce, pblock->nNonce);
+            fclose(f);
+            */
         }
+
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
         BOOST_CHECK(Assert(m_node.chainman)->ProcessNewBlock(shared_pblock, true, true, nullptr));
         pblock->hashPrevBlock = pblock->GetHash();

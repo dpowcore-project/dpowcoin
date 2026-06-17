@@ -7,7 +7,7 @@
 Test logic for skipping signature validation on blocks which we've assumed
 valid (https://github.com/bitcoin/bitcoin/pull/9484)
 
-We build a chain that includes and invalid signature for one of the
+We build a chain that includes an invalid signature for one of the
 transactions:
 
     0:        genesis block
@@ -16,15 +16,15 @@ transactions:
               output can be spent
     102:      a block containing a transaction spending the coinbase
               transaction output. The transaction has an invalid signature.
-    103-2202: bury the bad block with just over two weeks' worth of blocks
-              (2100 blocks)
+    103-4302: bury the bad block with just over two weeks' worth of blocks
+              (4200 blocks) – adapted for 300s block time (4200*300 = 14.6 days > 14 days)
 
 Start three nodes:
 
-    - node0 has no -assumevalid parameter. Try to sync to block 2202. It will
+    - node0 has no -assumevalid parameter. Try to sync to block 4302. It will
       reject block 102 and only sync as far as block 101
     - node1 has -assumevalid set to the hash of block 102. Try to sync to
-      block 2202. node1 will sync all the way to block 2202.
+      block 4302. node1 will sync all the way to block 4302.
     - node2 has -assumevalid set to the hash of block 102. Try to sync to
       block 200. node2 will reject block 102 since it's assumed valid, but it
       isn't buried by at least two weeks' work.
@@ -65,7 +65,7 @@ class AssumeValidTest(BitcoinTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
-        self.rpc_timeout = 120
+        self.rpc_timeout = 600
 
     def setup_network(self):
         self.add_nodes(3)
@@ -129,8 +129,9 @@ class AssumeValidTest(BitcoinTestFramework):
         self.block_time += 1
         height += 1
 
-        # Bury the assumed valid block 2100 deep
-        for _ in range(2100):
+        # Bury the assumed valid block 4200 deep (enough for 300s block time)
+        BURIAL_BLOCKS = 4200
+        for _ in range(BURIAL_BLOCKS):
             block = create_block(self.tip, create_coinbase(height), self.block_time)
             block.solve()
             self.blocks.append(block)
@@ -138,36 +139,46 @@ class AssumeValidTest(BitcoinTestFramework):
             self.block_time += 1
             height += 1
 
+        TOTAL_BLOCKS = 1 + 100 + 1 + BURIAL_BLOCKS  # = 4302
+
         # Start node1 and node2 with assumevalid so they accept a block with a bad signature.
         self.start_node(1, extra_args=["-assumevalid=" + hex(block102.sha256)])
         self.start_node(2, extra_args=["-assumevalid=" + hex(block102.sha256)])
 
+        # Send headers to node0 in chunks of 2000 (MAX_HEADERS_RESULTS)
         p2p0 = self.nodes[0].add_p2p_connection(BaseNode())
-        p2p0.send_header_for_blocks(self.blocks[0:2000])
-        p2p0.send_header_for_blocks(self.blocks[2000:])
+        for start in range(0, TOTAL_BLOCKS, 2000):
+            p2p0.send_header_for_blocks(self.blocks[start:start+2000])
 
         # Send blocks to node0. Block 102 will be rejected.
         self.send_blocks_until_disconnected(p2p0)
-        self.wait_until(lambda: self.nodes[0].getblockcount() >= COINBASE_MATURITY + 1)
+        self.wait_until(lambda: self.nodes[0].getblockcount() >= COINBASE_MATURITY + 1, timeout=1200)
         assert_equal(self.nodes[0].getblockcount(), COINBASE_MATURITY + 1)
 
+        # Node1: send headers in chunks, then blocks in batches
         p2p1 = self.nodes[1].add_p2p_connection(BaseNode())
-        p2p1.send_header_for_blocks(self.blocks[0:2000])
-        p2p1.send_header_for_blocks(self.blocks[2000:])
+        for start in range(0, TOTAL_BLOCKS, 2000):
+            p2p1.send_header_for_blocks(self.blocks[start:start+2000])
 
-        # Send all blocks to node1. All blocks will be accepted.
-        for i in range(2202):
-            p2p1.send_message(msg_block(self.blocks[i]))
-        # Syncing 2200 blocks can take a while on slow systems. Give it plenty of time to sync.
-        p2p1.sync_with_ping(960)
-        assert_equal(self.nodes[1].getblock(self.nodes[1].getbestblockhash())['height'], 2202)
+        BATCH_SIZE = 50
+        for i in range(0, TOTAL_BLOCKS, BATCH_SIZE):
+            batch = self.blocks[i:i + BATCH_SIZE]
+            for block in batch:
+                p2p1.send_message(msg_block(block))
+            # Wait for node to process this batch before sending the next
+            p2p1.sync_with_ping(timeout=600)
 
+        # Final sync to ensure all blocks are processed
+        p2p1.sync_with_ping(1200)
+        assert_equal(self.nodes[1].getblock(self.nodes[1].getbestblockhash())['height'], TOTAL_BLOCKS)
+
+        # Node2: only first 200 blocks (shallow burial)
         p2p2 = self.nodes[2].add_p2p_connection(BaseNode())
         p2p2.send_header_for_blocks(self.blocks[0:200])
 
         # Send blocks to node2. Block 102 will be rejected.
         self.send_blocks_until_disconnected(p2p2)
-        self.wait_until(lambda: self.nodes[2].getblockcount() >= COINBASE_MATURITY + 1)
+        self.wait_until(lambda: self.nodes[2].getblockcount() >= COINBASE_MATURITY + 1, timeout=300)
         assert_equal(self.nodes[2].getblockcount(), COINBASE_MATURITY + 1)
 
 

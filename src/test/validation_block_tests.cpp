@@ -90,18 +90,18 @@ std::shared_ptr<CBlock> MinerTestingSetup::FinalizeBlock(std::shared_ptr<CBlock>
 {
     const CBlockIndex* prev_block{WITH_LOCK(::cs_main, return m_node.chainman->m_blockman.LookupBlockIndex(pblock->hashPrevBlock))};
     m_node.chainman->GenerateCoinbaseCommitment(*pblock, prev_block);
-
     pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
-
-    while (!(CheckProofOfWork(pblock->GetYespowerPoWHash(), pblock->nBits, Params().GetConsensus()) && CheckProofOfWork(pblock->GetArgon2idPoWHash(), pblock->nBits, Params().GetConsensus()))) {
+    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
+    while (true) {
+        if (CheckProofOfWork(pblock->GetYespowerPoWHash(), pblock->nBits, Params().GetConsensus())) {
+            if (CheckProofOfWork(pblock->GetArgon2idPoWHash(), pblock->nBits, Params().GetConsensus())) break;
+        }
         ++(pblock->nNonce);
     }
-
     // submit block header, so that miner can get the block height from the
     // global state and the node has the topology of the chain
     BlockValidationState ignored;
     BOOST_CHECK(Assert(m_node.chainman)->ProcessNewBlockHeaders({pblock->GetBlockHeader()}, true, ignored));
-
     return pblock;
 }
 

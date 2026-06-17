@@ -58,6 +58,9 @@ static constexpr auto HEADERS_DOWNLOAD_TIMEOUT_BASE = 15min;
 static constexpr auto HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER = 1ms;
 /** How long to wait for a peer to respond to a getheaders request */
 static constexpr auto HEADERS_RESPONSE_TIME{2min};
+/** Minimum timeout extension per PRESYNC/REDOWNLOAD batch; ensures the rolling
+ *  window never shrinks below the initial computed timeout. */
+static constexpr auto HEADERS_PRESYNC_RENEWAL_TIMEOUT{10min};
 /** Protect at least this many outbound peers from disconnection due to slow/
  * behind headers chain.
  */
@@ -65,9 +68,9 @@ static constexpr int32_t MAX_OUTBOUND_PEERS_TO_PROTECT_FROM_DISCONNECT = 4;
 /** Timeout for (unprotected) outbound peers to sync to our chainwork */
 static constexpr auto CHAIN_SYNC_TIMEOUT{20min};
 /** How frequently to check for stale tips */
-static constexpr auto STALE_CHECK_INTERVAL{5min};
+static constexpr auto STALE_CHECK_INTERVAL{10min};
 /** How frequently to check for extra outbound peers and disconnect */
-static constexpr auto EXTRA_PEER_CHECK_INTERVAL{30s};
+static constexpr auto EXTRA_PEER_CHECK_INTERVAL{45s};
 /** Minimum time an outbound-peer-eviction candidate must be connected for, in order to evict */
 static constexpr auto MINIMUM_CONNECT_TIME{30s};
 /** SHA256("main address relay")[0:8] */
@@ -123,9 +126,9 @@ static const int MAX_BLOCKTXN_DEPTH = 10;
  *  want to make this a per-peer adaptive value at some point. */
 static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024;
 /** Block download timeout base, expressed in multiples of the block interval (i.e. 10 min) */
-static constexpr double BLOCK_DOWNLOAD_TIMEOUT_BASE = 1;
+static constexpr double BLOCK_DOWNLOAD_TIMEOUT_BASE = 2;
 /** Additional block download timeout per parallel downloading peer (i.e. 5 min) */
-static constexpr double BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 0.5;
+static constexpr double BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 1;
 /** Maximum number of headers to announce when relaying blocks with headers message.*/
 static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 8;
 /** Maximum number of unconnecting headers announcements before DoS score */
@@ -2482,8 +2485,15 @@ void PeerManagerImpl::SendBlockTransactions(CNode& pfrom, Peer& peer, const CBlo
 
 bool PeerManagerImpl::CheckHeadersPoW(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams, Peer& peer)
 {
-    // Do these headers have proof-of-work matching what's claimed?
-    if (!HasValidProofOfWork(headers, consensusParams)) {
+    bool in_presync;
+    {
+        LOCK(peer.m_headers_sync_mutex);
+        in_presync = peer.m_headers_sync &&
+                     peer.m_headers_sync->GetState() == HeadersSyncState::State::PRESYNC;
+    }
+
+    if (!(in_presync ? HasValidProofOfWorkPresync(headers, consensusParams)
+                     : HasValidProofOfWork(headers, consensusParams))) {
         Misbehaving(peer, 100, "header with invalid proof of work");
         return false;
     }
@@ -2905,11 +2915,18 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, Peer& peer,
         //   during the REDOWNLOAD phase of a low-work headers sync.
         // So just check whether we still have headers that we need to process,
         // or not.
-        if (headers.empty()) {
-            return;
-        }
-
         have_headers_sync = !!peer.m_headers_sync;
+    }
+
+    // headers is a local variable and safe to read after the lock is released.
+    // If PRESYNC consumed the batch, extend the sync timeout and return.
+    // Without this, the one-shot timeout set at sync start expires long before
+    // PRESYNC + REDOWNLOAD complete on a chain with many headers.
+    if (headers.empty()) {
+        if (peer.m_headers_sync_timeout != std::chrono::microseconds::max()) {
+            peer.m_headers_sync_timeout = GetTime<std::chrono::microseconds>() + HEADERS_PRESYNC_RENEWAL_TIMEOUT;
+        }
+        return;
     }
 
     // Do these headers connect to something in our block index?
@@ -2975,6 +2992,12 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, Peer& peer,
         }
     }
     assert(pindexLast);
+
+    // Extend the sync timeout on each successfully validated batch (covers
+    // REDOWNLOAD phase and normal IBD where m_best_header is still far behind).
+    if (peer.m_headers_sync_timeout != std::chrono::microseconds::max()) {
+        peer.m_headers_sync_timeout = GetTime<std::chrono::microseconds>() + HEADERS_PRESYNC_RENEWAL_TIMEOUT;
+    }
 
     // Consider fetching more headers if we are not using our headers-sync mechanism.
     if (nCount == MAX_HEADERS_RESULTS && !have_headers_sync) {

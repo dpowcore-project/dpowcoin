@@ -1,10 +1,10 @@
 AC_PREREQ([2.69])
 define(_CLIENT_VERSION_MAJOR, 26)
-define(_CLIENT_VERSION_MINOR, 2)
+define(_CLIENT_VERSION_MINOR, 3)
 define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_RC, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
-define(_COPYRIGHT_YEAR, 2023)
+define(_COPYRIGHT_YEAR, 2026)
 define(_COPYRIGHT_HOLDERS,[The %s developers])
 define(_COPYRIGHT_HOLDERS_SUBSTITUTION,[[Dpowcoin Core]])
 AC_INIT([Dpowcoin Core],m4_join([.], _CLIENT_VERSION_MAJOR, _CLIENT_VERSION_MINOR, _CLIENT_VERSION_BUILD)m4_if(_CLIENT_VERSION_RC, [0], [], [rc]_CLIENT_VERSION_RC),[https://github.com/dpowcore-project/dpowcoin/issues],[dpowcoin],[https://dpowcore.org/])
@@ -483,6 +483,11 @@ enable_sse42=no
 enable_sse41=no
 enable_avx2=no
 enable_x86_shani=no
+enable_argon2_avx2=no
+enable_argon2_avx512=no
+enable_argon2_sse2=no
+enable_argon2_ssse3=no
+enable_argon2_neon=no
 
 if test "$use_asm" = "yes"; then
 
@@ -495,6 +500,10 @@ AX_CHECK_COMPILE_FLAG([-msse4.2], [SSE42_CXXFLAGS="-msse4.2"], [], [$CXXFLAG_WER
 AX_CHECK_COMPILE_FLAG([-msse4.1], [SSE41_CXXFLAGS="-msse4.1"], [], [$CXXFLAG_WERROR])
 AX_CHECK_COMPILE_FLAG([-mavx -mavx2], [AVX2_CXXFLAGS="-mavx -mavx2"], [], [$CXXFLAG_WERROR])
 AX_CHECK_COMPILE_FLAG([-msse4 -msha], [X86_SHANI_CXXFLAGS="-msse4 -msha"], [], [$CXXFLAG_WERROR])
+AX_CHECK_COMPILE_FLAG([-mavx512f], [ARGON2_AVX512F_CXXFLAGS="-mavx512f"], [], [$CXXFLAG_WERROR])
+AX_CHECK_COMPILE_FLAG([-mavx2], [ARGON2_AVX2_CXXFLAGS="-mavx2"], [], [$CXXFLAG_WERROR])
+AX_CHECK_COMPILE_FLAG([-mssse3], [ARGON2_SSSE3_CXXFLAGS="-mssse3"], [], [$CXXFLAG_WERROR])
+AX_CHECK_COMPILE_FLAG([-msse2], [ARGON2_SSE2_CXXFLAGS="-msse2"], [], [$CXXFLAG_WERROR])
 
 enable_clmul=
 AX_CHECK_COMPILE_FLAG([-mpclmul], [enable_clmul=yes], [], [$CXXFLAG_WERROR], [AC_LANG_PROGRAM([
@@ -582,6 +591,124 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
  [ AC_MSG_RESULT([no])]
 )
 CXXFLAGS="$TEMP_CXXFLAGS"
+
+# AVX512
+TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$ARGON2_AVX512F_CXXFLAGS $CXXFLAGS"
+AC_MSG_CHECKING([for Argon2 AVX512 intrinsics])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #include <stdint.h>
+    #include <immintrin.h>
+  ]], [[
+    __m512i v = _mm512_set1_epi32(0);
+    return 0;
+  ]])],
+ [ AC_MSG_RESULT([yes])
+   enable_argon2_avx512=yes
+   AC_DEFINE([ENABLE_ARGON2_AVX512], [1], [Define this symbol to build Argon2 AVX512 code]) ],
+ [ AC_MSG_RESULT([no]) ]
+)
+CXXFLAGS="$TEMP_CXXFLAGS"
+
+# AVX2
+TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$ARGON2_AVX2_CXXFLAGS $CXXFLAGS"
+AC_MSG_CHECKING([for Argon2 AVX2 intrinsics])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #include <stdint.h>
+    #include <immintrin.h>
+  ]], [[
+    __m256i l = _mm256_set1_epi32(0);
+    return 0;
+  ]])],
+ [ AC_MSG_RESULT([yes])
+   enable_argon2_avx2=yes
+   AC_DEFINE([ENABLE_ARGON2_AVX2], [1], [Define this symbol to build code that uses Argon2 AVX2 intrinsics]) ],
+ [ AC_MSG_RESULT([no])]
+)
+CXXFLAGS="$TEMP_CXXFLAGS"
+
+# Argon2 SSSE3
+TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$ARGON2_SSSE3_CXXFLAGS $CXXFLAGS"
+AC_MSG_CHECKING([for Argon2 SSSE3 intrinsics])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #include <stdint.h>
+    #include <tmmintrin.h>
+  ]], [[
+    __m128i a = _mm_set1_epi8(0);
+    static const char tbl[16] = {3,4,5,6,7,0,1,2,11,12,13,14,15,8,9,10};
+    __m128i b = _mm_shuffle_epi8(a, _mm_loadu_si128((const __m128i*)tbl));
+    __m128i c = _mm_alignr_epi8(a, b, 8);
+    return 0;
+  ]])],
+ [ AC_MSG_RESULT([yes])
+   enable_argon2_ssse3=yes
+   AC_DEFINE([ENABLE_ARGON2_SSSE3], [1], [Define this symbol to build Argon2 SSSE3 code]) ],
+ [ AC_MSG_RESULT([no]) ]
+)
+CXXFLAGS="$TEMP_CXXFLAGS"
+
+# Argon2 SSE2
+TEMP_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$ARGON2_SSE2_CXXFLAGS $CXXFLAGS"
+AC_MSG_CHECKING([for Argon2 SSE2 intrinsics])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #include <stdint.h>
+    #include <emmintrin.h>
+  ]], [[
+    __m128i a = _mm_set1_epi32(0);
+    __m128i b = _mm_set1_epi32(1);
+    __m128i r = _mm_xor_si128(a, b);
+    return 0;
+  ]])],
+ [ AC_MSG_RESULT([yes])
+   enable_argon2_sse2=yes
+   AC_DEFINE([ENABLE_ARGON2_SSE2], [1], [Define this symbol to build Argon2 SSE2 code]) ],
+ [ AC_MSG_RESULT([no]) ]
+)
+CXXFLAGS="$TEMP_CXXFLAGS"
+
+# Argon2 NEON — step 1: AArch64 (NEON baseline, no extra flags)
+AC_MSG_CHECKING([for Argon2 NEON intrinsics (native)])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    #include <arm_neon.h>
+    #include <stdint.h>
+  ]], [[
+    uint64x2_t a = vdupq_n_u64(UINT64_C(0));
+    uint64x2_t b = vdupq_n_u64(UINT64_C(1));
+    uint32x2_t lo = vmovn_u64(a);
+    uint64x2_t ml = vmull_u32(lo, lo);
+    uint64x2_t r  = veorq_u64(vaddq_u64(a, b), vaddq_u64(ml, ml));
+    return 0;
+  ]])],
+ [ AC_MSG_RESULT([yes]); enable_argon2_neon=yes; ARGON2_NEON_CXXFLAGS="" ],
+ [ AC_MSG_RESULT([no])
+   # step 2: ARMv7+NEON (-mfpu=neon)
+   AX_CHECK_COMPILE_FLAG([-mfpu=neon], [ARGON2_NEON_CXXFLAGS="-mfpu=neon"], [], [$CXXFLAG_WERROR])
+   TEMP_CXXFLAGS="$CXXFLAGS"
+   CXXFLAGS="$ARGON2_NEON_CXXFLAGS $CXXFLAGS"
+   AC_MSG_CHECKING([for Argon2 NEON intrinsics (ARMv7+NEON)])
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+       #include <arm_neon.h>
+       #include <stdint.h>
+     ]], [[
+       uint64x2_t a = vdupq_n_u64(UINT64_C(0));
+       uint64x2_t b = vdupq_n_u64(UINT64_C(1));
+       uint32x2_t lo = vmovn_u64(a);
+       uint64x2_t ml = vmull_u32(lo, lo);
+       uint64x2_t r  = veorq_u64(vaddq_u64(a, b), vaddq_u64(ml, ml));
+       return 0;
+     ]])],
+    [ AC_MSG_RESULT([yes]); enable_argon2_neon=yes ],
+    [ AC_MSG_RESULT([no]); ARGON2_NEON_CXXFLAGS="" ]
+   )
+   CXXFLAGS="$TEMP_CXXFLAGS"
+ ]
+)
+if test "$enable_argon2_neon" = "yes"; then
+  AC_DEFINE([ENABLE_ARGON2_NEON], [1], [Define this symbol to build Argon2 NEON code])
+fi
 
 # ARM
 AX_CHECK_COMPILE_FLAG([-march=armv8-a+crc+crypto], [ARM_CRC_CXXFLAGS="-march=armv8-a+crc+crypto"], [], [$CXXFLAG_WERROR])
@@ -1850,6 +1977,11 @@ AM_CONDITIONAL([HARDEN], [test "$use_hardening" = "yes"])
 AM_CONDITIONAL([ENABLE_SSE42], [test "$enable_sse42" = "yes"])
 AM_CONDITIONAL([ENABLE_SSE41], [test "$enable_sse41" = "yes"])
 AM_CONDITIONAL([ENABLE_AVX2], [test "$enable_avx2" = "yes"])
+AM_CONDITIONAL([ENABLE_ARGON2_AVX512], [test "$enable_argon2_avx512" = "yes"])
+AM_CONDITIONAL([ENABLE_ARGON2_AVX2], [test "$enable_argon2_avx2" = "yes"])
+AM_CONDITIONAL([ENABLE_ARGON2_SSSE3], [test "$enable_argon2_ssse3" = "yes"])
+AM_CONDITIONAL([ENABLE_ARGON2_SSE2], [test "$enable_argon2_sse2" = "yes"])
+AM_CONDITIONAL([ENABLE_ARGON2_NEON], [test "$enable_argon2_neon" = "yes"])
 AM_CONDITIONAL([ENABLE_X86_SHANI], [test "$enable_x86_shani" = "yes"])
 AM_CONDITIONAL([ENABLE_ARM_CRC], [test "$enable_arm_crc" = "yes"])
 AM_CONDITIONAL([ENABLE_ARM_SHANI], [test "$enable_arm_shani" = "yes"])
@@ -1917,6 +2049,11 @@ AC_SUBST(AVX2_CXXFLAGS)
 AC_SUBST(X86_SHANI_CXXFLAGS)
 AC_SUBST(ARM_CRC_CXXFLAGS)
 AC_SUBST(ARM_SHANI_CXXFLAGS)
+AC_SUBST(ARGON2_AVX512F_CXXFLAGS)
+AC_SUBST(ARGON2_AVX2_CXXFLAGS)
+AC_SUBST(ARGON2_SSSE3_CXXFLAGS)
+AC_SUBST(ARGON2_SSE2_CXXFLAGS)
+AC_SUBST(ARGON2_NEON_CXXFLAGS)
 AC_SUBST(LIBTOOL_APP_LDFLAGS)
 AC_SUBST(USE_SQLITE)
 AC_SUBST(USE_BDB)

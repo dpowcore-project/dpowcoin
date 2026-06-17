@@ -66,6 +66,27 @@ if ENABLE_ARM_SHANI
 LIBBITCOIN_CRYPTO_ARM_SHANI = crypto/libbitcoin_crypto_arm_shani.la
 LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARM_SHANI)
 endif
+if ENABLE_ARGON2_AVX512
+LIBBITCOIN_CRYPTO_ARGON2_AVX512 = crypto/libbitcoin_crypto_argon2_avx512.la
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARGON2_AVX512)
+endif
+if ENABLE_ARGON2_AVX2
+LIBBITCOIN_CRYPTO_ARGON2_AVX2 = crypto/libbitcoin_crypto_argon2_avx2.la
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARGON2_AVX2)
+endif
+if ENABLE_ARGON2_SSSE3
+LIBBITCOIN_CRYPTO_ARGON2_SSSE3 = crypto/libbitcoin_crypto_argon2_ssse3.la
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARGON2_SSSE3)
+endif
+if ENABLE_ARGON2_SSE2
+LIBBITCOIN_CRYPTO_ARGON2_SSE2 = crypto/libbitcoin_crypto_argon2_sse2.la
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARGON2_SSE2)
+endif
+if ENABLE_ARGON2_NEON
+LIBBITCOIN_CRYPTO_ARGON2_NEON = crypto/libbitcoin_crypto_argon2_neon.la
+LIBBITCOIN_CRYPTO += $(LIBBITCOIN_CRYPTO_ARGON2_NEON)
+endif
+
 noinst_LTLIBRARIES += $(LIBBITCOIN_CRYPTO)
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*.h) $(wildcard secp256k1/src/*.c) $(wildcard secp256k1/include/*)
@@ -583,21 +604,13 @@ crypto_libbitcoin_crypto_base_la_SOURCES = \
   crypto/yespower-1.0.1/sha256.c \
   crypto/yespower-1.0.1/yespower.h \
   crypto/yespower-1.0.1/yespower-opt.c \
-  crypto/argon2d/argon2.c \
-  crypto/argon2d/argon2.h \
-  crypto/argon2d/core.c \
-  crypto/argon2d/core.h \
-  crypto/argon2d/encoding.c \
-  crypto/argon2d/encoding.h \
-  crypto/argon2d/genkat.c \
-  crypto/argon2d/genkat.h \
-  crypto/argon2d/opt.c \
-  crypto/argon2d/thread.c \
-  crypto/argon2d/thread.h \
-  crypto/argon2d/blake2/blake2-impl.h \
-  crypto/argon2d/blake2/blamka-round-opt.h \
-  crypto/argon2d/blake2/blake2.h \
-  crypto/argon2d/blake2/blake2b.c
+  crypto/argon2d/argon2.cpp \
+  crypto/argon2d/argon2_core.cpp \
+  crypto/argon2d/argon2_encoding.cpp \
+  crypto/argon2d/argon2_thread.cpp \
+  crypto/argon2d/argon2_ref.cpp \
+  crypto/argon2d/argon2_opt.cpp \
+  crypto/argon2d/blake2/blake2b.cpp
 
 if USE_ASM
 crypto_libbitcoin_crypto_base_la_SOURCES += crypto/sha256_sse4.cpp
@@ -639,6 +652,41 @@ crypto_libbitcoin_crypto_arm_shani_la_CXXFLAGS += $(ARM_SHANI_CXXFLAGS)
 crypto_libbitcoin_crypto_arm_shani_la_CPPFLAGS += -DENABLE_ARM_SHANI
 crypto_libbitcoin_crypto_arm_shani_la_SOURCES = crypto/sha256_arm_shani.cpp
 #
+# Argon2 per-ISA libs — same -static pattern as sha256 ISA libs above.
+# Each TU is compiled with its own ISA flags; the ENABLE_* define tells
+# the source which ISA it is being compiled for.
+
+crypto_libbitcoin_crypto_argon2_avx512_la_LDFLAGS  = $(AM_LDFLAGS) -static
+crypto_libbitcoin_crypto_argon2_avx512_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
+crypto_libbitcoin_crypto_argon2_avx512_la_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DENABLE_ARGON2_AVX512
+crypto_libbitcoin_crypto_argon2_avx512_la_CXXFLAGS += $(ARGON2_AVX512F_CXXFLAGS)
+crypto_libbitcoin_crypto_argon2_avx512_la_SOURCES   = crypto/argon2d/argon2_opt_avx512.cpp
+
+crypto_libbitcoin_crypto_argon2_avx2_la_LDFLAGS  = $(AM_LDFLAGS) -static
+crypto_libbitcoin_crypto_argon2_avx2_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
+crypto_libbitcoin_crypto_argon2_avx2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DENABLE_ARGON2_AVX2
+crypto_libbitcoin_crypto_argon2_avx2_la_CXXFLAGS += $(ARGON2_AVX2_CXXFLAGS)
+crypto_libbitcoin_crypto_argon2_avx2_la_SOURCES   = crypto/argon2d/argon2_opt_avx2.cpp
+
+crypto_libbitcoin_crypto_argon2_ssse3_la_LDFLAGS  = $(AM_LDFLAGS) -static
+crypto_libbitcoin_crypto_argon2_ssse3_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
+crypto_libbitcoin_crypto_argon2_ssse3_la_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DENABLE_ARGON2_SSSE3
+crypto_libbitcoin_crypto_argon2_ssse3_la_CXXFLAGS += $(ARGON2_SSSE3_CXXFLAGS)
+crypto_libbitcoin_crypto_argon2_ssse3_la_SOURCES   = crypto/argon2d/argon2_opt_ssse3.cpp
+
+crypto_libbitcoin_crypto_argon2_sse2_la_LDFLAGS  = $(AM_LDFLAGS) -static
+crypto_libbitcoin_crypto_argon2_sse2_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
+crypto_libbitcoin_crypto_argon2_sse2_la_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DENABLE_ARGON2_SSE2
+crypto_libbitcoin_crypto_argon2_sse2_la_CXXFLAGS += $(ARGON2_SSE2_CXXFLAGS)
+crypto_libbitcoin_crypto_argon2_sse2_la_SOURCES   = crypto/argon2d/argon2_opt_sse2.cpp
+
+crypto_libbitcoin_crypto_argon2_neon_la_LDFLAGS  = $(AM_LDFLAGS) -static
+crypto_libbitcoin_crypto_argon2_neon_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS) -static
+crypto_libbitcoin_crypto_argon2_neon_la_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) -DENABLE_ARGON2_NEON
+if ENABLE_ARGON2_NEON
+crypto_libbitcoin_crypto_argon2_neon_la_CXXFLAGS += $(ARGON2_NEON_CXXFLAGS)
+endif
+crypto_libbitcoin_crypto_argon2_neon_la_SOURCES   = crypto/argon2d/argon2_opt_neon.cpp
 
 # consensus #
 libbitcoin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES)

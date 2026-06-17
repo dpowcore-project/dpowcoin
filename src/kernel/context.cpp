@@ -5,6 +5,7 @@
 #include <kernel/context.h>
 
 #include <crypto/sha256.h>
+#include <crypto/argon2d/argon2.h>
 #include <key.h>
 #include <logging.h>
 #include <pubkey.h>
@@ -22,6 +23,8 @@ Context::Context()
     g_context = this;
     std::string sha256_algo = SHA256AutoDetect();
     LogPrintf("Using the '%s' SHA256 implementation\n", sha256_algo);
+    std::string argon2_algo = Argon2AutoDetect();
+    LogPrintf("Using the '%s' Argon2id implementation\n", argon2_algo);
     RandomInit();
     ECC_Start();
 }

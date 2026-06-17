@@ -15,11 +15,11 @@
  * software. If not, they may be obtained at the above URLs.
  */
 
-#ifndef BLAKE_ROUND_MKA_H
-#define BLAKE_ROUND_MKA_H
+#ifndef BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAMKA_ROUND_REF_H
+#define BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAMKA_ROUND_REF_H
 
-#include "blake2.h"
-#include "blake2-impl.h"
+#include <crypto/argon2d/blake2/blake2.h>
+#include <crypto/argon2d/blake2/blake2-impl.h>
 
 /* designed by the Lyra PHC team */
 static BLAKE2_INLINE uint64_t fBlaMka(uint64_t x, uint64_t y) {
@@ -53,4 +53,4 @@ static BLAKE2_INLINE uint64_t fBlaMka(uint64_t x, uint64_t y) {
         G(v3, v4, v9, v14);                                                    \
     } while ((void)0, 0)
 
-#endif
+#endif // BITCOIN_CRYPTO_ARGON2D_BLAKE2_BLAMKA_ROUND_REF_H

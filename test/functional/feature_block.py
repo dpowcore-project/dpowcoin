@@ -25,6 +25,7 @@ from test_framework.messages import (
     SEQUENCE_FINAL,
     uint256_from_compact,
     uint256_from_str,
+    calc_pow_hashes,
 )
 from test_framework.p2p import P2PDataStore
 from test_framework.script import (
@@ -635,8 +636,11 @@ class FullBlockTest(BitcoinTestFramework):
         self.move_tip(44)
         b47 = self.next_block(47)
         target = uint256_from_compact(b47.nBits)
-        while b47.argon2id <= target and b47.yespower <= target:
-            # Rehash nonces until an invalid too-high-hash block is found.
+        while True:
+            yespower, argon2id = calc_pow_hashes(b47)
+            # Looking for a nonce where at least one algorithm fails
+            if yespower > target or argon2id is None or argon2id > target:
+                break
             b47.nNonce += 1
             b47.rehash()
         self.send_blocks([b47], False, force_send=True, reject_reason='high-hash', reconnect=True)
