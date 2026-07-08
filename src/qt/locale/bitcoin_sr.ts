@@ -59,12 +59,12 @@
     </message>
     <message>
         <source>These are your Dpowcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation type="unfinished">Ово су твоје Биткоин адресе за слање уплата. Увек добро провери износ и адресу на коју шаљеш пре него што пошаљеш уплату.</translation>
+        <translation type="unfinished">Ово су твоје Дповкоин адресе за слање уплата. Увек добро провери износ и адресу на коју шаљеш пре него што пошаљеш уплату.</translation>
     </message>
     <message>
         <source>These are your Dpowcoin addresses for receiving payments. Use the 'Create new receiving address' button in the receive tab to create new addresses.
 Signing is only possible with addresses of the type 'legacy'.</source>
-        <translation type="unfinished">Ово су твоје Биткоин адресе за приманје уплата. Користи дугме „Направи нову адресу за примање” у картици за примање за креирање нових адреса.
+        <translation type="unfinished">Ово су твоје Дповкоин адресе за приманје уплата. Користи дугме „Направи нову адресу за примање” у картици за примање за креирање нових адреса.
 Потписивање је могуће само за адресе типа 'legacy'.</translation>
     </message>
     <message>
@@ -165,7 +165,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DPOWCOINS&lt;/b&gt;!</source>
-        <translation type="unfinished">Упозорење: Уколико шифрираш новчаник и изгубиш своју лозинку, &lt;b&gt;ИЗГУБИЋЕШ СВЕ СВОЈЕ БИТКОИНЕ&lt;/b&gt;!</translation>
+        <translation type="unfinished">Упозорење: Уколико шифрираш новчаник и изгубиш своју лозинку, &lt;b&gt;ИЗГУБИЋЕШ СВЕ СВОЈЕ ДПОВКОИНЕ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -185,7 +185,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Remember that encrypting your wallet cannot fully protect your dpowcoins from being stolen by malware infecting your computer.</source>
-        <translation type="unfinished">Упамти, шифрирање новчаника не може у потуности заштити твоје биткоине од крађе од стране малвера инфицира твој рачунар.</translation>
+        <translation type="unfinished">Упамти, шифрирање новчаника не може у потуности заштити твоје дповкоине од крађе од стране малвера инфицира твој рачунар.</translation>
     </message>
     <message>
         <source>Wallet to be encrypted</source>
@@ -224,12 +224,20 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Лозинка коју сте унели за дешифровање новчаника је погрешна.</translation>
     </message>
     <message>
+        <source>The passphrase entered for the wallet decryption is incorrect. It contains a null character (ie - a zero byte). If the passphrase was set with a version of this software prior to 25.0, please try again with only the characters up to — but not including — the first null character. If this is successful, please set a new passphrase to avoid this issue in the future.</source>
+        <translation type="unfinished">Приступна фраза унета за дешифровање новчаника је нетачна. Садржи нулти карактер (тј. - нулти бајт). Ако је приступна фраза постављена са верзијом овог софтвера старијом од 25.0, покушајте поново само са знаковима до — али не укључујући — првог нултог знака. Ако је ово успешно, поставите нову приступну фразу да бисте избегли овај проблем у будућности.</translation>
+    </message>
+    <message>
         <source>Wallet passphrase was successfully changed.</source>
         <translation type="unfinished">Лозинка новчаника успешно је промењена.</translation>
     </message>
     <message>
         <source>Passphrase change failed</source>
         <translation type="unfinished">Promena lozinke nije uspela</translation>
+    </message>
+    <message>
+        <source>The old passphrase entered for the wallet decryption is incorrect. It contains a null character (ie - a zero byte). If the passphrase was set with a version of this software prior to 25.0, please try again with only the characters up to — but not including — the first null character.</source>
+        <translation type="unfinished">Стара приступна фраза унета за дешифровање новчаника је нетачна. Садржи нулти карактер (тј. - нулти бајт). Ако је приступна фраза постављена са верзијом овог софтвера старијом од 25.0, покушајте поново са само знаковима до — али не укључујући — првог нултог знака.</translation>
     </message>
     <message>
         <source>Warning: The Caps Lock key is on!</source>
@@ -249,6 +257,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
 </context>
 <context>
     <name>BitcoinApplication</name>
+    <message>
+        <source>Settings file %1 might be corrupt or invalid.</source>
+        <translation type="unfinished">Датотека подешавања %1 је можда оштећена или неважећа.</translation>
+    </message>
     <message>
         <source>Runaway exception</source>
         <translation type="unfinished">Изузетак покретања</translation>
@@ -296,7 +308,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Enter a Dpowcoin address (e.g. %1)</source>
-        <translation type="unfinished">Унеси Биткоин адресу, (нпр %1)</translation>
+        <translation type="unfinished">Унеси Дповкоин адресу, (нпр %1)</translation>
     </message>
     <message>
         <source>Unroutable</source>
@@ -471,7 +483,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Send coins to a Dpowcoin address</source>
-        <translation type="unfinished">Пошаљи новац на Биткоин адресу</translation>
+        <translation type="unfinished">Пошаљи новац на Дповкоин адресу</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -515,7 +527,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Sign messages with your Dpowcoin addresses to prove you own them</source>
-        <translation type="unfinished">Потписуј поруку са своје Биткоин адресе као доказ да си њихов власник</translation>
+        <translation type="unfinished">Потписуј поруку са своје Дповкоин адресе као доказ да си њихов власник</translation>
     </message>
     <message>
         <source>&amp;Verify message…</source>
@@ -523,7 +535,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Verify messages to ensure they were signed with specified Dpowcoin addresses</source>
-        <translation type="unfinished">Верификуј поруке и утврди да ли су потписане од стране спецификованих Биткоин адреса</translation>
+        <translation type="unfinished">Верификуј поруке и утврди да ли су потписане од стране спецификованих Дповкоин адреса</translation>
     </message>
     <message>
         <source>&amp;Load PSBT from file…</source>
@@ -579,7 +591,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Request payments (generates QR codes and dpowcoin: URIs)</source>
-        <translation type="unfinished">Затражи плаћање (генерише QR кодове и биткоин: URI-е)</translation>
+        <translation type="unfinished">Затражи плаћање (генерише QR кодове и дповкоин: URI-е)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -638,6 +650,10 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Учитај делимично потписану Dpowcoin трансакцију</translation>
     </message>
     <message>
+        <source>Load PSBT from &amp;clipboard…</source>
+        <translation type="unfinished">Учитај ”PSBT” из привремене меморије</translation>
+    </message>
+    <message>
         <source>Load Partially Signed Dpowcoin Transaction from clipboard</source>
         <translation type="unfinished">Учитај делимично потписану Dpowcoin трансакцију из clipboard-a</translation>
     </message>
@@ -659,7 +675,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Open a dpowcoin: URI</source>
-        <translation type="unfinished">Отвори биткоин: URI</translation>
+        <translation type="unfinished">Отвори дповкоин: URI</translation>
     </message>
     <message>
         <source>Open Wallet</source>
@@ -692,7 +708,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Show the %1 help message to get a list with possible Dpowcoin command-line options</source>
-        <translation type="unfinished">Прикажи  поруку помоћи %1 за листу са могућим опцијама Биткоин командне линије</translation>
+        <translation type="unfinished">Прикажи  поруку помоћи %1 за листу са могућим опцијама Дповкоин командне линије</translation>
     </message>
     <message>
         <source>&amp;Mask values</source>
@@ -714,6 +730,11 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <source>Wallet Data</source>
         <extracomment>Name of the wallet data file format.</extracomment>
         <translation type="unfinished">Подаци Новчаника</translation>
+    </message>
+    <message>
+        <source>Load Wallet Backup</source>
+        <extracomment>The title for Restore Wallet File Windows</extracomment>
+        <translation type="unfinished">Учитај резевну копију новчаника</translation>
     </message>
     <message>
         <source>Restore Wallet</source>
@@ -749,9 +770,9 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <source>%n active connection(s) to Dpowcoin network.</source>
         <extracomment>A substring of the tooltip.</extracomment>
         <translation type="unfinished">
-            <numerusform>%n активних конекција са Биткоин мрежом</numerusform>
-            <numerusform>%n активних конекција са Биткоин мрежом</numerusform>
-            <numerusform>%n активних конекција са Биткоин мрежом</numerusform>
+            <numerusform>%n активних конекција са Дповкоин мрежом</numerusform>
+            <numerusform>%n активних конекција са Дповкоин мрежом</numerusform>
+            <numerusform>%n активних конекција са Дповкоин мрежом</numerusform>
         </translation>
     </message>
     <message>
@@ -1182,7 +1203,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>The entered address "%1" is not a valid Dpowcoin address.</source>
-        <translation type="unfinished">Унета адреса "%1" није важећа Биткоин адреса.</translation>
+        <translation type="unfinished">Унета адреса "%1" није важећа Дповкоин адреса.</translation>
     </message>
     <message>
         <source>Address "%1" already exists as a receiving address with label "%2" and so cannot be added as a sending address.</source>
@@ -1228,7 +1249,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <name>Intro</name>
     <message>
         <source>Dpowcoin</source>
-        <translation type="unfinished">Биткоин</translation>
+        <translation type="unfinished">Дповкоин</translation>
     </message>
     <message numerus="yes">
         <source>%n GB of space available</source>
@@ -1273,7 +1294,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>%1 will download and store a copy of the Dpowcoin block chain.</source>
-        <translation type="unfinished">%1 биће преузеће и складиштити копију Биткоин ланца блокова.</translation>
+        <translation type="unfinished">%1 биће преузеће и складиштити копију Дповкоин ланца блокова.</translation>
     </message>
     <message>
         <source>The wallet will also be stored in this directory.</source>
@@ -1362,11 +1383,11 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the dpowcoin network, as detailed below.</source>
-        <translation type="unfinished">Недавне трансакције можда не буду видљиве, зато салдо твог новчаника може бити нетачан. Ова информација биће тачна када новчаник заврши са синхронизацијом биткоин мреже, приказаном испод.</translation>
+        <translation type="unfinished">Недавне трансакције можда не буду видљиве, зато салдо твог новчаника може бити нетачан. Ова информација биће тачна када новчаник заврши са синхронизацијом дповкоин мреже, приказаном испод.</translation>
     </message>
     <message>
         <source>Attempting to spend dpowcoins that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation type="unfinished">Покушај трошења биткоина на које утичу још увек неприказане трансакције мрежа неће прихватити.</translation>
+        <translation type="unfinished">Покушај трошења дповкоина на које утичу још увек неприказане трансакције мрежа неће прихватити.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -1417,7 +1438,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     <name>OpenURIDialog</name>
     <message>
         <source>Open dpowcoin URI</source>
-        <translation type="unfinished">Отвори биткоин URI</translation>
+        <translation type="unfinished">Отвори дповкоин URI</translation>
     </message>
     <message>
         <source>Paste address from clipboard</source>
@@ -1534,7 +1555,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Automatically open the Dpowcoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation type="unfinished">Аутоматски отвори Биткоин клијент порт на рутеру. Ова опција ради само уколико твој рутер подржава и има омогућен UPnP.</translation>
+        <translation type="unfinished">Аутоматски отвори Дповкоин клијент порт на рутеру. Ова опција ради само уколико твој рутер подржава и има омогућен UPnP.</translation>
     </message>
     <message>
         <source>Map port using &amp;UPnP</source>
@@ -1558,7 +1579,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Connect to the Dpowcoin network through a SOCKS5 proxy.</source>
-        <translation type="unfinished">Конектуј се на Биткоин мрежу кроз SOCKS5 проксијем.</translation>
+        <translation type="unfinished">Конектуј се на Дповкоин мрежу кроз SOCKS5 проксијем.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1727,7 +1748,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dpowcoin network after a connection is established, but this process has not completed yet.</source>
-        <translation type="unfinished">Приказана информација може бити застарела. Ваш новчаник се аутоматски синхронизује са Биткоин мрежом након успостављања конекције, али овај процес је још увек у току.</translation>
+        <translation type="unfinished">Приказана информација може бити застарела. Ваш новчаник се аутоматски синхронизује са Дповкоин мрежом након успостављања конекције, али овај процес је још увек у току.</translation>
     </message>
     <message>
         <source>Watch-only:</source>
@@ -1930,7 +1951,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
     </message>
     <message>
         <source>Cannot start dpowcoin: click-to-pay handler</source>
-        <translation type="unfinished">Не могу покренути биткоин: "кликни-да-платиш" механизам</translation>
+        <translation type="unfinished">Не могу покренути дповкоин: "кликни-да-платиш" механизам</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -1950,7 +1971,7 @@ If you are receiving this error you should request the merchant provide a BIP21 
     </message>
     <message>
         <source>URI cannot be parsed! This can be caused by an invalid Dpowcoin address or malformed URI parameters.</source>
-        <translation type="unfinished">URI се не може рашчланити! Ово може бити проузроковано неважећом Биткоин адресом или погрешно форматираним URI параметрима.</translation>
+        <translation type="unfinished">URI се не може рашчланити! Ово може бити проузроковано неважећом Дповкоин адресом или погрешно форматираним URI параметрима.</translation>
     </message>
     <message>
         <source>Payment request file handling</source>
@@ -2456,7 +2477,7 @@ For more information on using this console, type %6.
     </message>
     <message>
         <source>An optional message to attach to the payment request, which will be displayed when the request is opened. Note: The message will not be sent with the payment over the Dpowcoin network.</source>
-        <translation type="unfinished">Опциона порука коју можеш прикачити уз захтев за плаћање, која ће бити приказана када захтев буде отворен. Напомена: Порука неће бити послата са уплатом на Биткоин мрежи.</translation>
+        <translation type="unfinished">Опциона порука коју можеш прикачити уз захтев за плаћање, која ће бити приказана када захтев буде отворен. Напомена: Порука неће бити послата са уплатом на Дповкоин мрежи.</translation>
     </message>
     <message>
         <source>An optional label to associate with the new receiving address.</source>
@@ -2737,7 +2758,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>When there is less transaction volume than space in the blocks, miners as well as relaying nodes may enforce a minimum fee. Paying only this minimum fee is just fine, but be aware that this can result in a never confirming transaction once there is more demand for dpowcoin transactions than the network can process.</source>
-        <translation type="unfinished">Када је мањи обим трансакција од простора у блоку, рудари, као и повезани нодови могу применити минималну провизију. Плаћање само минималне накнаде - провизије је добро, али треба бити свестан да ово може резултовати трансакцијом која неће никада бити потврђена, у случају када је број захтева за биткоин трансакцијама већи од могућности мреже да обради.</translation>
+        <translation type="unfinished">Када је мањи обим трансакција од простора у блоку, рудари, као и повезани нодови могу применити минималну провизију. Плаћање само минималне накнаде - провизије је добро, али треба бити свестан да ово може резултовати трансакцијом која неће никада бити потврђена, у случају када је број захтева за дповкоин трансакцијама већи од могућности мреже да обради.</translation>
     </message>
     <message>
         <source>A too low fee might result in a never confirming transaction (read the tooltip)</source>
@@ -2823,7 +2844,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>Creates a Partially Signed Dpowcoin Transaction (PSBT) for use with e.g. an offline %1 wallet, or a PSBT-compatible hardware wallet.</source>
-        <translation type="unfinished">Креира делимично потписану Биткоин трансакцију (PSBT) за коришћење са нпр. офлајн %1 новчаником, или PSBT компатибилним хардверским новчаником. </translation>
+        <translation type="unfinished">Креира делимично потписану Дповкоин трансакцију (PSBT) за коришћење са нпр. офлајн %1 новчаником, или PSBT компатибилним хардверским новчаником. </translation>
     </message>
     <message>
         <source> from wallet '%1'</source>
@@ -2884,7 +2905,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     <message>
         <source>Please, review your transaction proposal. This will produce a Partially Signed Dpowcoin Transaction (PSBT) which you can save or copy and then sign with e.g. an offline %1 wallet, or a PSBT-compatible hardware wallet.</source>
         <extracomment>Text to inform a user attempting to create a transaction of their current options. At this stage, a user can only create a PSBT. This string is displayed when private keys are disabled and an external signer is not available.</extracomment>
-        <translation type="unfinished">Молимо, проверите ваш предлог трансакције. Ово ће произвести делимично потписану Биткоин трансакцију (PSBT) коју можете копирати и онда потписати са нпр. офлајн %1 новчаником, или PSBT компатибилним хардверским новчаником.</translation>
+        <translation type="unfinished">Молимо, проверите ваш предлог трансакције. Ово ће произвести делимично потписану Дповкоин трансакцију (PSBT) коју можете копирати и онда потписати са нпр. офлајн %1 новчаником, или PSBT компатибилним хардверским новчаником.</translation>
     </message>
     <message>
         <source>Do you want to create this transaction?</source>
@@ -2954,7 +2975,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>Warning: Invalid Dpowcoin address</source>
-        <translation type="unfinished">Упозорење: Неважећа Биткоин адреса</translation>
+        <translation type="unfinished">Упозорење: Неважећа Дповкоин адреса</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2993,7 +3014,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>The Dpowcoin address to send the payment to</source>
-        <translation type="unfinished">Биткоин адреса на коју се шаље уплата</translation>
+        <translation type="unfinished">Дповкоин адреса на коју се шаље уплата</translation>
     </message>
     <message>
         <source>Paste address from clipboard</source>
@@ -3009,7 +3030,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>The fee will be deducted from the amount being sent. The recipient will receive less dpowcoins than you enter in the amount field. If multiple recipients are selected, the fee is split equally.</source>
-        <translation type="unfinished">Провизија ће бити одузета од износа који је послат. Примаоц ће добити мање биткоина него што је унесено у поље за износ. Уколико је одабрано више примаоца, провизија се дели равномерно.</translation>
+        <translation type="unfinished">Провизија ће бити одузета од износа који је послат. Примаоц ће добити мање дповкоина него што је унесено у поље за износ. Уколико је одабрано више примаоца, провизија се дели равномерно.</translation>
     </message>
     <message>
         <source>S&amp;ubtract fee from amount</source>
@@ -3029,7 +3050,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>A message that was attached to the dpowcoin: URI which will be stored with the transaction for your reference. Note: This message will not be sent over the Dpowcoin network.</source>
-        <translation type="unfinished">Порука која је приложена биткоину: URI која ће бити сачувана уз трансакцију ради референце. Напомена: Ова порука се шаље преко Биткоин мреже.</translation>
+        <translation type="unfinished">Порука која је приложена дповкоину: URI која ће бити сачувана уз трансакцију ради референце. Напомена: Ова порука се шаље преко Дповкоин мреже.</translation>
     </message>
 </context>
 <context>
@@ -3051,11 +3072,11 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>You can sign messages/agreements with your addresses to prove you can receive dpowcoins sent to them. Be careful not to sign anything vague or random, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.</source>
-        <translation type="unfinished">Можете потписати поруку/споразум са вашом адресом да би сте доказали да можете примити биткоин послат ка њима. Будите опрезни да не потписујете ништа нејасно или случајно, јер се може десити напад крађе идентитета, да потпишете ваш идентитет нападачу. Потпишите само потпуно детаљне изјаве са којима се слажете.</translation>
+        <translation type="unfinished">Можете потписати поруку/споразум са вашом адресом да би сте доказали да можете примити дповкоин послат ка њима. Будите опрезни да не потписујете ништа нејасно или случајно, јер се може десити напад крађе идентитета, да потпишете ваш идентитет нападачу. Потпишите само потпуно детаљне изјаве са којима се слажете.</translation>
     </message>
     <message>
         <source>The Dpowcoin address to sign the message with</source>
-        <translation type="unfinished">Биткоин адреса са којом ћете потписати поруку</translation>
+        <translation type="unfinished">Дповкоин адреса са којом ћете потписати поруку</translation>
     </message>
     <message>
         <source>Choose previously used address</source>
@@ -3079,7 +3100,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>Sign the message to prove you own this Dpowcoin address</source>
-        <translation type="unfinished">Потпишите поруку да докажете да сте власник ове Биткоин адресе</translation>
+        <translation type="unfinished">Потпишите поруку да докажете да сте власник ове Дповкоин адресе</translation>
     </message>
     <message>
         <source>Sign &amp;Message</source>
@@ -3103,7 +3124,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>The Dpowcoin address the message was signed with</source>
-        <translation type="unfinished">Биткоин адреса са којом је потписана порука</translation>
+        <translation type="unfinished">Дповкоин адреса са којом је потписана порука</translation>
     </message>
     <message>
         <source>The signed message to verify</source>
@@ -3115,7 +3136,7 @@ Note:  Since the fee is calculated on a per-byte basis, a fee rate of "100 satos
     </message>
     <message>
         <source>Verify the message to ensure it was signed with the specified Dpowcoin address</source>
-        <translation type="unfinished">Потврдите поруку да осигурате да је потписана са одговарајућом Биткоин адресом</translation>
+        <translation type="unfinished">Потврдите поруку да осигурате да је потписана са одговарајућом Дповкоин адресом</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>

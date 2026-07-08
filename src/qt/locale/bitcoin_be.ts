@@ -59,7 +59,7 @@
     </message>
     <message>
         <source>These are your Dpowcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation type="unfinished">Тут знаходзяцца Біткойн-адрасы для высылання плацяжоў. Заўсёды спраўджвайце колькасць і адрас прызначэння перад здзяйсненнем транзакцыі.</translation>
+        <translation type="unfinished">Тут знаходзяцца Дповкоин-адрасы для высылання плацяжоў. Заўсёды спраўджвайце колькасць і адрас прызначэння перад здзяйсненнем транзакцыі.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -81,6 +81,10 @@
         <source>There was an error trying to save the address list to %1. Please try again.</source>
         <extracomment>An error message. %1 is a stand-in argument for the name of the file we attempted to save to.</extracomment>
         <translation type="unfinished">Адбылася памылка падчас спробы захаваць адрас у %1. Паспрабуйце зноў.</translation>
+    </message>
+    <message>
+        <source>Receiving addresses - %1</source>
+        <translation type="unfinished">Адрасы прымання - %1</translation>
     </message>
     <message>
         <source>Exporting Failed</source>
@@ -146,7 +150,7 @@
     </message>
     <message>
         <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DPOWCOINS&lt;/b&gt;!</source>
-        <translation type="unfinished">Увага: калі вы зашыфруеце свой гаманец і страціце парольную фразу, то &lt;b&gt;СТРАЦІЦЕ ЎСЕ СВАЕ БІТКОЙНЫ&lt;/b&gt;!</translation>
+        <translation type="unfinished">Увага: калі вы зашыфруеце свой гаманец і страціце парольную фразу, то &lt;b&gt;СТРАЦІЦЕ ЎСЕ СВАЕ ДПОВКОЙНЫ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -155,6 +159,10 @@
     <message>
         <source>Wallet encrypted</source>
         <translation type="unfinished">Гаманец зашыфраваны</translation>
+    </message>
+    <message>
+        <source>Wallet to be encrypted</source>
+        <translation type="unfinished">Гаманец будзе зашыфраваны</translation>
     </message>
     <message>
         <source>IMPORTANT: Any previous backups you have made of your wallet file should be replaced with the newly generated, encrypted wallet file. For security reasons, previous backups of the unencrypted wallet file will become useless as soon as you start using the new, encrypted wallet.</source>
@@ -288,7 +296,7 @@
     </message>
     <message>
         <source>Send coins to a Dpowcoin address</source>
-        <translation type="unfinished">Даслаць манеты на Біткойн-адрас</translation>
+        <translation type="unfinished">Даслаць манеты на Дповкоин-адрас</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -312,11 +320,11 @@
     </message>
     <message>
         <source>Sign messages with your Dpowcoin addresses to prove you own them</source>
-        <translation type="unfinished">Падпісаць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
+        <translation type="unfinished">Падпісаць паведамленне з дапамогай Дповкоин-адраса каб даказаць, што яно належыць вам</translation>
     </message>
     <message>
         <source>Verify messages to ensure they were signed with specified Dpowcoin addresses</source>
-        <translation type="unfinished">Спраўдзіць паведамленне з дапамогай Біткойн-адраса каб даказаць, што яно належыць вам</translation>
+        <translation type="unfinished">Спраўдзіць паведамленне з дапамогай Дповкоин-адраса каб даказаць, што яно належыць вам</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -332,7 +340,7 @@
     </message>
     <message>
         <source>Request payments (generates QR codes and dpowcoin: URIs)</source>
-        <translation type="unfinished">Запатрабаваць плацёж (генеруецца QR-код для біткойн URI)</translation>
+        <translation type="unfinished">Запатрабаваць плацёж (генеруецца QR-код для дповкойн URI)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -582,7 +590,7 @@
     <name>Intro</name>
     <message>
         <source>Dpowcoin</source>
-        <translation type="unfinished">Біткойн</translation>
+        <translation type="unfinished">Дповкоин</translation>
     </message>
     <message numerus="yes">
         <source>%n GB of space available</source>
