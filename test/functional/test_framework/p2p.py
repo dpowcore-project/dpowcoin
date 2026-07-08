@@ -144,7 +144,7 @@ MAGIC_BYTES = {
     "mainnet": b"\xf2\x9f\x4a\xfb",   # mainnet
     "testnet3": b"\x3c\xda\x0b\xe8",  # testnet3
     "regtest": b"\xaf\xc0\x0c\x2e",   # regtest
-    "signet": b"\x0a\x03\xcf\x40",    # signet
+    "signet": b"\xea\x64\xee\x7f",    # signet
 }
 
 

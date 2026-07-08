@@ -351,11 +351,11 @@ class MempoolAcceptanceTest(BitcoinTestFramework):
         tx.vin.append(CTxIn(COutPoint(int(seed_tx["txid"], 16), seed_tx["sent_vout"]), b"", SEQUENCE_FINAL))
         tx.wit.vtxinwit = [CTxInWitness()]
         tx.wit.vtxinwit[0].scriptWitness.stack = [CScript([OP_TRUE])]
-        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 2)))))
+        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 3))))) # Changed to 3 from 2 due BIP53 rule.
         # Note it's only non-witness size that matters!
-        assert_equal(len(tx.serialize_without_witness()), 64)
+        assert_equal(len(tx.serialize_without_witness()), 63) # Changed to 63 from 64 due BIP53 rule.
         assert_equal(MIN_STANDARD_TX_NONWITNESS_SIZE - 1, 64)
-        assert_greater_than(len(tx.serialize()), 64)
+        assert_greater_than(len(tx.serialize()), 63) # Changed to 63 from 64 due BIP53 rule.
 
         self.check_mempool_result(
             result_expected=[{'txid': tx.rehash(), 'allowed': False, 'reject-reason': 'tx-size-small'}],

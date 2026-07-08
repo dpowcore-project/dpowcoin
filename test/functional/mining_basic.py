@@ -22,8 +22,12 @@ from test_framework.messages import (
     CBlock,
     CBlockHeader,
     COIN,
+    CTxOut,
     ser_uint256,
 )
+
+from test_framework.script import CScript, OP_RETURN
+
 from test_framework.p2p import P2PDataStore
 from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
@@ -207,6 +211,7 @@ class MiningTest(BitcoinTestFramework):
         bad_block = copy.deepcopy(block)
         bad_tx = copy.deepcopy(bad_block.vtx[0])
         bad_tx.vin[0].prevout.hash = 255
+        bad_tx.vout.append(CTxOut(0, CScript([OP_RETURN])))  # Dpowcoin: pad to avoid BIP53 64-byte rejection
         bad_tx.rehash()
         bad_block.vtx.append(bad_tx)
         assert_template(node, bad_block, 'bad-txns-inputs-missingorspent')

@@ -1320,6 +1320,10 @@ class TaprootTest(BitcoinTestFramework):
         self.lastblockheight = block['height']
         self.lastblocktime = block['time']
 
+        # Dpowcoin MAX_FUTURE_BLOCK_TIME=600s: advance mocktime well beyond lastblocktime
+        # so that subsequent block submissions with nTime = lastblocktime+N are accepted.
+        node.setmocktime(self.lastblocktime + 9999)
+
     def test_spenders(self, node, spenders, input_counts):
         """Run randomized tests with a number of "spenders".
 

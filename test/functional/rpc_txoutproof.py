@@ -74,7 +74,7 @@ class MerkleBlockTest(BitcoinTestFramework):
         assert_equal(sorted(self.nodes[0].verifytxoutproof(self.nodes[0].gettxoutproof([txid2, txid1]))), sorted(txlist))
         # We can always get a proof if we have a -txindex
         self.sync_all()
-        self.nodes[1].syncwithvalidationinterfacequeue()
+        self.wait_until(lambda: self.nodes[1].getindexinfo().get('txindex', {}).get('synced', False))
         assert_equal(self.nodes[0].verifytxoutproof(self.nodes[1].gettxoutproof([txid_spent])), [txid_spent])
         # We can't get a proof if we specify transactions from different blocks
         assert_raises_rpc_error(-5, "Not all transactions found in specified or retrieved block", self.nodes[0].gettxoutproof, [txid1, txid3])

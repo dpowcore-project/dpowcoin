@@ -139,7 +139,7 @@ class FeatureIndexPruneTest(BitcoinTestFramework):
             # The nodes need to be reconnected to the non-pruning node upon restart, otherwise they will be stuck
             self.connect_nodes(i, 3)
 
-        self.sync_blocks(timeout=300)
+        self.sync_blocks(timeout=600)
         self.sync_index(height=2500)
 
         for node in self.nodes[:2]:

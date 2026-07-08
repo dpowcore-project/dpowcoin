@@ -271,8 +271,7 @@ class InvalidMessagesTest(BitcoinTestFramework):
         blockheader.rehash()
         target = uint256_from_compact(blockheader.nBits)
         while True:
-            yespower, argon2id = calc_pow_hashes(blockheader)
-            if yespower <= target and argon2id is not None and argon2id <= target:
+            if calc_pow_hashes(blockheader) <= target:
                 break
             blockheader.nNonce += 1
             blockheader.rehash()
@@ -283,10 +282,8 @@ class InvalidMessagesTest(BitcoinTestFramework):
         assert_equal(chaintips[0]['status'], 'headers-only')
         assert_equal(chaintips[0]['hash'], blockheader.hash)
 
-        # invalidate PoW: find a nonce where at least one algorithm (yespower or argon2id) fails
         while True:
-            yespower, argon2id = calc_pow_hashes(blockheader)
-            if yespower > target or argon2id is None or argon2id > target:
+            if calc_pow_hashes(blockheader) > target:
                 break
             blockheader.nNonce += 1
             blockheader.rehash()
