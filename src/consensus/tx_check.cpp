@@ -19,6 +19,15 @@ bool CheckTransaction(const CTransaction& tx, TxValidationState& state)
     if (::GetSerializeSize(tx, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) * WITNESS_SCALE_FACTOR > MAX_BLOCK_WEIGHT)
         return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-txns-oversize");
 
+    // Bitweb Params
+    // BIP53: Reject transactions that are exactly 64 bytes when serialized
+    // without witness. Such transactions create ambiguity in the Merkle tree.
+    // Coinbase transactions are excluded: a 64-byte coinbase would require
+    // at least 224 bits of work to exploit, making it practically impossible.
+    if (!tx.IsCoinBase() && ::GetSerializeSize(tx, PROTOCOL_VERSION | SERIALIZE_TRANSACTION_NO_WITNESS) == 64)
+        return state.Invalid(TxValidationResult::TX_CONSENSUS, "bad-txns-64byte",
+                             "tx serialized size is exactly 64 bytes (BIP53)");
+
     // Check for negative or overflow output values (see CVE-2010-5139)
     CAmount nValueOut = 0;
     for (const auto& txout : tx.vout)

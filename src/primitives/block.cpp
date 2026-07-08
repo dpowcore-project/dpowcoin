@@ -62,30 +62,30 @@ uint256 CBlockHeader::GetArgon2idPoWHash() const
     uint256 hash2;
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss << *this;
-    
+
     // Hashing the data using SHA-512 (two rounds)
     std::vector<unsigned char> salt_sha512(CSHA512::OUTPUT_SIZE);
     CSHA512 sha512;
     sha512.Write((unsigned char*)&ss[0], ss.size()).Finalize(salt_sha512.data());
     sha512.Reset().Write(salt_sha512.data(), salt_sha512.size()).Finalize(salt_sha512.data());
-    
+
     // Preparing data for hashing
     const void* pwd = &ss[0];
     size_t pwdlen = ss.size();
     const void* salt = salt_sha512.data();
     size_t saltlen = salt_sha512.size();
-    
+
     // Calling the argon2id_hash_raw function for the first round
     int rc = argon2id_hash_raw(2, 4096, 2, pwd, pwdlen, salt, saltlen, &hash, 32);
     if (rc != ARGON2_OK) {
         printf("Error: Failed to compute Argon2id hash for the first round\n");
         exit(1);
     }
-    
+
     // Using the hash from the first round as the salt for the second round
     salt = &hash;
     saltlen = 32;
-    
+
     // Calling the argon2id_hash_raw function for the second round
     rc = argon2id_hash_raw(2, 32768, 2, pwd, pwdlen, salt, saltlen, &hash2, 32);
     if (rc != ARGON2_OK) {

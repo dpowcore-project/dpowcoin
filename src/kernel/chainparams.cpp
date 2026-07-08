@@ -88,7 +88,7 @@ public:
         consensus.lwmaAveragingWindow = 576;
         // consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 3628; // ~ 90% of 4032
+        consensus.nRuleChangeActivationThreshold = 3024; // 75%
         consensus.nMinerConfirmationWindow = 4032; //two weeks
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = Consensus::BIP9Deployment::NEVER_ACTIVE;
@@ -251,6 +251,7 @@ public:
         checkpointData = {
             {
                 {0, uint256S("50b91b8074496181a7245d505f1e416a419b6ec9730c34dab78b3f8a277f66a9")},
+                {580, uint256S("de050a29984d69914e700927eb05d6eb3cd5aef529ad52d21b4fc13d674a28d9")},
             }
         };
 
@@ -285,7 +286,7 @@ public:
         vSeeds.clear();
 
         if (!options.challenge) {
-            bin = ParseHex("512103ad5e0edad18cb1f0fc0d28a3d4f1f3e445640337489abb10404f2d1e086be430210359ef5021964fe22d6f8e05b2463c9540ce96883fe3b278760f048f5189f2e6c452ae");
+            bin = ParseHex("512102d0bde366648b8645e45b8295e02e2b9039008f9d8767297d5cb0bb15e68d13e151ae");
             vSeeds.emplace_back("seedsignet.dpowcore.org.");
 
             // Hardcoded nodes can be removed once there are more DNS seeds
@@ -335,7 +336,7 @@ public:
         consensus.lwmaAveragingWindow = 576;
         // consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
-        consensus.nRuleChangeActivationThreshold = 3628; // ~90% of 4032
+        consensus.nRuleChangeActivationThreshold = 3024;  // 75%
         consensus.nMinerConfirmationWindow = 4032; // two weeks
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
@@ -490,14 +491,14 @@ public:
                 .height = 110,
                 .hash_serialized = AssumeutxoHash{uint256S("0x6657b736d4fe4db0cbc796789e812d5dba7f5c143764b1b6905612f1830609d1")},
                 .nChainTx = 111,
-                .blockhash = uint256S("0xd15210e4aa854744051a2f169650ce824a57d97f0a27ab3829bfac94308e77ab")
+                .blockhash = uint256S("0x42bd2a2aec34f825104ef902109f0c6a9eaf9b376fdc93e2b4469e38716a3135")
             },
             {
                 // For use by test/functional/feature_assumeutxo.py
                 .height = 299,
                 .hash_serialized = AssumeutxoHash{uint256S("0x61d9c2b29a2571a5fe285fe2d8554f91f93309666fc9b8223ee96338de25ff53")},
                 .nChainTx = 300,
-                .blockhash = uint256S("0x6b55d4173c2bd28c6e6ed4a9458447669f763e927fffdcc7d8e7a935e576fe64")
+                .blockhash = uint256S("0xc415696a263bcf9507b4fd06bf7a0e596348425d6cffb3e2be7dce68702a998b")
             },
         };
 
