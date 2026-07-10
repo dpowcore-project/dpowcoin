@@ -15,6 +15,7 @@
 #include <kernel/messagestartchars.h>
 #include <logging.h>
 #include <pow.h>
+#include <pow_cache.h> // Dpowcoin Params
 #include <reverse_iterator.h>
 #include <signet.h>
 #include <streams.h>
@@ -1025,28 +1026,32 @@ bool BlockManager::WriteUndoDataForBlock(const CBlockUndo& blockundo, BlockValid
 bool BlockManager::ReadBlockFromDisk(CBlock& block, const FlatFilePos& pos) const
 {
     block.SetNull();
+
     // Open history file to read
     CAutoFile filein{OpenBlockFile(pos, true)};
     if (filein.IsNull()) {
         return error("ReadBlockFromDisk: OpenBlockFile failed for %s", pos.ToString());
     }
+
     // Read block
     try {
         filein >> block;
     } catch (const std::exception& e) {
         return error("%s: Deserialize or I/O error - %s at %s", __func__, e.what(), pos.ToString());
     }
-    // Dual PoW: check cheap Yespower first, only verify Argon2id if Yespower passes
-    if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, GetConsensus())) {
-        return error("ReadBlockFromDisk: Errors in block header Yespower proof of work failed at %s", pos.ToString());
+
+    // Check the header. [Dpowcoin] Cached via CheckProofOfWorkCached() --
+    // see pow_cache.h for the full rationale (this is the same choke point
+    // validation.cpp's CheckBlockHeader() uses).
+    if (!CheckProofOfWorkCached(block, GetConsensus())) {
+        return error("ReadBlockFromDisk: Errors in block header at %s", pos.ToString());
     }
-    if (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, GetConsensus())) {
-        return error("ReadBlockFromDisk: Errors in block header Argon2id proof of work failed at %s", pos.ToString());
-    }
+
     // Signet only: check block solution
     if (GetConsensus().signet_blocks && !CheckSignetBlockSolution(block, GetConsensus())) {
         return error("ReadBlockFromDisk: Errors in block solution at %s", pos.ToString());
     }
+
     return true;
 }
 

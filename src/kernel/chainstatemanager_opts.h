@@ -9,6 +9,7 @@
 
 #include <arith_uint256.h>
 #include <dbwrapper.h>
+#include <pow_cache.h> // Dpowcoin Params
 #include <txdb.h>
 #include <uint256.h>
 #include <util/time.h>
@@ -45,6 +46,12 @@ struct ChainstateManagerOpts {
     DBOptions coins_db{};
     CoinsViewOptions coins_view{};
     Notifications& notifications;
+    /* Dpowcoin Params */
+    //! [Dpowcoin] Maximum size of the header proof-of-work (Argon2id)
+    //! verification cache -- see pow_cache.h (GetHeaderPoWCache(),
+    //! InitHeaderPoWCache()) for what this actually sizes and why.
+    size_t header_pow_cache_bytes{DEFAULT_HEADER_POW_CACHE_BYTES};
+    /* Dpowcoin Params */
 };
 
 } // namespace kernel

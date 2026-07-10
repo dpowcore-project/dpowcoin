@@ -658,8 +658,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             /*
             pblock->nNonce = 0;
             // code for regenerate BLOCKINFO
-            while (!CheckProofOfWork(pblock->GetYespowerPoWHash(), pblock->nBits, Assert(m_node.chainman)->GetParams().GetConsensus()) ||
-                   !CheckProofOfWork(pblock->GetArgon2idPoWHash(), pblock->nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
+            while (!CheckProofOfWork(pblock->GetArgon2idPoWHash(), pblock->nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
                 ++pblock->nNonce;
                 if (pblock->nNonce == 0) {
                     BOOST_FAIL("nNonce overflow — no valid nonce found for this extranonce");

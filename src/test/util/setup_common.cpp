@@ -190,12 +190,16 @@ ChainTestingSetup::ChainTestingSetup(const ChainType chainType, const std::vecto
 
     constexpr int script_check_threads = 2;
     StartScriptCheckWorkerThreads(script_check_threads);
+
+    constexpr int header_pow_check_threads = 2;
+    StartHeaderPoWCheckWorkerThreads(header_pow_check_threads);
 }
 
 ChainTestingSetup::~ChainTestingSetup()
 {
     if (m_node.scheduler) m_node.scheduler->stop();
     StopScriptCheckWorkerThreads();
+    StopHeaderPoWCheckWorkerThreads();
     GetMainSignals().FlushBackgroundCallbacks();
     GetMainSignals().UnregisterBackgroundSignalScheduler();
     m_node.connman.reset();
@@ -315,13 +319,9 @@ CBlock TestChain100Setup::CreateBlock(
         block.vtx.push_back(MakeTransactionRef(tx));
     }
     RegenerateCommitments(block, *Assert(m_node.chainman));
-    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
-    while (true) {
-        if (CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, m_node.chainman->GetConsensus())) {
-            if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus())) break;
-        }
-        ++block.nNonce;
-    }
+
+    while (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus())) ++block.nNonce;
+
     return block;
 }
 

@@ -96,6 +96,7 @@ BITCOIN_TESTS =\
   test/fs_tests.cpp \
   test/getarg_tests.cpp \
   test/hash_tests.cpp \
+  test/header_pow_queue_tests.cpp \
   test/headers_sync_chainwork_tests.cpp \
   test/httpserver_tests.cpp \
   test/i2p_tests.cpp \
@@ -119,6 +120,7 @@ BITCOIN_TESTS =\
   test/policy_fee_tests.cpp \
   test/policyestimator_tests.cpp \
   test/pool_tests.cpp \
+  test/pow_cache_tests.cpp \
   test/pow_tests.cpp \
   test/prevector_tests.cpp \
   test/raii_event_tests.cpp \
@@ -309,6 +311,8 @@ test_fuzz_fuzz_SOURCES = \
  test/fuzz/policy_estimator_io.cpp \
  test/fuzz/poolresource.cpp \
  test/fuzz/pow.cpp \
+ test/fuzz/pow_cache.cpp \
+ test/fuzz/pow_cache_check.cpp \
  test/fuzz/prevector.cpp \
  test/fuzz/primitives_transaction.cpp \
  test/fuzz/process_message.cpp \

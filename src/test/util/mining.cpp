@@ -49,14 +49,12 @@ std::vector<std::shared_ptr<CBlock>> CreateBlockChain(size_t total_height, const
         block.nTime = ++time;
         block.nBits = params.GenesisBlock().nBits;
         block.nNonce = 0;
-        // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
-        while (true) {
-            if (CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, params.GetConsensus())) {
-                if (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, params.GetConsensus())) break;
-            }
+
+        while (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, params.GetConsensus())) {
             ++block.nNonce;
             assert(block.nNonce);
         }
+
     }
     return ret;
 }
@@ -86,15 +84,12 @@ protected:
 };
 
 COutPoint MineBlock(const NodeContext& node, std::shared_ptr<CBlock>& block)
-{
-    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
-    while (true) {
-        if (CheckProofOfWork(block->GetYespowerPoWHash(), block->nBits, Params().GetConsensus())) {
-            if (CheckProofOfWork(block->GetArgon2idPoWHash(), block->nBits, Params().GetConsensus())) break;
-        }
+{    
+    while (!CheckProofOfWork(block->GetArgon2idPoWHash(), block->nBits, Params().GetConsensus())) {
         ++block->nNonce;
         assert(block->nNonce);
     }
+
     auto& chainman{*Assert(node.chainman)};
     const auto old_height = WITH_LOCK(chainman.GetMutex(), return chainman.ActiveHeight());
     bool new_block;

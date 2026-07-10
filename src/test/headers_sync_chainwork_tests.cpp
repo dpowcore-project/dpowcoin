@@ -28,11 +28,7 @@ struct HeadersGeneratorSetup : public RegTestingSetup {
 
 void HeadersGeneratorSetup::FindProofOfWork(CBlockHeader& starting_header)
 {
-    // Dual PoW: cheap Yespower first, Argon2id only if Yespower passes
-    while (true) {
-        if (CheckProofOfWork(starting_header.GetYespowerPoWHash(), starting_header.nBits, Params().GetConsensus())) {
-            if (CheckProofOfWork(starting_header.GetArgon2idPoWHash(), starting_header.nBits, Params().GetConsensus())) break;
-        }
+    while (!CheckProofOfWork(starting_header.GetArgon2idPoWHash(), starting_header.nBits, Params().GetConsensus())) {
         ++(starting_header.nNonce);
     }
 }

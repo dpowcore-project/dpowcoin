@@ -35,6 +35,7 @@
 #include <policy/rbf.h>
 #include <policy/settings.h>
 #include <pow.h>
+#include <pow_cache.h> // Dpowcoin Params
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <random.h>
@@ -2071,6 +2072,18 @@ void StopScriptCheckWorkerThreads()
     scriptcheckqueue.StopWorkerThreads();
 }
 
+static CCheckQueue<CHeaderPoWCheck> headerpowcheckqueue(64);
+
+void StartHeaderPoWCheckWorkerThreads(int threads_num)
+{
+    headerpowcheckqueue.StartWorkerThreads(threads_num);
+}
+
+void StopHeaderPoWCheckWorkerThreads()
+{
+    headerpowcheckqueue.StopWorkerThreads();
+}
+
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
@@ -3632,16 +3645,23 @@ void ChainstateManager::ReceivedBlockTransactions(const CBlock& block, CBlockInd
     }
 }
 
+/* Dpowcoin Params */
+// [Dpowcoin] CheckProofOfWorkCached() -- the HeaderPoWCache-backed choke
+// point used below by CheckBlockHeader(), HasValidProofOfWork(), and
+// node/blockstorage.cpp's ReadBlockFromDisk() -- lives in pow_cache.h/.cpp,
+// a standalone module with no knowledge of CBlockHeader beyond a forward
+// declaration; it depends on pow.h (for the plain CheckProofOfWork()), not
+// the other way around. See pow_cache.h for the full safety argument
+// (positive-only, keyed on GetHash(), miss-safe fallback) and
+// pow_cache.cpp for the HeaderPoWCache class + singleton.
+/* Dpowcoin Params */
 static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // Check proof of work matches claimed amount (dual PoW logic)
-    // Cheap Yespower is verified first; Argon2id is only checked if Yespower passes
-    if (fCheckPOW && !CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
-        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "Yespower proof of work failed");
-    }
-    if (fCheckPOW && !CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, consensusParams)) {
-        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "Argon2id proof of work failed");
-    }
+    // Check proof of work matches claimed amount.
+    // [Dpowcoin] Cached via CheckProofOfWorkCached() -- see its doc above.
+    if (fCheckPOW && !CheckProofOfWorkCached(block, consensusParams))
+        return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
+
     return true;
 }
 
@@ -3830,25 +3850,45 @@ std::vector<unsigned char> ChainstateManager::GenerateCoinbaseCommitment(CBlock&
     return commitment;
 }
 
-bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams)
+/* Dpowcoin Params */
+// [Dpowcoin] Headers-presync PoW gate (net_processing.cpp's
+// CheckHeadersPoW(), called during the multi-threaded headers-presync
+// stage) -- routed through the same CheckProofOfWorkCached() choke point
+// as CheckBlockHeader() above, so a header re-verified here after already
+// passing full validation elsewhere (or vice versa) hits the cache instead
+// of re-running Argon2id.
+//
+// Below HEADER_POW_PARALLEL_THRESHOLD headers this runs sequentially, on
+// the calling (net processing) thread. At or above it, the batch is
+// dispatched across headerpowcheckqueue's worker threads (see
+// StartHeaderPoWCheckWorkerThreads(), called independently of -par/
+// scriptcheckqueue from init.cpp). The queue is always safe to dispatch
+// to even when zero worker threads were started (e.g. on a 1-2 core box):
+// the calling thread then processes the whole batch itself via the
+// queue's own master-thread path, giving identical results at sequential
+// speed.
+bool CHeaderPoWCheck::operator()()
 {
-    return std::all_of(headers.cbegin(), headers.cend(),
-        [&](const auto& header) {
-            // Dual PoW: cheap Yespower as a fast filter,
-            // Argon2id is only computed if Yespower passes
-            if (!CheckProofOfWork(header.GetYespowerPoWHash(), header.nBits, consensusParams))
-                return false;
-            return CheckProofOfWork(header.GetArgon2idPoWHash(), header.nBits, consensusParams);
-        });
+    return CheckProofOfWorkCached(*m_header, *m_params);
 }
 
-bool HasValidProofOfWorkPresync(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams)
+bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams)
 {
-    return std::all_of(headers.cbegin(), headers.cend(),
-        [&](const auto& header) { 
-            return CheckProofOfWork(header.GetYespowerPoWHash(), header.nBits, consensusParams);
-        });
+    if (headers.size() < HEADER_POW_PARALLEL_THRESHOLD) {
+        return std::all_of(headers.cbegin(), headers.cend(),
+                [&](const auto& header) { return CheckProofOfWorkCached(header, consensusParams);});
+    }
+
+    CCheckQueueControl<CHeaderPoWCheck> control(&headerpowcheckqueue);
+    std::vector<CHeaderPoWCheck> checks;
+    checks.reserve(headers.size());
+    for (const auto& header : headers) {
+        checks.emplace_back(header, consensusParams);
+    }
+    control.Add(std::move(checks));
+    return control.Wait();
 }
+/* Dpowcoin Params */
 
 bool IsBlockMutated(const CBlock& block, bool check_witness_root)
 {
@@ -3908,6 +3948,16 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
 
     // Check proof of work
     const Consensus::Params& consensusParams = chainman.GetConsensus();
+
+    // TRANSITIONAL: Yespower required only in window [100000, 225000). Remove in next release.
+    static const int YESPOWER_START_HEIGHT = 100000;
+    static const int YESPOWER_FORK_HEIGHT  = 225000;
+    if (nHeight >= YESPOWER_START_HEIGHT && nHeight < YESPOWER_FORK_HEIGHT) {
+        if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
+            return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
+        }
+    }
+
     if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "bad-diffbits", "incorrect proof of work");
 

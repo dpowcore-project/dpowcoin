@@ -58,9 +58,6 @@ static constexpr auto HEADERS_DOWNLOAD_TIMEOUT_BASE = 15min;
 static constexpr auto HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER = 1ms;
 /** How long to wait for a peer to respond to a getheaders request */
 static constexpr auto HEADERS_RESPONSE_TIME{2min};
-/** Minimum timeout extension per PRESYNC/REDOWNLOAD batch; ensures the rolling
- *  window never shrinks below the initial computed timeout. */
-static constexpr auto HEADERS_PRESYNC_RENEWAL_TIMEOUT{10min};
 /** Protect at least this many outbound peers from disconnection due to slow/
  * behind headers chain.
  */
@@ -2485,15 +2482,8 @@ void PeerManagerImpl::SendBlockTransactions(CNode& pfrom, Peer& peer, const CBlo
 
 bool PeerManagerImpl::CheckHeadersPoW(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams, Peer& peer)
 {
-    bool in_presync;
-    {
-        LOCK(peer.m_headers_sync_mutex);
-        in_presync = peer.m_headers_sync &&
-                     peer.m_headers_sync->GetState() == HeadersSyncState::State::PRESYNC;
-    }
-
-    if (!(in_presync ? HasValidProofOfWorkPresync(headers, consensusParams)
-                     : HasValidProofOfWork(headers, consensusParams))) {
+    // Do these headers have proof-of-work matching what's claimed?
+    if (!HasValidProofOfWork(headers, consensusParams)) {
         Misbehaving(peer, 100, "header with invalid proof of work");
         return false;
     }
@@ -2915,18 +2905,11 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, Peer& peer,
         //   during the REDOWNLOAD phase of a low-work headers sync.
         // So just check whether we still have headers that we need to process,
         // or not.
-        have_headers_sync = !!peer.m_headers_sync;
-    }
-
-    // headers is a local variable and safe to read after the lock is released.
-    // If PRESYNC consumed the batch, extend the sync timeout and return.
-    // Without this, the one-shot timeout set at sync start expires long before
-    // PRESYNC + REDOWNLOAD complete on a chain with many headers.
-    if (headers.empty()) {
-        if (peer.m_headers_sync_timeout != std::chrono::microseconds::max()) {
-            peer.m_headers_sync_timeout = GetTime<std::chrono::microseconds>() + HEADERS_PRESYNC_RENEWAL_TIMEOUT;
+        if (headers.empty()) {
+            return;
         }
-        return;
+
+        have_headers_sync = !!peer.m_headers_sync;
     }
 
     // Do these headers connect to something in our block index?
@@ -2992,12 +2975,6 @@ void PeerManagerImpl::ProcessHeadersMessage(CNode& pfrom, Peer& peer,
         }
     }
     assert(pindexLast);
-
-    // Extend the sync timeout on each successfully validated batch (covers
-    // REDOWNLOAD phase and normal IBD where m_best_header is still far behind).
-    if (peer.m_headers_sync_timeout != std::chrono::microseconds::max()) {
-        peer.m_headers_sync_timeout = GetTime<std::chrono::microseconds>() + HEADERS_PRESYNC_RENEWAL_TIMEOUT;
-    }
 
     // Consider fetching more headers if we are not using our headers-sync mechanism.
     if (nCount == MAX_HEADERS_RESULTS && !have_headers_sync) {

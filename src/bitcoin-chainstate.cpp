@@ -291,6 +291,7 @@ epilogue:
     scheduler.stop();
     if (chainman.m_thread_load.joinable()) chainman.m_thread_load.join();
     StopScriptCheckWorkerThreads();
+    StopHeaderPoWCheckWorkerThreads();
 
     GetMainSignals().FlushBackgroundCallbacks();
     {

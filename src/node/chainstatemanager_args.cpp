@@ -41,6 +41,15 @@ util::Result<void> ApplyArgsManOptions(const ArgsManager& args, ChainstateManage
     ReadDatabaseArgs(args, opts.coins_db);
     ReadCoinsViewArgs(args, opts.coins_view);
 
+    /* Dpowcoin Params */
+    if (auto max_size = args.GetIntArg("-headerpowcachesize")) { // [Dpowcoin]
+        // 0 is a valid, if useless, floor (CuckooCache::setup_bytes clamps
+        // internally to its own minimum), and multiplying before dividing
+        // avoids truncating a sub-MiB remainder for small values.
+        opts.header_pow_cache_bytes = std::max<int64_t>(*max_size, 0) * (1 << 20);
+    }
+    /* Dpowcoin Params */
+
     return {};
 }
 } // namespace node

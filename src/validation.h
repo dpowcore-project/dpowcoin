@@ -69,6 +69,15 @@ class SignalInterrupt;
 static const int MAX_SCRIPTCHECK_THREADS = 15;
 /** -par default (number of script-checking threads, 0 = auto) */
 static const int DEFAULT_SCRIPTCHECK_THREADS = 0;
+/** Cap on additional worker threads dedicated to header PoW checks. Computed
+ *  independently of -par/script_threads: Argon2id is memory-hard, so gains
+ *  past a handful of threads are eaten by memory bandwidth contention, and
+ *  this queue runs concurrently with scriptcheckqueue and the rest of the
+ *  node. */
+static const int MAX_HEADER_POW_CHECK_THREADS = 6;
+/** Below this many headers in a batch, dispatching through the header PoW
+ *  check queue isn't worth its overhead; checked sequentially instead. */
+static const size_t HEADER_POW_PARALLEL_THRESHOLD = 32;
 /** Block files containing a block-height within MIN_BLOCKS_TO_KEEP of ActiveChain().Tip() will not be pruned. */
 static const unsigned int MIN_BLOCKS_TO_KEEP = 288;
 static const signed int DEFAULT_CHECKBLOCKS = 6;
@@ -102,6 +111,11 @@ extern const std::vector<std::string> CHECKLEVEL_DOC;
 void StartScriptCheckWorkerThreads(int threads_num);
 /** Stop all of the script checking worker threads */
 void StopScriptCheckWorkerThreads();
+
+/** Run instances of header PoW checking worker threads */
+void StartHeaderPoWCheckWorkerThreads(int threads_num);
+/** Stop all of the header PoW checking worker threads */
+void StopHeaderPoWCheckWorkerThreads();
 
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
 
@@ -339,6 +353,31 @@ static_assert(std::is_nothrow_move_assignable_v<CScriptCheck>);
 static_assert(std::is_nothrow_move_constructible_v<CScriptCheck>);
 static_assert(std::is_nothrow_destructible_v<CScriptCheck>);
 
+/**
+ * Closure representing one header proof-of-work verification, run through
+ * CCheckQueue so a batch of headers can be checked across several worker
+ * threads at once. Each header's PoW is independent of every other header
+ * in the batch -- only the hash computation itself is parallelized; link
+ * continuity and chainwork accounting happen afterwards, sequentially, in
+ * the original order.
+ *
+ * Verification goes through CheckProofOfWorkCached() (see pow_cache.h), so
+ * a header already verified elsewhere (e.g. full validation) is served
+ * from cache here instead of recomputing Argon2id, and vice versa.
+ */
+class CHeaderPoWCheck
+{
+private:
+    const CBlockHeader* m_header;
+    const Consensus::Params* m_params;
+
+public:
+    CHeaderPoWCheck(const CBlockHeader& header, const Consensus::Params& params)
+        : m_header(&header), m_params(&params) {}
+
+    bool operator()();
+};
+
 /** Initializes the script-execution cache */
 [[nodiscard]] bool InitScriptExecutionCache(size_t max_size_bytes);
 
@@ -357,10 +396,11 @@ bool TestBlockValidity(BlockValidationState& state,
                        bool fCheckPOW = true,
                        bool fCheckMerkleRoot = true) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
-/** Check with the proof of work on each blockheader matches the value in nBits */
+/** Check that the proof of work on each block header matches the value in
+ *  nBits. Below HEADER_POW_PARALLEL_THRESHOLD headers, checked sequentially;
+ *  at or above it, dispatched across the header PoW check queue's worker
+ *  threads (see StartHeaderPoWCheckWorkerThreads()). */
 bool HasValidProofOfWork(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams);
-
-bool HasValidProofOfWorkPresync(const std::vector<CBlockHeader>& headers, const Consensus::Params& consensusParams);
 
 /** Check if a block has been mutated (with respect to its merkle root and witness commitments). */
 bool IsBlockMutated(const CBlock& block, bool check_witness_root);
