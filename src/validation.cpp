@@ -3940,7 +3940,7 @@ arith_uint256 CalculateHeadersWork(const std::vector<CBlockHeader>& headers)
  *  in ConnectBlock().
  *  Note that -reindex-chainstate skips the validation that happens here!
  */
-static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, BlockManager& blockman, const ChainstateManager& chainman, const CBlockIndex* pindexPrev, NodeClock::time_point now) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
+static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, BlockManager& blockman, const ChainstateManager& chainman, const CBlockIndex* pindexPrev, NodeClock::time_point now, bool fCheckPOW = true) EXCLUSIVE_LOCKS_REQUIRED(::cs_main)
 {
     AssertLockHeld(::cs_main);
     assert(pindexPrev != nullptr);
@@ -3950,9 +3950,13 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
     const Consensus::Params& consensusParams = chainman.GetConsensus();
 
     // TRANSITIONAL: Yespower required only in window [100000, 225000). Remove in next release.
+    // NOTE: fCheckPOW=false is used by TestBlockValidity() on freshly-assembled,
+    // not-yet-mined block templates (nNonce==0) coming out of CreateNewBlock();
+    // checking PoW against those is meaningless and would always fail, so we
+    // must skip this the same way CheckBlock()/CheckBlockHeader() do.
     static const int YESPOWER_START_HEIGHT = 100000;
     static const int YESPOWER_FORK_HEIGHT  = 225000;
-    if (nHeight >= YESPOWER_START_HEIGHT && nHeight < YESPOWER_FORK_HEIGHT) {
+    if (fCheckPOW && nHeight >= YESPOWER_START_HEIGHT && nHeight < YESPOWER_FORK_HEIGHT) {
         if (!CheckProofOfWork(block.GetYespowerPoWHash(), block.nBits, consensusParams)) {
             return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
         }
@@ -4392,7 +4396,7 @@ bool TestBlockValidity(BlockValidationState& state,
     indexDummy.phashBlock = &block_hash;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(block, state, chainstate.m_blockman, chainstate.m_chainman, pindexPrev, adjusted_time_callback()))
+    if (!ContextualCheckBlockHeader(block, state, chainstate.m_blockman, chainstate.m_chainman, pindexPrev, adjusted_time_callback(), fCheckPOW))
         return error("%s: Consensus::ContextualCheckBlockHeader: %s", __func__, state.ToString());
     if (!CheckBlock(block, state, chainparams.GetConsensus(), fCheckPOW, fCheckMerkleRoot))
         return error("%s: Consensus::CheckBlock: %s", __func__, state.ToString());
