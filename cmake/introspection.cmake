@@ -210,4 +210,135 @@ if(NOT MSVC)
     " HAVE_ARM_SHANI
     CXXFLAGS ${ARM_SHANI_CXXFLAGS}
   )
+
+  # Dpowcoin Params
+  # --------------------------------------------------------------------------
+  # Check for ARM NEON intrinsics - portable subset (AArch64 + ARMv7+NEON).
+  #
+  # Probes only intrinsics available on both 64-bit and 32-bit ARM NEON:
+  #   vmovn_u64, vmull_u32, vaddq_u64, veorq_u64 - widening-multiply G step.
+  # vqtbl1q_u8 is intentionally NOT probed here (AArch64-only).
+  #
+  # Step 1: compile without extra flags.
+  #   On AArch64, NEON is mandatory - arm_neon.h just works.
+  #   On any other baseline-NEON target this also catches it.
+  # Step 2: if step 1 fails, try -mfpu=neon (ARMv7 where NEON is optional).
+  # --------------------------------------------------------------------------
+  check_cxx_source_compiles("
+    #include <arm_neon.h>
+    #include <stdint.h>
+    int main()
+    {
+      uint64x2_t a = vdupq_n_u64(UINT64_C(0));
+      uint64x2_t b = vdupq_n_u64(UINT64_C(1));
+      uint32x2_t lo = vmovn_u64(a);
+      uint64x2_t ml = vmull_u32(lo, lo);
+      uint64x2_t r  = veorq_u64(vaddq_u64(a, b), vaddq_u64(ml, ml));
+      (void)r;
+      return 0;
+    }
+    " HAVE_ARGON2_NEON_NATIVE
+  )
+  if(HAVE_ARGON2_NEON_NATIVE)
+    set(HAVE_ARGON2_NEON TRUE)
+    set(ARGON2_NEON_CXXFLAGS "")
+  else()
+    set(ARGON2_NEON_ARMV7_CXXFLAGS -mfpu=neon)
+    check_cxx_source_compiles_with_flags("
+      #include <arm_neon.h>
+      #include <stdint.h>
+      int main()
+      {
+        uint64x2_t a = vdupq_n_u64(UINT64_C(0));
+        uint64x2_t b = vdupq_n_u64(UINT64_C(1));
+        uint32x2_t lo = vmovn_u64(a);
+        uint64x2_t ml = vmull_u32(lo, lo);
+        uint64x2_t r  = veorq_u64(vaddq_u64(a, b), vaddq_u64(ml, ml));
+        (void)r;
+        return 0;
+      }
+      " HAVE_ARGON2_NEON_ARMV7
+      CXXFLAGS ${ARGON2_NEON_ARMV7_CXXFLAGS}
+    )
+    if(HAVE_ARGON2_NEON_ARMV7)
+      set(HAVE_ARGON2_NEON TRUE)
+      set(ARGON2_NEON_CXXFLAGS ${ARGON2_NEON_ARMV7_CXXFLAGS})
+    endif()
+  endif()
+
+  # Check for Argon2 SSE2 intrinsics.
+  # SSE2 is mandatory on x86-64 (ABI baseline) so -msse2 is a no-op there.
+  # On i686 without SSE2 this check will fail and opt_sse2.cpp is skipped;
+  # opt.cpp will fall back to fill_segment_ref (pure-C reference).
+  set(ARGON2_SSE2_CXXFLAGS -msse2)
+  check_cxx_source_compiles_with_flags("
+    #include <emmintrin.h>
+
+    int main()
+    {
+      __m128i a = _mm_set1_epi32(0);
+      __m128i b = _mm_set1_epi32(1);
+      __m128i r = _mm_xor_si128(a, b);
+      (void)r;
+      return 0;
+    }
+    " HAVE_ARGON2_SSE2
+    CXXFLAGS ${ARGON2_SSE2_CXXFLAGS}
+  )
+
+  # Check for Argon2 SSSE3 intrinsics.
+  # SSSE3 was introduced in Intel Penryn (2007) and AMD Bobcat (2011).
+  # On Sandy Bridge / Ivy Bridge machines (SSSE3 but no AVX2) this is the
+  # fastest available tier. On Haswell+ it is superseded by AVX2.
+  #
+  # Key SSSE3 instructions used:
+  #   _mm_shuffle_epi8  - faster rotr24 and rotr16 vs. shift+or (SSE2)
+  #   _mm_alignr_epi8   - faster diagonalize vs. unpack pair (SSE2)
+  set(ARGON2_SSSE3_CXXFLAGS -mssse3)
+  check_cxx_source_compiles_with_flags("
+    #include <tmmintrin.h>
+    int main()
+    {
+      __m128i a = _mm_set1_epi8(0);
+      /* _mm_shuffle_epi8 and _mm_alignr_epi8 are the two key SSSE3 ops */
+      static const char tbl[16] = {3,4,5,6,7,0,1,2, 11,12,13,14,15,8,9,10};
+      __m128i b = _mm_shuffle_epi8(a, _mm_loadu_si128((const __m128i*)tbl));
+      __m128i c = _mm_alignr_epi8(a, b, 8);
+      (void)c;
+      return 0;
+    }
+    " HAVE_ARGON2_SSSE3
+    CXXFLAGS ${ARGON2_SSSE3_CXXFLAGS}
+  )
+
+  # Check for Argon2 AVX2 intrinsics.
+  set(ARGON2_AVX2_CXXFLAGS -mavx2)
+  check_cxx_source_compiles_with_flags("
+    #include <stdint.h>
+    #include <immintrin.h>
+
+    int main()
+    {
+      __m256i l = _mm256_set1_epi32(0);
+      return 0;
+    }
+    " HAVE_ARGON2_AVX2
+    CXXFLAGS ${ARGON2_AVX2_CXXFLAGS}
+  )
+
+  # Check for Argon2 AVX512F intrinsics.
+  set(ARGON2_AVX512F_CXXFLAGS -mavx512f)
+  check_cxx_source_compiles_with_flags("
+    #include <stdint.h>
+    #include <immintrin.h>
+
+    int main()
+    {
+      __m512i v = _mm512_set1_epi32(0);
+      return 0;
+    }
+    " HAVE_ARGON2_AVX512
+    CXXFLAGS ${ARGON2_AVX512F_CXXFLAGS}
+  )
+
 endif()

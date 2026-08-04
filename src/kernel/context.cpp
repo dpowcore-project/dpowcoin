@@ -4,6 +4,9 @@
 
 #include <kernel/context.h>
 
+/* Dpowcoin Params */
+#include <crypto/argon2d/argon2.h>
+/* Dpowcoin Params */
 #include <crypto/sha256.h>
 #include <random.h>
 #include <util/log.h>
@@ -18,6 +21,11 @@ Context::Context()
     std::call_once(globals_initialized, []() {
         std::string sha256_algo = SHA256AutoDetect();
         LogInfo("Using the '%s' SHA256 implementation\n", sha256_algo);
+        /* Dpowcoin Params */
+        // Dpowcoin: detect best SIMD implementation for Argon2id PoW hashing
+        std::string argon2_algo = Argon2AutoDetect();
+        LogInfo("Using the '%s' Argon2id implementation\n", argon2_algo);
+        /* Dpowcoin Params */
         RandomInit();
     });
 }
