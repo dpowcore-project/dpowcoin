@@ -414,8 +414,51 @@ BlockValidationState TestBlockValidity(
     bool check_pow,
     bool check_merkle_root) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 
-/** Check that the proof of work on each blockheader matches the value in nBits */
-bool HasValidProofOfWork(std::span<const CBlockHeader> headers, const Consensus::Params& consensusParams);
+/* Dowcoin Params */
+/**
+ * Argon2id proof-of-work check for a single header, meant to be run
+ * through CCheckQueue so a batch of headers can be verified across
+ * several worker threads at once. Each header's PoW is independent of
+ * every other header in the batch -- only the hash computation itself is
+ * parallelized; link continuity and chainwork accounting happen
+ * afterwards, sequentially, in the original order.
+ *
+ * Verification goes through CheckProofOfWorkCached() (see pow_cache.h),
+ * which makes the cache bidirectional across header-sync phases: a header
+ * verified during PRESYNC's anti-DoS pass is already cached when the same
+ * header (same hash, same content) is re-sent from scratch for
+ * REDOWNLOAD, so REDOWNLOAD hits the cache instead of recomputing
+ * Argon2id. Sequential re-checks in CheckBlockHeader() benefit the same
+ * way.
+ */
+class CHeaderPoWCheck
+{
+private:
+    const CBlockHeader* m_header;
+    const Consensus::Params* m_params;
+
+public:
+    CHeaderPoWCheck(const CBlockHeader& header, const Consensus::Params& params)
+        : m_header(&header), m_params(&params) {}
+
+    std::optional<bool> operator()() const;
+};
+
+//! Worker threads dedicated to verifying header PoW in parallel. Kept
+//! small and independent of hardware_concurrency(): Argon2id is
+//! memory-hard, so gains past a handful of threads are eaten by memory
+//! bandwidth contention, and this queue competes for CPU with
+//! m_script_check_queue and the rest of the node.
+constexpr unsigned int MAX_HEADER_POW_CHECK_THREADS{6};
+
+//! Below this many headers, queue dispatch overhead isn't worth it.
+constexpr size_t HEADER_POW_PARALLEL_THRESHOLD{32};
+
+//! Check that the proof of work on each block header matches the value in
+//! nBits. Below HEADER_POW_PARALLEL_THRESHOLD headers, checked sequentially;
+//! at or above it, dispatched across queue's worker threads.
+bool HasValidProofOfWork(std::span<const CBlockHeader> headers, const Consensus::Params& consensusParams, CCheckQueue<CHeaderPoWCheck>& queue);
+/* Dpowcoin Params */
 
 /** Check if a block has been mutated (with respect to its merkle root and witness commitments). */
 bool IsBlockMutated(const CBlock& block, bool check_witness_root);
@@ -977,6 +1020,16 @@ private:
     //! A queue for script verifications that have to be performed by worker threads.
     CCheckQueue<CScriptCheck> m_script_check_queue;
 
+    /* Dpowcoin Params */
+    //! A queue for header PoW verifications that have to be performed by
+    //! worker threads. Bitweb Params: constructed in
+    //! ChainstateManager::ChainstateManager() and joined by
+    //! ~ChainstateManager(), so its worker threads never outlive the
+    //! ChainstateManager that created them -- same lifetime discipline as
+    //! m_script_check_queue above.
+    CCheckQueue<CHeaderPoWCheck> m_header_pow_check_queue;
+    /* Dpowcoin Params */
+
     //! Timers and counters used for benchmarking validation in both background
     //! and active chainstates.
     SteadyClock::duration GUARDED_BY(::cs_main) time_check{};
@@ -1364,6 +1417,14 @@ public:
     std::optional<int> BlocksAheadOfTip() const LOCKS_EXCLUDED(::cs_main);
 
     CCheckQueue<CScriptCheck>& GetCheckQueue() { return m_script_check_queue; }
+
+    /* Dpowcoin Params */
+    //! accessor for the ChainstateManager-owned header PoW
+    //! check queue, used by HasValidProofOfWork() callers
+    //! (net_processing.cpp's PeerManagerImpl::CheckHeadersPoW(), and tests
+    //! via m_node.chainman).
+    CCheckQueue<CHeaderPoWCheck>& GetHeaderCheckQueue() { return m_header_pow_check_queue; }
+    /* Dpowcoin Params */
 
     ~ChainstateManager();
 

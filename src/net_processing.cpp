@@ -2619,7 +2619,8 @@ void PeerManagerImpl::SendBlockTransactions(CNode& pfrom, Peer& peer, const CBlo
 bool PeerManagerImpl::CheckHeadersPoW(const std::vector<CBlockHeader>& headers, Peer& peer)
 {
     // Do these headers have proof-of-work matching what's claimed?
-    if (!HasValidProofOfWork(headers, m_chainparams.GetConsensus())) {
+    // Dpowcoin Params addet m_chainman.GetHeaderCheckQueue()
+    if (!HasValidProofOfWork(headers, m_chainparams.GetConsensus(), m_chainman.GetHeaderCheckQueue())) {
         Misbehaving(peer, "header with invalid proof of work");
         return false;
     }
@@ -5469,8 +5470,19 @@ void PeerManagerImpl::CheckForStaleTipAndEvictPeers()
         // Check whether our tip is stale, and if so, allow using an extra
         // outbound peer
         if (!m_chainman.m_blockman.LoadingBlocks() && m_connman.GetNetworkActive() && m_connman.GetUseAddrmanOutgoing() && TipMayBeStale()) {
+
+            /* Dpowcoin Params */
+            /*
             LogInfo("Potential stale tip detected, will try using extra outbound peer (last tip update: %d seconds ago)\n",
                       count_seconds(now - m_last_tip_update.load()));
+            */
+            // We do not need spam about stale tip at initial sync
+            if (!m_chainman.IsInitialBlockDownload()) {
+                LogInfo("Potential stale tip detected, will try using extra outbound peer (last tip update: %d seconds ago)\n",
+                          count_seconds(now - m_last_tip_update.load()));
+            }
+            /* Dpowcoin Params */
+
             m_connman.SetTryNewOutboundPeer(true);
         } else if (m_connman.GetTryNewOutboundPeer()) {
             m_connman.SetTryNewOutboundPeer(false);

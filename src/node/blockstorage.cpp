@@ -16,7 +16,7 @@
 #include <kernel/messagestartchars.h>
 #include <kernel/notifications_interface.h>
 #include <kernel/types.h>
-#include <pow.h>
+#include <pow_cache.h> // Dpowcoin Params
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <random.h>
@@ -145,10 +145,21 @@ bool BlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, s
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
 
-                if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams)) {
+                /* Dpowcoin Params */
+                /* Dpowcoin - we use Litcoin solution */
+                /*
+                Dpowcoin: Disable PoW Sanity check while loading block index from disk.
+                We use the sha256 hash for the block index for performance reasons, which is recorded for later use.
+                CheckProofOfWork() uses the Argon2id hash which is discarded after a block is accepted.
+                While it is technically feasible to verify the PoW, doing so takes several minutes as it
+                requires recomputing every PoW hash during every Dpowcoin startup.
+                We opt instead to simply trust the data that is on your local disk.
+
+                    if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams)) {
                     LogError("%s: CheckProofOfWork failed: %s\n", __func__, pindexNew->ToString());
                     return false;
                 }
+                */
 
                 pcursor->Next();
             } else {
@@ -1053,11 +1064,16 @@ bool BlockManager::ReadBlock(CBlock& block, const FlatFilePos& pos, const std::o
 
     const auto block_hash{block.GetHash()};
 
-    // Check the header
-    if (!CheckProofOfWork(block_hash, block.nBits, GetConsensus())) {
+    /* Dpowcoin Params */
+    // Check the header. [Dpowcoin] Cached via CheckProofOfWorkCached() --
+    // this block's PoW was almost certainly already verified once when it
+    // was first accepted (see pow.h), so most getdata/RPC/reindex re-reads
+    // of historical blocks hit the cache instead of recomputing Argon2id.
+    if (!CheckProofOfWorkCached(block, GetConsensus())) {
         LogError("Errors in block header at %s while reading block", pos.ToString());
         return false;
     }
+    /* Dpowcoin Params */
 
     // Signet only: check block solution
     if (GetConsensus().signet_blocks && !CheckSignetBlockSolution(block, GetConsensus())) {

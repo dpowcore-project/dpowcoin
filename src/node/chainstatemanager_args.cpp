@@ -69,6 +69,16 @@ util::Result<void> ApplyArgsManOptions(const ArgsManager& args, ChainstateManage
         opts.signature_cache_bytes = clamped_size_each;
     }
 
+    /* Bitweb Params */
+    if (auto max_size = args.GetIntArg("-headerpowcachesize")) { // [Bitweb]
+        // Same floor/overflow reasoning as -maxsigcachesize just above:
+        // 0 is a valid, if useless, floor (CuckooCache::setup_bytes clamps
+        // internally to its own minimum), and multiplying before dividing
+        // avoids truncating a sub-MiB remainder for small values.
+        opts.header_pow_cache_bytes = std::max<int64_t>(*max_size, 0) * (1 << 20);
+    }
+    /* Bitweb Params */
+
     return {};
 }
 } // namespace node

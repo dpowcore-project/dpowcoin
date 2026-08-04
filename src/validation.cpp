@@ -37,6 +37,7 @@
 #include <policy/settings.h>
 #include <policy/truc_policy.h>
 #include <pow.h>
+#include <pow_cache.h> // Dpowcoin Params
 #include <primitives/block.h>
 #include <primitives/transaction.h>
 #include <random.h>
@@ -73,6 +74,7 @@
 #include <ranges>
 #include <span>
 #include <string>
+#include <thread> // Dpowcoin Params
 #include <tuple>
 #include <utility>
 
@@ -3873,14 +3875,29 @@ void ChainstateManager::ReceivedBlockTransactions(const CBlock& block, CBlockInd
     }
 }
 
+// Dpowcoin Params
+// CheckProofOfWorkCached() -- the HeaderPoWCache-backed choke
+// point used below by CheckBlockHeader(), CHeaderPoWCheck::operator(), and
+// HasValidProofOfWork()'s small-batch path -- lives in pow_cache.h/.cpp,
+// a standalone module with no knowledge of CBlockHeader beyond a forward
+// declaration; it depends on pow.h (for the plain CheckProofOfWork()), not
+// the other way around. It's a shared primitive: node/blockstorage.cpp's
+// ReadBlock() also calls it on every disk read. See pow_cache.h for the
+// full safety argument (positive-only, keyed on GetHash(), miss-safe
+// fallback) and pow_cache.cpp for the HeaderPoWCache class + singleton.
+
+/* Dpowcoin Params */
 static bool CheckBlockHeader(const CBlockHeader& block, BlockValidationState& state, const Consensus::Params& consensusParams, bool fCheckPOW = true)
 {
-    // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(), block.nBits, consensusParams))
+    // Check proof of work matches claimed amount.
+    // [Bitweb] Cached via CheckProofOfWorkCached() -- see its doc above.
+    if (fCheckPOW && !CheckProofOfWorkCached(block, consensusParams)) {
         return state.Invalid(BlockValidationResult::BLOCK_INVALID_HEADER, "high-hash", "proof of work failed");
+    }
 
     return true;
 }
+/* Dpowcoin Params */
 
 static bool CheckMerkleRoot(const CBlock& block, BlockValidationState& state)
 {
@@ -4066,11 +4083,52 @@ void ChainstateManager::GenerateCoinbaseCommitment(CBlock& block, const CBlockIn
     UpdateUncommittedBlockStructures(block, pindexPrev);
 }
 
-bool HasValidProofOfWork(std::span<const CBlockHeader> headers, const Consensus::Params& consensusParams)
+/* Dpowcoin Params */
+std::optional<bool> CHeaderPoWCheck::operator()() const
 {
-    return std::ranges::all_of(headers,
-                               [&](const auto& header) { return CheckProofOfWork(header.GetHash(), header.nBits, consensusParams); });
+    // value is unused on failure; presence alone signals failure.
+    if (!CheckProofOfWorkCached(*m_header, *m_params)) {
+        return false;
+    }
+    return std::nullopt;
 }
+
+//! Number of worker threads to hand CCheckQueue<CHeaderPoWCheck> at
+//! construction time. total_participants is how many threads -- including
+//! the calling (master) thread itself, which always helps out via
+//! CCheckQueueControl::Complete(), same convention as -par's
+//! worker_threads_num -- will be hashing concurrently for one batch. One
+//! core is left free for the rest of the node whenever more than one core
+//! is available, so this never starves the system on small boxes (e.g. a
+//! Raspberry Pi).
+static int HeaderPoWCheckQueueWorkerThreads()
+{
+    const int cores{static_cast<int>(std::thread::hardware_concurrency())};
+    const int total_participants{std::clamp(cores > 1 ? cores - 1 : cores, 1, static_cast<int>(MAX_HEADER_POW_CHECK_THREADS))};
+    return total_participants - 1;
+}
+
+bool HasValidProofOfWork(std::span<const CBlockHeader> headers, const Consensus::Params& consensusParams, CCheckQueue<CHeaderPoWCheck>& queue)
+{
+    // Below the parallel-dispatch threshold, checked sequentially through
+    // the same CheckProofOfWorkCached() choke point CHeaderPoWCheck uses --
+    // so this path stays behaviorally identical to the queued one.
+    if (headers.size() < HEADER_POW_PARALLEL_THRESHOLD) {
+        return std::ranges::all_of(headers, [&](const auto& header) {
+            return CheckProofOfWorkCached(header, consensusParams);
+        });
+    }
+
+    CCheckQueueControl<CHeaderPoWCheck> control(queue);
+    std::vector<CHeaderPoWCheck> checks;
+    checks.reserve(headers.size());
+    for (const auto& header : headers) {
+        checks.emplace_back(header, consensusParams);
+    }
+    control.Add(std::move(checks));
+    return !control.Complete().has_value();
+}
+/* Dpowcoin Params */
 
 bool IsBlockMutated(const CBlock& block, bool check_witness_root)
 {
@@ -6169,6 +6227,7 @@ static ChainstateManager::Options&& Flatten(ChainstateManager::Options&& opts)
 
 ChainstateManager::ChainstateManager(const util::SignalInterrupt& interrupt, Options options, node::BlockManager::Options blockman_options)
     : m_script_check_queue{/*batch_size=*/128, std::clamp(options.worker_threads_num, 0, MAX_SCRIPTCHECK_THREADS)},
+      m_header_pow_check_queue{/*batch_size=*/64, HeaderPoWCheckQueueWorkerThreads()}, // Dpowcoin Params
       m_interrupt{interrupt},
       m_options{Flatten(std::move(options))},
       m_blockman{interrupt, std::move(blockman_options)},
