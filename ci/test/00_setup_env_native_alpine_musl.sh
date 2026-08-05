@@ -8,7 +8,7 @@ export LC_ALL=C.UTF-8
 
 export CONTAINER_NAME=ci_native_alpine_musl
 export CI_IMAGE_NAME_TAG="mirror.gcr.io/alpine:3.23"
-export CI_BASE_PACKAGES="build-base musl-dev pkgconf curl ccache make ninja git python3-dev py3-pip which patch xz procps rsync util-linux bison e2fsprogs cmake dash linux-headers"
+export CI_BASE_PACKAGES="build-base musl-dev pkgconf curl ccache make ninja git python3-dev py3-pip which patch xz procps rsync util-linux bison e2fsprogs cmake dash linux-headers py3-argon2-cffi"
 export PIP_PACKAGES="--break-system-packages pyzmq pycapnp"
 export DEP_OPTS="DEBUG=1"
 export GOAL="install"
@@ -18,4 +18,4 @@ export BITCOIN_CONFIG="\
  -DCMAKE_BUILD_TYPE=Debug \
 "
 export TEST_RUNNER_EXTRA="--v2transport --usecli --extended"
-export BITCOIN_CMD="bitcoin -m" # Used in functional tests
+export BITCOIN_CMD="dpowcoin -m" # Used in functional tests

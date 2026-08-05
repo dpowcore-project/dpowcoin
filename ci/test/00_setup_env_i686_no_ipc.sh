@@ -11,7 +11,7 @@ export CONTAINER_NAME=ci_i686_no_multiprocess
 export CI_IMAGE_NAME_TAG="mirror.gcr.io/debian:trixie"
 export CI_IMAGE_PLATFORM="linux/amd64"
 export CI_CONTAINER_CAP="--security-opt seccomp=unconfined"
-export PACKAGES="llvm clang g++-multilib"
+export PACKAGES="llvm clang g++-multilib python3-argon2"
 export DEP_OPTS="DEBUG=1 NO_IPC=1"
 export GOAL="install"
 export CI_LIMIT_STACK_SIZE=1

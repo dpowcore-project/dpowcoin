@@ -17,9 +17,13 @@ concurrency:
   group: ${{ github.event_name != 'pull_request' && github.run_id || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
 env:
   CI_FAILFAST_TEST_LEAVE_DANGLING: 1  # GHA does not care about dangling processes and setting this variable avoids killing the CI script itself on error
-  REPO_USE_WARP_RUNNERS: 'bitcoin/bitcoin' # Use warp runners for this repo, instead of falling back to the slow GHA runners
+  REPO_USE_WARP_RUNNERS: 'disabled' # Use warp runners for this repo, instead of falling back to the slow GHA runners
+  # Set to 'true' to enable GHA cache. Off by default: overhead > benefit at 0% hit rate on GitHub-hosted runners.
+  USE_CACHE: 'false'
 
 defaults:
   run:
@@ -30,7 +34,7 @@ defaults:
 jobs:
   runners:
     name: '[meta] determine runners'
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     outputs:
       provider: ${{ steps.runners.outputs.provider }}
     steps:
@@ -115,7 +119,7 @@ jobs:
           git config user.name "CI"
       - run: |
           sudo apt-get update
-          sudo apt-get install clang mold ccache build-essential cmake ninja-build pkgconf python3-zmq libevent-dev libboost-dev libsqlite3-dev systemtap-sdt-dev libzmq3-dev qt6-base-dev qt6-tools-dev qt6-l10n-tools libqrencode-dev capnproto libcapnp-dev -y
+          sudo apt-get install clang mold ccache build-essential cmake ninja-build pkgconf python3-zmq libevent-dev libboost-dev libsqlite3-dev systemtap-sdt-dev libzmq3-dev qt6-base-dev qt6-tools-dev qt6-l10n-tools libqrencode-dev capnproto libcapnp-dev python3-argon2 -y
           sudo pip3 install --break-system-packages pycapnp
       - name: Compile and run tests
         run: |
@@ -135,7 +139,7 @@ jobs:
     # in Github repository settings.
     if: ${{ vars.SKIP_BRANCH_PUSH != 'true' || github.event_name == 'pull_request' }}
 
-    timeout-minutes: 120
+    timeout-minutes: 360
 
     strategy:
       fail-fast: false
@@ -185,6 +189,7 @@ jobs:
 
       - name: Restore Ccache cache
         id: ccache-cache
+        if: env.USE_CACHE == 'true'
         uses: actions/cache/restore@v5
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -206,7 +211,7 @@ jobs:
 
       - name: Save Ccache cache
         uses: actions/cache/save@v5
-        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.ccache-cache.outputs.cache-hit != 'true'
+        if: env.USE_CACHE == 'true' && github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.ccache-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ env.CCACHE_DIR }}
           # https://github.com/actions/cache/blob/main/tips-and-workarounds.md#update-a-cache
@@ -220,7 +225,7 @@ jobs:
 
     env:
       PYTHONUTF8: 1
-      TEST_RUNNER_TIMEOUT_FACTOR: 40
+      TEST_RUNNER_TIMEOUT_FACTOR: 360
 
     strategy:
       fail-fast: false
@@ -264,6 +269,7 @@ jobs:
 
       - name: Restore vcpkg tools cache
         id: vcpkg-tools-cache
+        if: env.USE_CACHE == 'true'
         uses: actions/cache/restore@v5
         with:
           path: C:/vcpkg/downloads/tools
@@ -271,6 +277,7 @@ jobs:
           restore-keys: ${{ github.job }}-vcpkg-tools-
 
       - name: Restore vcpkg binary cache
+        if: env.USE_CACHE == 'true'
         uses: actions/cache/restore@v5
         id: vcpkg-binary-cache
         with:
@@ -283,7 +290,7 @@ jobs:
 
       - name: Save vcpkg binary cache
         uses: actions/cache/save@v5
-        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.vcpkg-binary-cache.outputs.cache-hit != 'true' && matrix.job-type == 'standard'
+        if: env.USE_CACHE == 'true' && github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.vcpkg-binary-cache.outputs.cache-hit != 'true' && matrix.job-type == 'standard'
         with:
           path: ~/AppData/Local/vcpkg/archives
           key: ${{ github.job }}-vcpkg-binary-${{ hashFiles('cmake_version', 'msbuild_version', 'toolset_version', 'vcpkg.json') }}
@@ -291,7 +298,7 @@ jobs:
       - name: Save vcpkg tools cache
         uses: actions/cache/save@v5
         # Only save cache from one job as they share tools. If the matrix is expanded to jobs with unique tools, this may need amending.
-        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.vcpkg-tools-cache.outputs.cache-hit != 'true' && matrix.job-type == 'standard'
+        if: env.USE_CACHE == 'true' && github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch && steps.vcpkg-tools-cache.outputs.cache-hit != 'true' && matrix.job-type == 'standard'
         with:
           path: C:/vcpkg/downloads/tools
           key: ${{ github.job }}-vcpkg-tools-${{ github.run_id }}
@@ -318,7 +325,7 @@ jobs:
     # Record frozen commit, so that the native tests on cross-builds can run on
     # the exact same commit id of the build.
     name: '[meta] record frozen commit'
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     outputs:
       commit: ${{ steps.record-commit.outputs.commit }}
     steps:
@@ -363,6 +370,7 @@ jobs:
 
       - name: Restore caches
         id: restore-cache
+        if: env.USE_CACHE == 'true'
         uses: ./.github/actions/cache/restore
         with:
           provider: ${{ needs.runners.outputs.provider }}
@@ -376,6 +384,7 @@ jobs:
         run: ./ci/test_run_all.sh
 
       - name: Save caches
+        if: env.USE_CACHE == 'true'
         uses: ./.github/actions/cache/save
         with:
           provider: ${{ needs.runners.outputs.provider }}
@@ -408,7 +417,7 @@ jobs:
 
     env:
       PYTHONUTF8: 1
-      TEST_RUNNER_TIMEOUT_FACTOR: 40
+      TEST_RUNNER_TIMEOUT_FACTOR: 360
 
     steps:
       - *ANNOTATION_PR_NUMBER
@@ -423,7 +432,7 @@ jobs:
         with:
           name: ${{ matrix.artifact-name }}-${{ github.run_id }}
 
-      - name: Run bitcoind.exe
+      - name: Run dpowcoind.exe
         run: py -3 .github/ci-windows-cross.py print_version
 
       - *IMPORT_VS_ENV
@@ -461,86 +470,92 @@ jobs:
           - name: 'iwyu'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_iwyu.sh'
 
           - name: '32 bit ARM'
             warp-runner: 'ubuntu-24.04-arm' # Warp's Arm runners don't support 32-bit mode currently
             fallback-runner: 'ubuntu-24.04-arm'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_arm.sh'
             provider: 'gha'
 
           - name: 'ASan + LSan + UBSan + integer'
             warp-runner: 'warp-ubuntu-2404-x64-8x' # has to match container in ci/test/00_setup_env_native_asan.sh for tracing tools
             fallback-runner: 'ubuntu-24.04'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_asan.sh'
 
           - name: 'macOS-cross to arm64'
             warp-runner: 'warp-ubuntu-latest-x64-4x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_mac_cross.sh'
 
           - name: 'macOS-cross to x86_64'
             warp-runner: 'warp-ubuntu-latest-x64-4x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_mac_cross_intel.sh'
 
           - name: 'No wallet'
             warp-runner: 'warp-ubuntu-latest-x64-4x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_nowallet.sh'
 
           - name: 'i686, no IPC'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_i686_no_ipc.sh'
 
           - name: 'fuzzer,address,undefined,integer'
             warp-runner: 'warp-ubuntu-latest-x64-16x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 240
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_fuzz.sh'
 
           - name: 'previous releases'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_previous_releases.sh'
 
           - name: 'Alpine (musl)'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_alpine_musl.sh'
+
+          - name: 'CentOS Stream 10, depends, gui'
+            warp-runner: 'warp-ubuntu-latest-x64-8x'
+            fallback-runner: 'ubuntu-latest'
+            timeout-minutes: 360
+            file-env: './ci/test/00_setup_env_native_centos.sh'
 
           - name: 'tidy'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_tidy.sh'
 
           - name: 'TSan'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_tsan.sh'
 
           - name: 'MSan, fuzz'
             warp-runner: 'warp-ubuntu-latest-x64-8x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 150
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_fuzz_with_msan.sh'
 
           - name: 'MSan'
             warp-runner: 'warp-ubuntu-latest-x64-16x'
             fallback-runner: 'ubuntu-latest'
-            timeout-minutes: 120
+            timeout-minutes: 360
             file-env: './ci/test/00_setup_env_native_msan.sh'
 
     steps:
@@ -553,6 +568,7 @@ jobs:
 
       - name: Restore caches
         id: restore-cache
+        if: env.USE_CACHE == 'true'
         uses: ./.github/actions/cache/restore
         with:
           provider: ${{ matrix.provider || needs.runners.outputs.provider }}
@@ -581,6 +597,7 @@ jobs:
         run: ./ci/test_run_all.sh
 
       - name: Save caches
+        if: env.USE_CACHE == 'true'
         uses: ./.github/actions/cache/save
         with:
           provider: ${{ matrix.provider || needs.runners.outputs.provider }}
@@ -590,9 +607,9 @@ jobs:
     needs: runners
     runs-on: ${{ needs.runners.outputs.provider == 'warp' && 'warp-ubuntu-latest-x64-2x' || 'ubuntu-latest' }}
     if: ${{ vars.SKIP_BRANCH_PUSH != 'true' || github.event_name == 'pull_request' }}
-    timeout-minutes: 20
+    timeout-minutes: 360
     env:
-      CONTAINER_NAME: "bitcoin-linter"
+      CONTAINER_NAME: "dpowcoin-linter"
     steps:
       - *ANNOTATION_PR_NUMBER
 

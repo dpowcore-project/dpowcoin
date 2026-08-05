@@ -13,4 +13,4 @@ COPY ./ci/lint/01_install.sh /install.sh
 RUN /install.sh && \
   rm -rf /var/lib/apt/lists/*
 
-WORKDIR /bitcoin
+WORKDIR /dpowcoin

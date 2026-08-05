@@ -38,7 +38,7 @@ def get_worktree_mounts(repo_root):
 def main():
     repo_root = Path(__file__).resolve().parent.parent
     is_ci = os.environ.get("GITHUB_ACTIONS") == "true"
-    container = "bitcoin-linter"
+    container = "dpowcoin-linter"
 
     build_cmd = [
         "docker",
@@ -60,7 +60,7 @@ def main():
     if is_ci:
         if os.environ.get("GITHUB_EVENT_NAME") == "pull_request":
             extra_env = ["--env", "LINT_CI_IS_PR=1"]
-        elif os.environ.get("GITHUB_REPOSITORY") == "bitcoin/bitcoin":
+        elif os.environ.get("GITHUB_REPOSITORY") == "dpowcore-project/dpowcoin":
             extra_env = ["--env", "LINT_CI_SANITY_CHECK_COMMIT_SIG=1"]
 
     run(
@@ -69,7 +69,7 @@ def main():
             "run",
             "--rm",
             *extra_env,
-            f"--volume={repo_root}:/bitcoin",
+            f"--volume={repo_root}:/dpowcoin",
             *get_worktree_mounts(repo_root),
             *([] if is_ci else ["-it"]),
             container,

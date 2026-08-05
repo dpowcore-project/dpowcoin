@@ -7,7 +7,7 @@
 export LC_ALL=C.UTF-8
 
 export CONTAINER_NAME="ci_mac_native"  # macos does not use a container, but the env var is needed for logging
-export PIP_PACKAGES="--break-system-packages pycapnp zmq"
+export PIP_PACKAGES="--break-system-packages pycapnp zmq argon2-cffi"
 export GOAL="install deploy"
 export CMAKE_GENERATOR="Ninja"
 export CI_OS_NAME="macos"
@@ -19,4 +19,4 @@ export BITCOIN_CONFIG="\
   -DREDUCE_EXPORTS=ON \
   -DCMAKE_EXE_LINKER_FLAGS='-Wl,-stack_size -Wl,0x80000' \
 "
-export BITCOIN_CMD="bitcoin -m" # Used in functional tests
+export BITCOIN_CMD="dpowcoin -m" # Used in functional tests

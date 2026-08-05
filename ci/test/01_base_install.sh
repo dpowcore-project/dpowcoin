@@ -32,7 +32,11 @@ if [ -n "${APT_LLVM_V}" ]; then
   )
 fi
 
-if command -v apk >/dev/null 2>&1; then
+if [[ $CI_IMAGE_NAME_TAG == *centos* ]]; then
+  bash -c "dnf -y install epel-release"
+  # The ninja-build package is available in the CRB repository.
+  bash -c "dnf -y --allowerasing --enablerepo crb install $CI_BASE_PACKAGES $PACKAGES"
+elif command -v apk >/dev/null 2>&1; then
   ${CI_RETRY_EXE} apk update
   # shellcheck disable=SC2086
   ${CI_RETRY_EXE} apk add --no-cache $CI_BASE_PACKAGES $PACKAGES

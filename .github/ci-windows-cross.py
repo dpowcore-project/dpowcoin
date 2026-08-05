@@ -24,26 +24,26 @@ def run(cmd, **kwargs):
 
 
 def print_version():
-    bitcoind = Path.cwd() / "bin" / "bitcoind.exe"
-    run([str(bitcoind), "-version"])
+    dpowcoind = Path.cwd() / "bin" / "dpowcoind.exe"
+    run([str(dpowcoind), "-version"])
 
 
 def check_manifests():
     release_dir = Path.cwd() / "bin"
-    manifest_path = release_dir / "bitcoind.manifest"
+    manifest_path = release_dir / "dpowcoind.manifest"
 
-    cmd_bitcoind_manifest = [
+    cmd_dpowcoind_manifest = [
         "mt.exe",
         "-nologo",
-        f"-inputresource:{release_dir / 'bitcoind.exe'}",
+        f"-inputresource:{release_dir / 'dpowcoind.exe'}",
         f"-out:{manifest_path}",
     ]
-    run(cmd_bitcoind_manifest)
+    run(cmd_dpowcoind_manifest)
     print(manifest_path.read_text())
 
     skipped = {  # Skip as they currently do not have manifests
         "fuzz.exe",
-        "bench_bitcoin.exe",
+        "bench_dpowcoin.exe",
     }
     for entry in release_dir.iterdir():
         if entry.suffix.lower() != ".exe":
@@ -81,7 +81,7 @@ def prepare_tests():
         str(previous_releases_dir),
     ]
     run(cmd_download_prev_rel)
-    run([sys.executable, "-m", "pip", "install", "pyzmq"])
+    run([sys.executable, "-m", "pip", "install", "pyzmq", "argon2-cffi"])
 
     dest = workspace / "unit_test_data"
     download_script_assets(dest)
@@ -99,36 +99,20 @@ def run_functional_tests():
         f"--tmpdirprefix={workspace}",
         "--combinedlogslen=99999999",
         *shlex.split(os.environ.get("TEST_RUNNER_EXTRA", "").strip()),
-        # feature_unsupported_utxo_db.py fails on Windows because of emojis in the test data directory.
-        "--exclude",
-        "feature_unsupported_utxo_db.py",
         # See https://github.com/bitcoin/bitcoin/issues/31409.
         "--exclude",
         "wallet_multiwallet.py",
     ]
     run(test_runner_cmd)
 
-    # Run feature_unsupported_utxo_db sequentially in ASCII-only tmp dir,
-    # because it is excluded above due to lack of UTF-8 support in the
-    # ancient release.
-    cmd_feature_unsupported_db = [
-        sys.executable,
-        str(workspace / "test" / "functional" / "feature_unsupported_utxo_db.py"),
-        "--previous-releases",
-        "--tmpdir",
-        str(Path(workspace) / "test_feature_unsupported_utxo_db"),
-    ]
-    run(cmd_feature_unsupported_db)
-
-
 def run_unit_tests():
     workspace = Path.cwd()
     os.environ["DIR_UNIT_TEST_DATA"] = str(workspace / "unit_test_data")
     # Can't use ctest here like other jobs as we don't have a CMake build tree.
     commands = [
-        ["./bin/test_bitcoin-qt.exe"],
+        ["./bin/test_dpowcoin-qt.exe"],
         # Intentionally run sequentially here, to catch test case failures caused by dirty global state from prior test cases:
-        ["./bin/test_bitcoin.exe", "-l", "test_suite"],
+        ["./bin/test_dpowcoin.exe", "-l", "test_suite"],
         ["./src/secp256k1/bin/exhaustive_tests.exe"],
         ["./src/secp256k1/bin/noverify_tests.exe"],
         ["./src/secp256k1/bin/tests.exe"],

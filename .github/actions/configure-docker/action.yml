@@ -42,7 +42,7 @@ runs:
         fi
 
         # Configure docker build cache backend
-        # Always optimistically --cache‑from in case a cache blob exists
+        # Always optimistically --cache-from in case a cache blob exists
         args=(--cache-from "type=gha,${cache_options}")
 
         # Only add --cache-to when pushing to the default branch.

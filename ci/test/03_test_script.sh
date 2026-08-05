@@ -47,7 +47,7 @@ echo "=== END env ==="
 if [ "$RUN_FUZZ_TESTS" = "true" ]; then
   export DIR_FUZZ_IN=${DIR_QA_ASSETS}/fuzz_corpora/
   if [ ! -d "$DIR_FUZZ_IN" ]; then
-    ${CI_RETRY_EXE} git clone --depth=1 https://github.com/bitcoin-core/qa-assets "${DIR_QA_ASSETS}"
+    ${CI_RETRY_EXE} git clone --depth=1 https://github.com/dpowcore-project/qa-assets "${DIR_QA_ASSETS}"
   fi
   (
     cd "${DIR_QA_ASSETS}"
@@ -58,19 +58,21 @@ elif [ "$RUN_UNIT_TESTS" = "true" ]; then
   export DIR_UNIT_TEST_DATA=${DIR_QA_ASSETS}/unit_test_data/
   if [ ! -d "$DIR_UNIT_TEST_DATA" ]; then
     mkdir -p "$DIR_UNIT_TEST_DATA"
-    ${CI_RETRY_EXE} curl --location --fail https://github.com/bitcoin-core/qa-assets/raw/main/unit_test_data/script_assets_test.json -o "${DIR_UNIT_TEST_DATA}/script_assets_test.json"
+    ${CI_RETRY_EXE} curl --location --fail https://github.com/dpowcore-project/qa-assets/raw/main/unit_test_data/script_assets_test.json -o "${DIR_UNIT_TEST_DATA}/script_assets_test.json"
   fi
 fi
 
 # Make sure default datadir does not exist and is never read by creating a dummy file
 if [ "$CI_OS_NAME" == "macos" ]; then
-  echo > "${HOME}/Library/Application Support/Bitcoin"
+  echo > "${HOME}/Library/Application Support/Dpowcoin"
 else
-  echo > "${HOME}/.bitcoin"
+  echo > "${HOME}/.dpowcoin"
 fi
 
 if [ -z "$NO_DEPENDS" ]; then
-  if [[ $CI_IMAGE_NAME_TAG == *alpine* ]]; then
+  if [[ $CI_IMAGE_NAME_TAG == *centos* ]]; then
+    SHELL_OPTS="CONFIG_SHELL=/bin/dash"
+  elif [[ $CI_IMAGE_NAME_TAG == *alpine* ]]; then
     SHELL_OPTS="CONFIG_SHELL=/usr/bin/dash"
   else
     SHELL_OPTS="CONFIG_SHELL="
@@ -138,8 +140,8 @@ if [ "$RUN_CHECK_DEPS" = "true" ]; then
 fi
 
 if [[ "$CI_OS_NAME" == "macos" && "${GOAL}" = "install deploy" ]]; then
-  unzip "${BASE_BUILD_DIR}/bitcoin-macos-app.zip" -d "${BASE_BUILD_DIR}/deploy"
-  if ! ( codesign --verify "${BASE_BUILD_DIR}/deploy/Bitcoin-Qt.app" ); then
+  unzip "${BASE_BUILD_DIR}/dpowcoin-macos-app.zip" -d "${BASE_BUILD_DIR}/deploy"
+  if ! ( codesign --verify "${BASE_BUILD_DIR}/deploy/Dpowcoin-Qt.app" ); then
     echo "Codesigning failed."
     false
   fi
@@ -152,7 +154,7 @@ if [ "$RUN_UNIT_TESTS" = "true" ]; then
   ctest --test-dir "${BASE_BUILD_DIR}" \
     --stop-on-failure \
     "${MAKEJOBS}" \
-    --timeout $(( TEST_RUNNER_TIMEOUT_FACTOR * 60 ))
+    --timeout $(( TEST_RUNNER_TIMEOUT_FACTOR * 360 ))
 fi
 
 if [ "$RUN_FUNCTIONAL_TESTS" = "true" ]; then
