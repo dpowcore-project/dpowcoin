@@ -39,6 +39,14 @@ std::optional<CTransactionRef> PrivateBroadcast::PickTxForSend(const NodeId& wil
 {
     LOCK(m_mutex);
 
+    // BACKPORT (upstream 08b7c61fc703; not yet in 31.x as of 2026-07-04): DO NOT DROP ON
+    // NEXT UPSTREAM MERGE/REBASE. GetSendStatusByNode() assumes unique node ids; sending
+    // more than one transaction to a given node would be a privacy leak.
+    if (GetSendStatusByNode(will_send_to_nodeid).has_value()) { // nodeid reuse, shouldn't send >1 tx to a given node
+        Assume(false);
+        return std::nullopt;
+    }
+
     const auto it{std::ranges::max_element(
             m_transactions,
             [](const auto& a, const auto& b) { return a < b; },

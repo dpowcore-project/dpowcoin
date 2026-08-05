@@ -1270,7 +1270,16 @@ bool MemPoolAccept::SubmitPackage(const ATMPArgs& args, std::vector<Workspace>& 
             package_state.Invalid(PackageValidationResult::PCKG_MEMPOOL_ERROR,
                                   strprintf("BUG! PolicyScriptChecks succeeded but ConsensusScriptChecks failed: %s",
                                             ws.m_ptx->GetHash().ToString()));
-            // Remove the transaction from the mempool.
+        }
+        // BACKPORT (upstream bitcoin/bitcoin commit ac9aa71b7f; not yet in 31.x as of
+        // 2026-07-04): DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+        // Remove first failing tx and all subsequent in package. Previously only the tx that
+        // itself failed ConsensusScriptChecks was removed, leaving any later-in-package
+        // transactions (which may implicitly depend on the failed one) in the mempool -
+        // a potential mempool-consistency invariant violation. This is defensive
+        // (belt-and-suspenders): the guarded condition is not known to be reachable in
+        // production and has no dedicated unit/functional test upstream, only code review.
+        if (!all_submitted) {
             if (!m_subpackage.m_changeset) m_subpackage.m_changeset = m_pool.GetChangeSet();
             m_subpackage.m_changeset->StageRemoval(m_pool.GetIter(ws.m_ptx->GetHash()).value());
         }

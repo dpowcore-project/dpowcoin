@@ -72,6 +72,11 @@ struct CNodeStateStats {
 struct PeerManagerInfo {
     std::chrono::seconds median_outbound_time_offset{0s};
     bool ignores_incoming_txs{false};
+    // BACKPORT (upstream bitcoin/bitcoin commit 7b821ef9b7, PR #35267; not yet in 31.x
+    // as of 2026-07-04): DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE. Lets the RPC layer
+    // check whether -privatebroadcast is enabled before serving getprivatebroadcastinfo /
+    // abortprivatebroadcast.
+    bool private_broadcast{DEFAULT_PRIVATE_BROADCAST};
 };
 
 class PeerManager : public CValidationInterface, public NetEventsInterface

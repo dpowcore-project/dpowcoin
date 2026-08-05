@@ -34,4 +34,29 @@ public:
     }
 };
 
+/// Helper to initialize the global NodeClock mocktime for the duration of a test,
+/// and reset it afterwards.
+// BACKPORT (adapted from upstream bitcoin/bitcoin's FakeNodeClock/NodeClockContext; that
+// class isn't in 31.x this reimplements just what our fuzz harness needs, using 31.x's
+// own SetMockTime()/NodeSeconds, without master's later LimitOne<> CRTP wrapper).
+// DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+class FakeNodeClock
+{
+    NodeSeconds m_t{std::chrono::seconds::max()};
+
+public:
+    explicit FakeNodeClock(NodeSeconds init_time) { set(init_time); }
+    explicit FakeNodeClock(std::chrono::seconds init_time) { set(NodeSeconds{init_time}); }
+
+    /** Unset mocktime. */
+    ~FakeNodeClock() { set(std::chrono::seconds{0}); }
+
+    FakeNodeClock(const FakeNodeClock&) = delete;
+    FakeNodeClock& operator=(const FakeNodeClock&) = delete;
+
+    /** Set mocktime. */
+    void set(NodeSeconds t) { SetMockTime(m_t = t); }
+    void set(std::chrono::seconds t) { set(NodeSeconds{t}); }
+};
+
 #endif // BITCOIN_TEST_UTIL_TIME_H
