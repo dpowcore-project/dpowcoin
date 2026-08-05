@@ -54,13 +54,13 @@
         <translation type="unfinished">Избери</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation type="unfinished">Тези са вашите Биткойн адреси за изпращане на плащания. Винаги проверявайте количеството и получаващите адреси преди изпращане на монети. </translation>
+        <source>These are your Dpowcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation type="unfinished">Тези са вашите Дповкоин адреси за изпращане на плащания. Винаги проверявайте количеството и получаващите адреси преди изпращане на монети. </translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for receiving payments. Use the 'Create new receiving address' button in the receive tab to create new addresses.
+        <source>These are your Dpowcoin addresses for receiving payments. Use the 'Create new receiving address' button in the receive tab to create new addresses.
 Signing is only possible with addresses of the type 'legacy'.</source>
-        <translation type="unfinished">Това са вашите биткойн адреси за получаване на плащания. Използвайте бутона „Създаване на нови адреси“ в раздела за получаване, за да създадете нови адреси. Подписването е възможно само с адреси от типа „наследени“.</translation>
+        <translation type="unfinished">Това са вашите дповкоин адреси за получаване на плащания. Използвайте бутона „Създаване на нови адреси“ в раздела за получаване, за да създадете нови адреси. Подписването е възможно само с адреси от типа „наследени“.</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -159,8 +159,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Потвърди криптирането на порфейла</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR BITCOINS&lt;/b&gt;!</source>
-        <translation type="unfinished">ВНИМАНИЕ: Ако шифрирате вашият портфейл и изгубите паролата си, &lt;b&gt;ЩЕ ИЗГУБИТЕ ВСИЧКИТЕ СИ БИТКОИНИ&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DPOWCOINS&lt;/b&gt;!</source>
+        <translation type="unfinished">ВНИМАНИЕ: Ако шифрирате вашият портфейл и изгубите паролата си, &lt;b&gt;ЩЕ ИЗГУБИТЕ ВСИЧКИТЕ СИ ДПОВКОИНИ&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -187,8 +187,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Назад</translation>
     </message>
     <message>
-        <source>Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation type="unfinished">Не забравяйте, че криптирането на вашия портфейл не може напълно да защити вашите биткойни от кражба от зловреден софтуер, заразяващ компютъра ви.</translation>
+        <source>Remember that encrypting your wallet cannot fully protect your dpowcoins from being stolen by malware infecting your computer.</source>
+        <translation type="unfinished">Не забравяйте, че криптирането на вашия портфейл не може напълно да защити вашите дповкоини от кражба от зловреден софтуер, заразяващ компютъра ви.</translation>
     </message>
     <message>
         <source>Wallet to be encrypted</source>
@@ -302,8 +302,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Количество</translation>
     </message>
     <message>
-        <source>Enter a Bitcoin address (e.g. %1)</source>
-        <translation type="unfinished">Въведете Биткойн адрес (например: %1)</translation>
+        <source>Enter a Dpowcoin address (e.g. %1)</source>
+        <translation type="unfinished">Въведете Дповкоин адрес (например: %1)</translation>
     </message>
     <message>
         <source>Inbound</source>
@@ -474,8 +474,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Прокси е &lt;b&gt;разрешено&lt;/b&gt;: %1</translation>
     </message>
     <message>
-        <source>Send coins to a Bitcoin address</source>
-        <translation type="unfinished">Изпращане към Биткоин адрес</translation>
+        <source>Send coins to a Dpowcoin address</source>
+        <translation type="unfinished">Изпращане към Дповкоин адрес</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -518,16 +518,16 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Подпиши &amp;съобщение…</translation>
     </message>
     <message>
-        <source>Sign messages with your Bitcoin addresses to prove you own them</source>
-        <translation type="unfinished">Пишете съобщения със своя Биткойн адрес за да докажете,че е ваш.</translation>
+        <source>Sign messages with your Dpowcoin addresses to prove you own them</source>
+        <translation type="unfinished">Пишете съобщения със своя Дповкоин адрес за да докажете,че е ваш.</translation>
     </message>
     <message>
         <source>&amp;Verify message…</source>
         <translation type="unfinished">&amp;Потвърди съобщение…</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Bitcoin addresses</source>
-        <translation type="unfinished">Потвърждаване на съобщения  за да се знае,че са написани с дадените Биткойн адреси.</translation>
+        <source>Verify messages to ensure they were signed with specified Dpowcoin addresses</source>
+        <translation type="unfinished">Потвърждаване на съобщения  за да се знае,че са написани с дадените Дповкоин адреси.</translation>
     </message>
     <message>
         <source>&amp;Load PSBT from file…</source>
@@ -586,8 +586,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Свързване с рояк...</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and bitcoin: URIs)</source>
-        <translation type="unfinished">Изискване на плащания(генерира QR кодове и биткойн: URIs)</translation>
+        <source>Request payments (generates QR codes and dpowcoin: URIs)</source>
+        <translation type="unfinished">Изискване на плащания(генерира QR кодове и дповкоин: URIs)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -645,16 +645,16 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Ctrl+Q </translation>
     </message>
     <message>
-        <source>Load Partially Signed Bitcoin Transaction</source>
-        <translation type="unfinished">Заредете частично подписана Bitcoin трансакция</translation>
+        <source>Load Partially Signed Dpowcoin Transaction</source>
+        <translation type="unfinished">Заредете частично подписана Dpowcoin трансакция</translation>
     </message>
     <message>
         <source>Load PSBT from &amp;clipboard…</source>
-        <translation type="unfinished">Заредете PSBT (частично подписана Bitcoin трансакция) от &amp;клипборд...</translation>
+        <translation type="unfinished">Заредете PSBT (частично подписана Dpowcoin трансакция) от &amp;клипборд...</translation>
     </message>
     <message>
-        <source>Load Partially Signed Bitcoin Transaction from clipboard</source>
-        <translation type="unfinished">Заредете частично подписана Bitcoin трансакция от клипборд</translation>
+        <source>Load Partially Signed Dpowcoin Transaction from clipboard</source>
+        <translation type="unfinished">Заредете частично подписана Dpowcoin трансакция от клипборд</translation>
     </message>
     <message>
         <source>Node window</source>
@@ -673,8 +673,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">&amp;Получаване на адреси</translation>
     </message>
     <message>
-        <source>Open a bitcoin: URI</source>
-        <translation type="unfinished">Отвори bitcoin: URI</translation>
+        <source>Open a dpowcoin: URI</source>
+        <translation type="unfinished">Отвори dpowcoin: URI</translation>
     </message>
     <message>
         <source>Open Wallet</source>
@@ -711,8 +711,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Мигрирайте портфейл</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Bitcoin command-line options</source>
-        <translation type="unfinished">Покажи %1 помощно съобщение за да получиш лист с възможни Биткойн команди</translation>
+        <source>Show the %1 help message to get a list with possible Dpowcoin command-line options</source>
+        <translation type="unfinished">Покажи %1 помощно съобщение за да получиш лист с възможни Дповкоин команди</translation>
     </message>
     <message>
         <source>&amp;Mask values</source>
@@ -775,11 +775,11 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">&amp;Покажи</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network.</source>
+        <source>%n active connection(s) to Dpowcoin network.</source>
         <extracomment>A substring of the tooltip.</extracomment>
         <translation type="unfinished">
-            <numerusform>%n свързани активно към Bitcoin мрежата.</numerusform>
-            <numerusform>%n активно свързани към Биткойн мрежата. </numerusform>
+            <numerusform>%n свързани активно към Dpowcoin мрежата.</numerusform>
+            <numerusform>%n активно свързани към Дповкоин мрежата. </numerusform>
         </translation>
     </message>
     <message>
@@ -1279,8 +1279,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Редактиране на адрес за изпращане</translation>
     </message>
     <message>
-        <source>The entered address "%1" is not a valid Bitcoin address.</source>
-        <translation type="unfinished">"%1" не е валиден Биткоин адрес.</translation>
+        <source>The entered address "%1" is not a valid Dpowcoin address.</source>
+        <translation type="unfinished">"%1" не е валиден Дповкоин адрес.</translation>
     </message>
     <message>
         <source>Address "%1" already exists as a receiving address with label "%2" and so cannot be added as a sending address.</source>
@@ -1391,8 +1391,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Използване на директория ръчно</translation>
     </message>
     <message>
-        <source>Bitcoin</source>
-        <translation type="unfinished">Биткоин</translation>
+        <source>Dpowcoin</source>
+        <translation type="unfinished">Дповкоин</translation>
     </message>
     <message numerus="yes">
         <source>%n GB of space available</source>
@@ -1436,8 +1436,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         </translation>
     </message>
     <message>
-        <source>%1 will download and store a copy of the Bitcoin block chain.</source>
-        <translation type="unfinished">%1 ще свали и съхрани копие на биткойн блокчейна.</translation>
+        <source>%1 will download and store a copy of the Dpowcoin block chain.</source>
+        <translation type="unfinished">%1 ще свали и съхрани копие на дповкоин блокчейна.</translation>
     </message>
     <message>
         <source>The wallet will also be stored in this directory.</source>
@@ -1459,12 +1459,12 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">форма</translation>
     </message>
     <message>
-        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the bitcoin network, as detailed below.</source>
-        <translation type="unfinished">Последните трансакции все още не могат да се виждат и следователно балансът на портфейла ви може да бъде неправилен. Тази информация ще бъде правилна, след като портфейлът ви приключи синхронизирането с Bitcoin мрежата, както е подробно описано по-долу.</translation>
+        <source>Recent transactions may not yet be visible, and therefore your wallet's balance might be incorrect. This information will be correct once your wallet has finished synchronizing with the dpowcoin network, as detailed below.</source>
+        <translation type="unfinished">Последните трансакции все още не могат да се виждат и следователно балансът на портфейла ви може да бъде неправилен. Тази информация ще бъде правилна, след като портфейлът ви приключи синхронизирането с Dpowcoin мрежата, както е подробно описано по-долу.</translation>
     </message>
     <message>
-        <source>Attempting to spend bitcoins that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
-        <translation type="unfinished">Опитът да се изразходват биткойни, които са засегнати от все още показаните трансакции, няма да бъдат приети от мрежата.</translation>
+        <source>Attempting to spend dpowcoins that are affected by not-yet-displayed transactions will not be accepted by the network.</source>
+        <translation type="unfinished">Опитът да се изразходват дповкоини, които са засегнати от все още показаните трансакции, няма да бъдат приети от мрежата.</translation>
     </message>
     <message>
         <source>Number of blocks left</source>
@@ -1518,8 +1518,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
 <context>
     <name>OpenURIDialog</name>
     <message>
-        <source>Open bitcoin URI</source>
-        <translation type="unfinished">Отвори bitcoin URI </translation>
+        <source>Open dpowcoin URI</source>
+        <translation type="unfinished">Отвори dpowcoin URI </translation>
     </message>
     <message>
         <source>Paste address from clipboard</source>
@@ -1677,8 +1677,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Позволи входящи връзки</translation>
     </message>
     <message>
-        <source>Connect to the Bitcoin network through a SOCKS5 proxy.</source>
-        <translation type="unfinished">Свързване с Биткойн мрежата чрез SOCKS5  прокси.</translation>
+        <source>Connect to the Dpowcoin network through a SOCKS5 proxy.</source>
+        <translation type="unfinished">Свързване с Дповкоин мрежата чрез SOCKS5  прокси.</translation>
     </message>
     <message>
         <source>&amp;Connect through SOCKS5 proxy (default proxy):</source>
@@ -1809,8 +1809,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">форма</translation>
     </message>
     <message>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Bitcoin network after a connection is established, but this process has not completed yet.</source>
-        <translation type="unfinished">Текущата информация на екрана може да не е актуална. Вашият портфейл ще се синхронизира автоматично с мрежата на Биткоин, щом поне една връзката с нея се установи; този процес все още не е приключил.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Dpowcoin network after a connection is established, but this process has not completed yet.</source>
+        <translation type="unfinished">Текущата информация на екрана може да не е актуална. Вашият портфейл ще се синхронизира автоматично с мрежата на Дповкоин, щом поне една връзката с нея се установи; този процес все още не е приключил.</translation>
     </message>
     <message>
         <source>Available:</source>
@@ -1921,8 +1921,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Възникна грешка по време назаявката за плащане</translation>
     </message>
     <message>
-        <source>Cannot start bitcoin: click-to-pay handler</source>
-        <translation type="unfinished">Биткойн не можe да се стартира: click-to-pay handler</translation>
+        <source>Cannot start dpowcoin: click-to-pay handler</source>
+        <translation type="unfinished">Дповкоин не можe да се стартира: click-to-pay handler</translation>
     </message>
     <message>
         <source>URI handling</source>
@@ -2475,8 +2475,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         </translation>
     </message>
     <message>
-        <source>Warning: Invalid Bitcoin address</source>
-        <translation type="unfinished">Внимание: Невалиден Биткойн адрес</translation>
+        <source>Warning: Invalid Dpowcoin address</source>
+        <translation type="unfinished">Внимание: Невалиден Дповкоин адрес</translation>
     </message>
     <message>
         <source>Warning: Unknown change address</source>
@@ -2549,7 +2549,7 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">Подпис</translation>
     </message>
     <message>
-        <source>Sign the message to prove you own this Bitcoin address</source>
+        <source>Sign the message to prove you own this Dpowcoin address</source>
         <translation type="unfinished">Подпишете съобщение като доказателство, че притежавате определен адрес</translation>
     </message>
     <message>
@@ -2565,8 +2565,8 @@ Signing is only possible with addresses of the type 'legacy'.</source>
         <translation type="unfinished">&amp;Провери</translation>
     </message>
     <message>
-        <source>Verify the message to ensure it was signed with the specified Bitcoin address</source>
-        <translation type="unfinished">Проверете съобщение, за да сте сигурни че е подписано с определен Биткоин адрес</translation>
+        <source>Verify the message to ensure it was signed with the specified Dpowcoin address</source>
+        <translation type="unfinished">Проверете съобщение, за да сте сигурни че е подписано с определен Дповкоин адрес</translation>
     </message>
     <message>
         <source>Verify &amp;Message</source>

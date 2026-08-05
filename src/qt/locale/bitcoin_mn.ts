@@ -54,8 +54,8 @@
         <translation type="unfinished">С&amp;онго</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation type="unfinished">Эдгээр Биткойн хаягууд нь илгээх хаягууд. Хүлээн авах хаяг болон тоо хэмжээг илгээхээсээ өмнө сайн нягталж үзэж байна уу</translation>
+        <source>These are your Dpowcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation type="unfinished">Эдгээр Дповкоин хаягууд нь илгээх хаягууд. Хүлээн авах хаяг болон тоо хэмжээг илгээхээсээ өмнө сайн нягталж үзэж байна уу</translation>
     </message>
     <message>
         <source>&amp;Copy Address</source>
@@ -337,7 +337,7 @@
         <translation type="unfinished">Шинэчлэгдсэн</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network.</source>
+        <source>%n active connection(s) to Dpowcoin network.</source>
         <extracomment>A substring of the tooltip.</extracomment>
         <translation type="unfinished">
             <numerusform />
@@ -507,8 +507,8 @@
 <context>
     <name>Intro</name>
     <message>
-        <source>Bitcoin</source>
-        <translation type="unfinished">Биткойн</translation>
+        <source>Dpowcoin</source>
+        <translation type="unfinished">Дповкоин</translation>
     </message>
     <message numerus="yes">
         <source>%n GB of space available</source>
@@ -843,8 +843,8 @@
         </translation>
     </message>
     <message>
-        <source>Warning: Invalid Bitcoin address</source>
-        <translation type="unfinished">Анхаар:Буруу Биткойны хаяг байна</translation>
+        <source>Warning: Invalid Dpowcoin address</source>
+        <translation type="unfinished">Анхаар:Буруу Дповкоины хаяг байна</translation>
     </message>
     <message>
         <source>(no label)</source>

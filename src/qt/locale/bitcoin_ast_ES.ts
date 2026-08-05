@@ -54,13 +54,13 @@
         <translation type="unfinished">&amp;Escoyer</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
-        <translation type="unfinished">Estes son les tuyes direcciones de Bitcoin pa mandar pagos. Siempre revisa la cantidá y la dirección de recibimientu antes de mandar los coins.</translation>
+        <source>These are your Dpowcoin addresses for sending payments. Always check the amount and the receiving address before sending coins.</source>
+        <translation type="unfinished">Estes son les tuyes direcciones de Dpowcoin pa mandar pagos. Siempre revisa la cantidá y la dirección de recibimientu antes de mandar los coins.</translation>
     </message>
     <message>
-        <source>These are your Bitcoin addresses for receiving payments. Use the 'Create new receiving address' button in the receive tab to create new addresses.
+        <source>These are your Dpowcoin addresses for receiving payments. Use the 'Create new receiving address' button in the receive tab to create new addresses.
 Signing is only possible with addresses of the type 'legacy'.</source>
-        <translation type="unfinished">Estes son les tuyes direcciones de Bitcoin pa recibir pagos. Usa el botón 'Crear nueva dirección de recibimientu' na solapa de recibir pa crear nueves direcciones.
+        <translation type="unfinished">Estes son les tuyes direcciones de Dpowcoin pa recibir pagos. Usa el botón 'Crear nueva dirección de recibimientu' na solapa de recibir pa crear nueves direcciones.
 La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
     </message>
     <message>
@@ -160,8 +160,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Confirmar el cifrado de la cartera</translation>
     </message>
     <message>
-        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR BITCOINS&lt;/b&gt;!</source>
-        <translation type="unfinished">Advertencia: Si cifras la tua cartera y pierdes la frase de seguridá, ¡perderás &lt;b&gt;TOOS LOS TUYOS BITCOINS&lt;/b&gt;!</translation>
+        <source>Warning: If you encrypt your wallet and lose your passphrase, you will &lt;b&gt;LOSE ALL OF YOUR DPOWCOINS&lt;/b&gt;!</source>
+        <translation type="unfinished">Advertencia: Si cifras la tua cartera y pierdes la frase de seguridá, ¡perderás &lt;b&gt;TOOS LOS TUYOS DPOWCOINS&lt;/b&gt;!</translation>
     </message>
     <message>
         <source>Are you sure you wish to encrypt your wallet?</source>
@@ -188,8 +188,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Atrás</translation>
     </message>
     <message>
-        <source>Remember that encrypting your wallet cannot fully protect your bitcoins from being stolen by malware infecting your computer.</source>
-        <translation type="unfinished">Recuerda que cifrar la tua cartera nun puede protexer completamente los tuyos bitcoins de ser robados por malware que infecte tu ordenador.</translation>
+        <source>Remember that encrypting your wallet cannot fully protect your dpowcoins from being stolen by malware infecting your computer.</source>
+        <translation type="unfinished">Recuerda que cifrar la tua cartera nun puede protexer completamente los tuyos dpowcoins de ser robados por malware que infecte tu ordenador.</translation>
     </message>
     <message>
         <source>Wallet to be encrypted</source>
@@ -399,8 +399,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">El proxy ta &lt;b&gt;activáu&lt;/b&gt;: %1</translation>
     </message>
     <message>
-        <source>Send coins to a Bitcoin address</source>
-        <translation type="unfinished">Enviar monedas a una dirección de Bitcoin</translation>
+        <source>Send coins to a Dpowcoin address</source>
+        <translation type="unfinished">Enviar monedas a una dirección de Dpowcoin</translation>
     </message>
     <message>
         <source>Backup wallet to another location</source>
@@ -443,16 +443,16 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Firmar &amp;mensaje…</translation>
     </message>
     <message>
-        <source>Sign messages with your Bitcoin addresses to prove you own them</source>
-        <translation type="unfinished">Firmar mensajes con les tuyas direcciones de Bitcoin pa probar que les tienes</translation>
+        <source>Sign messages with your Dpowcoin addresses to prove you own them</source>
+        <translation type="unfinished">Firmar mensajes con les tuyas direcciones de Dpowcoin pa probar que les tienes</translation>
     </message>
     <message>
         <source>&amp;Verify message…</source>
         <translation type="unfinished">&amp;Verificar mensaje…</translation>
     </message>
     <message>
-        <source>Verify messages to ensure they were signed with specified Bitcoin addresses</source>
-        <translation type="unfinished">Verificar los mensajes pa asegurar que fueron firmados con les direcciones de Bitcoin especificaes</translation>
+        <source>Verify messages to ensure they were signed with specified Dpowcoin addresses</source>
+        <translation type="unfinished">Verificar los mensajes pa asegurar que fueron firmados con les direcciones de Dpowcoin especificaes</translation>
     </message>
     <message>
         <source>&amp;Load PSBT from file…</source>
@@ -511,8 +511,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Conectando con pares…</translation>
     </message>
     <message>
-        <source>Request payments (generates QR codes and bitcoin: URIs)</source>
-        <translation type="unfinished">Solicitar pagamientos (xenera códigos QR y bitcoin: URIs)</translation>
+        <source>Request payments (generates QR codes and dpowcoin: URIs)</source>
+        <translation type="unfinished">Solicitar pagamientos (xenera códigos QR y dpowcoin: URIs)</translation>
     </message>
     <message>
         <source>Show the list of used sending addresses and labels</source>
@@ -561,16 +561,16 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Actualizáu</translation>
     </message>
     <message>
-        <source>Load Partially Signed Bitcoin Transaction</source>
-        <translation type="unfinished">Cargar Transacción de Bitcoin Parcialmente Firmada</translation>
+        <source>Load Partially Signed Dpowcoin Transaction</source>
+        <translation type="unfinished">Cargar Transacción de Dpowcoin Parcialmente Firmada</translation>
     </message>
     <message>
         <source>Load PSBT from &amp;clipboard…</source>
         <translation type="unfinished">Cargar PSBT dende el &amp;portapapeles…</translation>
     </message>
     <message>
-        <source>Load Partially Signed Bitcoin Transaction from clipboard</source>
-        <translation type="unfinished">Cargar Transacción de Bitcoin Parcialmente Firmada dende el portapapeles</translation>
+        <source>Load Partially Signed Dpowcoin Transaction from clipboard</source>
+        <translation type="unfinished">Cargar Transacción de Dpowcoin Parcialmente Firmada dende el portapapeles</translation>
     </message>
     <message>
         <source>Node window</source>
@@ -589,8 +589,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">&amp;Direcciones de recepción</translation>
     </message>
     <message>
-        <source>Open a bitcoin: URI</source>
-        <translation type="unfinished">Abrir un bitcoin: URI</translation>
+        <source>Open a dpowcoin: URI</source>
+        <translation type="unfinished">Abrir un dpowcoin: URI</translation>
     </message>
     <message>
         <source>Open Wallet</source>
@@ -627,8 +627,8 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">Migrar una cartera</translation>
     </message>
     <message>
-        <source>Show the %1 help message to get a list with possible Bitcoin command-line options</source>
-        <translation type="unfinished">Amosar el mensaxe d’ayuda de %1 pa ver una llista de les posibles opciones de la llinia de comandos de Bitcoin</translation>
+        <source>Show the %1 help message to get a list with possible Dpowcoin command-line options</source>
+        <translation type="unfinished">Amosar el mensaxe d’ayuda de %1 pa ver una llista de les posibles opciones de la llinia de comandos de Dpowcoin</translation>
     </message>
     <message>
         <source>&amp;Mask values</source>
@@ -687,10 +687,10 @@ La firma ye possible solamentu con direcciones del tipu 'legacy'.</translation>
         <translation type="unfinished">&amp;Amosar</translation>
     </message>
     <message numerus="yes">
-        <source>%n active connection(s) to Bitcoin network.</source>
+        <source>%n active connection(s) to Dpowcoin network.</source>
         <extracomment>A substring of the tooltip.</extracomment>
         <translation type="unfinished">
-            <numerusform>%n conexión(es) activa(es) a la rede de Bitcoin</numerusform>
+            <numerusform>%n conexión(es) activa(es) a la rede de Dpowcoin</numerusform>
         </translation>
     </message>
     <message>
