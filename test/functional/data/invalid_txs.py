@@ -69,7 +69,7 @@ class BadTxTemplate:
     """Allows simple construction of a certain kind of invalid tx. Base class to be subclassed."""
     __metaclass__ = abc.ABCMeta
 
-    # The expected error code given by bitcoind upon submission of the tx.
+    # The expected error code given by dpowcoind upon submission of the tx.
     reject_reason: Optional[str] = ""
 
     # Only specified if it differs from mempool acceptance error.
@@ -121,8 +121,9 @@ class SizeTooSmall(BadTxTemplate):
     def get_tx(self):
         tx = CTransaction()
         tx.vin.append(self.valid_txin)
-        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 2)))))
-        assert len(tx.serialize_without_witness()) == 64
+        # Dpowcoin Params
+        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 3))))) # Changed to 3 from 2 due BIP53 rule.
+        assert len(tx.serialize_without_witness()) == 63 # Changed to 63 from 64 due BIP53 rule.
         assert MIN_STANDARD_TX_NONWITNESS_SIZE - 1 == 64
         return tx
 

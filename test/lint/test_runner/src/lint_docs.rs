@@ -8,20 +8,28 @@ use std::process::{Command, Stdio};
 use crate::util::{check_output, get_subtrees, git, LintResult};
 
 pub fn lint_doc_release_note_snippets() -> LintResult {
-    let non_release_notes = check_output(git().args([
+    let mut non_release_notes = check_output(git().args([
         "ls-files",
         "--",
         "doc/release-notes/",
         ":(exclude)doc/release-notes/*.*.md", // Assume that at least one dot implies a proper release note
     ]))?;
+    non_release_notes.push('\n');
+    non_release_notes.push_str(&check_output(git().args([
+        "ls-files",
+        "--",
+        "doc/bitcoin-release-notes/",
+        ":(exclude)doc/bitcoin-release-notes/*.*.md", // Assume that at least one dot implies a proper release note
+    ]))?);
+    let non_release_notes = non_release_notes.trim().to_string();
+
     if non_release_notes.is_empty() {
         Ok(())
     } else {
         println!("{non_release_notes}");
         Err(r#"
 Release note snippets and other docs must be put into the doc/ folder directly.
-
-The doc/release-notes/ folder is for archived release notes of previous releases only. Snippets are
+The doc/release-notes/ and doc/bitcoin-release-notes/ folders are for archived release notes of previous releases only. Snippets are
 expected to follow the naming "/doc/release-notes-<PR number>.md".
             "#
         .trim()

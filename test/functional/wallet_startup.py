@@ -4,7 +4,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test wallet load on startup.
 
-Verify that a bitcoind node can maintain list of wallets loading on startup
+Verify that a dpowcoind node can maintain list of wallets loading on startup
 """
 import shutil
 import uuid

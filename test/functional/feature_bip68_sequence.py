@@ -277,7 +277,8 @@ class BIP68Test(BitcoinTestFramework):
         self.nodes[0].prioritisetransaction(txid=tx2.txid_hex, fee_delta=int(self.relayfee*COIN))
 
         # Advance the time on the node so that we can test timelocks
-        self.nodes[0].setmocktime(cur_time+600)
+        for n in self.nodes:
+            n.setmocktime(cur_time+600)
         # Save block template now to use for the reorg later
         tmpl = self.nodes[0].getblocktemplate(NORMAL_GBT_REQUEST_PARAMS)
         self.generate(self.nodes[0], 1)

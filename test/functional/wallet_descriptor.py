@@ -50,7 +50,7 @@ class WalletDescriptorTest(BitcoinTestFramework):
         origin_part = origin_match.group(1) if origin_match else ""
         # Split on "]" for everything after the origin info
         after_origin = desc_verify.split("]", maxsplit=1)[-1]
-        # Look for the hardened markers “h” inside each piece
+        # Look for the hardened markers "h" inside each piece
         # We don't need to check for aspostrophe as normalization will not output aspostrophe
         found_hardened_in_origin = "h" in origin_part
         found_hardened_after_origin = "h" in after_origin

@@ -14,7 +14,7 @@ from test_framework.util import check_node_connections, assert_equal
 
 INBOUND_CONNECTIONS = 5
 BLOCK_RELAY_CONNECTIONS = 2
-ONION_ADDR = "pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion:8333"
+ONION_ADDR = "pg6mmjiyjmcrsslvykfwnntlaru7p5svn6y2ymmju6nubxndf4pscryd.onion:42003"
 
 
 class AnchorsTest(BitcoinTestFramework):

@@ -4,7 +4,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 """ Tests the utxocache:* tracepoint API interface.
-    See https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md#context-utxocache
+    See https://github.com/dpowcore-project/dpowcoin/blob/master/doc/tracing.md#context-utxocache
 """
 
 import ctypes
@@ -18,6 +18,7 @@ from test_framework.test_framework import BitcoinTestFramework
 from test_framework.util import (
     assert_equal,
     bpf_cflags,
+    sync_txindex,
 )
 from test_framework.wallet import MiniWallet
 
@@ -155,6 +156,12 @@ class UTXOCacheTracepointTest(BitcoinTestFramework):
 
     def run_test(self):
         self.wallet = MiniWallet(self.nodes[0])
+        # Under parallel test execution the background txindex sync thread can be
+        # starved of CPU (heavy argon2id mining in other jobs), so m_synced may
+        # still be false when test_add_spent() calls getrawtransaction() without a
+        # blockhash. That RPC path returns -5 immediately (no wait/retry loop) if
+        # the index isn't synced yet. Block here until it actually is.
+        sync_txindex(self, self.nodes[0])
 
         self.test_uncache()
         self.test_add_spent()
@@ -162,7 +169,7 @@ class UTXOCacheTracepointTest(BitcoinTestFramework):
 
     def test_uncache(self):
         """ Tests the utxocache:uncache tracepoint API.
-        https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md#tracepoint-utxocacheuncache
+        https://github.com/dpowcore-project/dpowcoin/blob/master/doc/tracing.md#tracepoint-utxocacheuncache
         """
         # To trigger an UTXO uncache from the cache, we create an invalid transaction
         # spending a not-cached, but existing UTXO. During transaction validation, this
@@ -227,8 +234,8 @@ class UTXOCacheTracepointTest(BitcoinTestFramework):
 
     def test_add_spent(self):
         """ Tests the utxocache:add utxocache:spent tracepoint API
-            See https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md#tracepoint-utxocacheadd
-            and https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md#tracepoint-utxocachespent
+            See https://github.com/dpowcore-project/dpowcoin/blob/master/doc/tracing.md#tracepoint-utxocacheadd
+            and https://github.com/dpowcore-project/dpowcoin/blob/master/doc/tracing.md#tracepoint-utxocachespent
         """
 
         self.log.info(
@@ -348,7 +355,7 @@ class UTXOCacheTracepointTest(BitcoinTestFramework):
 
     def test_flush(self):
         """ Tests the utxocache:flush tracepoint API.
-            See https://github.com/bitcoin/bitcoin/blob/master/doc/tracing.md#tracepoint-utxocacheflush"""
+            See https://github.com/dpowcore-project/dpowcoin/blob/master/doc/tracing.md#tracepoint-utxocacheflush"""
 
         self.log.info("test the utxocache:flush tracepoint API")
         self.log.info("hook into the utxocache:flush tracepoint")

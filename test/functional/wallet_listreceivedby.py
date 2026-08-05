@@ -133,7 +133,7 @@ class ReceivedByTest(BitcoinTestFramework):
         assert_equal(balance, Decimal("0.3"))
 
         # Test invalid address format error
-        assert_raises_rpc_error(-5, "Invalid Bitcoin address", self.nodes[1].getreceivedbyaddress, "invalid_address")
+        assert_raises_rpc_error(-5, "Invalid Dpowcoin address", self.nodes[1].getreceivedbyaddress, "invalid_address")
 
         self.log.info("listreceivedbylabel + getreceivedbylabel Test")
 

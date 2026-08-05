@@ -373,7 +373,7 @@ class P2PPrivateBroadcast(BitcoinTestFramework):
             "0" * 64,
         )
 
-        # Stop the SOCKS5 proxy server to avoid it being upset by the bitcoin
+        # Stop the SOCKS5 proxy server to avoid it being upset by the dpowcoin
         # node disconnecting in the middle of the SOCKS5 handshake when we
         # restart below.
         self.socks5_server.stop()
@@ -383,7 +383,7 @@ class P2PPrivateBroadcast(BitcoinTestFramework):
             "-privatebroadcast",
             "-v2transport=0",
             # A location where definitely a Tor control is not listening. This would allow
-            # Bitcoin Core to start, hoping/assuming that the location of the Tor proxy
+            # Dpowcoin Core to start, hoping/assuming that the location of the Tor proxy
             # may be retrieved after startup from the Tor control, but it will not be, so
             # the RPC should throw.
             "-torcontrol=127.0.0.1:1",

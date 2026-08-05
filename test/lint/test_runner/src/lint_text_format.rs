@@ -18,7 +18,7 @@ fn get_pathspecs_exclude_whitespace() -> Vec<String> {
             "contrib/windeploy/win-codesign.cert",
             "doc/README_windows.txt",
             // Temporary excludes, or existing violations
-            "contrib/init/bitcoind.openrc",
+            "contrib/init/dpowcoind.openrc",
             "contrib/macdeploy/macdeployqtplus",
             "src/crypto/sha256_sse4.cpp",
             "src/qt/res/src/*.svg",

@@ -21,6 +21,8 @@ from test_framework.messages import (
     msg_ping,
     msg_version,
     ser_string,
+    # Dpowcoin Params
+    uint256_from_compact,
 )
 from test_framework.p2p import (
     P2PDataStore,
@@ -182,7 +184,7 @@ class InvalidMessagesTest(BitcoinTestFramework):
         node = self.nodes[0]
         conn = node.add_p2p_connection(SenderOfAddrV2())
 
-        # Make sure bitcoind signals support for ADDRv2, otherwise this test
+        # Make sure dpowcoind signals support for ADDRv2, otherwise this test
         # will bombard an old node with messages it does not recognize which
         # will produce unexpected results.
         conn.wait_for_sendaddrv2()
@@ -229,14 +231,14 @@ class InvalidMessagesTest(BitcoinTestFramework):
                 '01' +       # network type (IPv4)
                 'fd0102' +   # address length (COMPACTSIZE(513))
                 'ab' * 513 + # address
-                '208d'))     # port
+                'a413'))     # port
 
     def test_addrv2_unrecognized_network(self):
         now_hex = int(time.time()).to_bytes(4, "little").hex()
         self.test_addrv2('unrecognized network',
             [
                 'received: addrv2 (25 bytes)',
-                '9.9.9.9:8333',
+                '9.9.9.9:42003',
                 'Added 1 addresses',
             ],
             bytes.fromhex(
@@ -247,14 +249,14 @@ class InvalidMessagesTest(BitcoinTestFramework):
                 '99' +     # network type (unrecognized)
                 '02' +     # address length (COMPACTSIZE(2))
                 'ab' * 2 + # address
-                '208d' +   # port
+                'a413' +   # port
                 # this should be added:
                 now_hex +  # time
                 '01' +     # service flags, COMPACTSIZE(NODE_NETWORK)
                 '01' +     # network type (IPv4)
                 '04' +     # address length (COMPACTSIZE(4))
                 '09' * 4 + # address
-                '208d'))   # port
+                'a413'))   # port
 
     def test_oversized_msg(self, msg, size):
         msg_type = msg.msgtype.decode('ascii')
@@ -288,8 +290,13 @@ class InvalidMessagesTest(BitcoinTestFramework):
         blockheader.hashPrevBlock = int(blockheader_tip_hash, 16)
         blockheader.nTime = int(time.time())
         blockheader.nBits = blockheader_tip.nBits
-        while not blockheader.hash_hex.startswith('0'):
+
+        # Dpowcoin Params
+        target = uint256_from_compact(blockheader.nBits)
+        while blockheader.argon2id > target:
             blockheader.nNonce += 1
+        # Dpowcoin Params
+
         peer = self.nodes[0].add_p2p_connection(P2PInterface())
         peer.send_and_ping(msg_headers([blockheader]))
         assert_equal(self.nodes[0].getblockchaininfo()['headers'], 1)
@@ -297,8 +304,8 @@ class InvalidMessagesTest(BitcoinTestFramework):
         assert_equal(chaintips[0]['status'], 'headers-only')
         assert_equal(chaintips[0]['hash'], blockheader.hash_hex)
 
-        # invalidate PoW
-        while not blockheader.hash_hex.startswith('f'):
+        # Dpowcoin Params
+        while blockheader.argon2id <= target:
             blockheader.nNonce += 1
         with self.nodes[0].assert_debug_log(['Misbehaving', 'header with invalid proof of work']):
             peer.send_without_ping(msg_headers([blockheader]))

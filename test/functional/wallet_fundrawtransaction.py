@@ -308,7 +308,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         dec_tx  = self.nodes[2].decoderawtransaction(rawtx)
         assert_equal(utx['txid'], dec_tx['vin'][0]['txid'])
 
-        assert_raises_rpc_error(-5, "Change address must be a valid bitcoin address", self.nodes[2].fundrawtransaction, rawtx, changeAddress='foobar')
+        assert_raises_rpc_error(-5, "Change address must be a valid dpowcoin address", self.nodes[2].fundrawtransaction, rawtx, changeAddress='foobar')
 
     def test_valid_change_address(self):
         self.log.info("Test fundrawtxn with a provided change address")
@@ -801,7 +801,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         wwatch.unloadwallet()
 
     def test_option_feerate(self):
-        self.log.info("Test fundrawtxn with explicit fee rates (fee_rate sat/vB and feeRate BTC/kvB)")
+        self.log.info("Test fundrawtxn with explicit fee rates (fee_rate sat/vB and feeRate DPC/kvB)")
         node = self.nodes[3]
         # Make sure there is exactly one input so coin selection can't skew the result.
         assert_equal(len(self.nodes[3].listunspent(1)), 1)
@@ -871,7 +871,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         node.fundrawtransaction(rawtx, feeRate=0.00000999, add_inputs=True)
 
         self.log.info("- raises RPC error if both feeRate and fee_rate are passed")
-        assert_raises_rpc_error(-8, "Cannot specify both fee_rate (sat/vB) and feeRate (BTC/kvB)",
+        assert_raises_rpc_error(-8, "Cannot specify both fee_rate (sat/vB) and feeRate (DPC/kvB)",
             node.fundrawtransaction, rawtx, fee_rate=0.1, feeRate=0.1, add_inputs=True)
 
         self.log.info("- raises RPC error if both feeRate and estimate_mode passed")
@@ -914,7 +914,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         outputs = {self.nodes[2].getnewaddress(): 1}
         rawtx = self.nodes[3].createrawtransaction(inputs, outputs)
 
-        # Test subtract fee from outputs with feeRate (BTC/kvB)
+        # Test subtract fee from outputs with feeRate (DPC/kvB)
         result = [self.nodes[3].fundrawtransaction(rawtx, fee_rate=self.fee_rate_sats_per_vb),
             self.nodes[3].fundrawtransaction(rawtx, subtractFeeFromOutputs=[], fee_rate=self.fee_rate_sats_per_vb),  # empty subtraction list
             self.nodes[3].fundrawtransaction(rawtx, subtractFeeFromOutputs=[0], fee_rate=self.fee_rate_sats_per_vb), # uses self.min_relay_tx_fee (set by fee_rate in sat/vB)
@@ -1384,7 +1384,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         # However at normal feerates, the difference between the effective value and the real value
         # that this bug is not detected because the transaction fee must be at least 0.01 BTC (the minimum change value).
         # Otherwise the targeted minimum change value will be enough to cover the transaction fees that were not
-        # being accounted for. So the minimum relay fee is set to 0.1 BTC/kvB in this test.
+        # being accounted for. So the minimum relay fee is set to 0.1 DPC/kvB in this test.
         self.log.info("Test issue 22670 ApproximateBestSubset bug")
         # Make sure the default wallet will not be loaded when restarted with a high minrelaytxfee
         self.nodes[0].unloadwallet(self.default_wallet_name, False)
@@ -1455,7 +1455,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         # If rounding up, then the calculated fee will be 126 + 78 = 204.
         # In the former case, the calculated needed fee is higher than the actual fee being paid, so an assertion is reached
         # To test this does not happen, we subtract 202 sats from the input value. If working correctly, this should
-        # fail with insufficient funds rather than bitcoind asserting.
+        # fail with insufficient funds rather than dpowcoind asserting.
         rawtx = w.createrawtransaction(inputs=[], outputs=[{self.nodes[0].getnewaddress(address_type="bech32"): 1 - 0.00000202}])
         expected_err_msg = "The total exceeds your balance when the 0.00000078 transaction fee is included."
         assert_raises_rpc_error(-4, expected_err_msg, w.fundrawtransaction, rawtx, fee_rate=1.85)
@@ -1551,7 +1551,7 @@ class RawTransactionsTest(BitcoinTestFramework):
         self.nodes[1].createwallet("cannot_cover_fees")
         wallet = self.nodes[1].get_wallet_rpc("cannot_cover_fees")
 
-        # Set up wallet with 2 utxos: 0.3 BTC and 0.15 BTC
+        # Set up wallet with 2 utxos: 0.3 DPC and 0.15 DPC
         default_wallet.sendtoaddress(wallet.getnewaddress(), 0.3)
         txid2 = default_wallet.sendtoaddress(wallet.getnewaddress(), 0.15)
         self.generate(self.nodes[0], 1)
@@ -1559,28 +1559,28 @@ class RawTransactionsTest(BitcoinTestFramework):
         amount_with_fee_err_msg = "The total exceeds your balance when the {} transaction fee is included."
 
         self.log.info("Test without preselected inputs")
-        self.log.info("Attempt to send 0.45 BTC without SFFO")
+        self.log.info("Attempt to send 0.45 DPC without SFFO")
         rawtx = wallet.createrawtransaction(inputs=[], outputs=[{default_wallet.getnewaddress(): 0.45}])
         assert_raises_rpc_error(-4, amount_with_fee_err_msg.format("0.00000042"), wallet.fundrawtransaction, rawtx, options={"fee_rate":1})
 
-        self.log.info("Send 0.45 BTC with SFFO")
+        self.log.info("Send 0.45 DPC with SFFO")
         wallet.fundrawtransaction(rawtx, options={"subtractFeeFromOutputs":[0]})
 
-        self.log.info("Attempt to send 0.45 BTC by restricting coin selection with minconf=6")
+        self.log.info("Attempt to send 0.45 DPC by restricting coin selection with minconf=6")
         assert_raises_rpc_error(-4, "Insufficient funds", wallet.fundrawtransaction, rawtx, options={"minconf":6})
 
         self.log.info("Test with preselected inputs")
-        self.log.info("Attempt to send 0.45 BTC preselecting 0.15 BTC utxo")
+        self.log.info("Attempt to send 0.45 DPC preselecting 0.15 DPC utxo")
         rawtx = wallet.createrawtransaction(inputs=[{"txid": txid2, "vout": vout2}], outputs=[{default_wallet.getnewaddress(): 0.45}])
         assert_raises_rpc_error(-4, amount_with_fee_err_msg.format("0.00000042"), wallet.fundrawtransaction, rawtx, options={"fee_rate":1})
 
-        self.log.info("Send 0.45 BTC preselecting 0.15 BTC utxo with SFFO")
+        self.log.info("Send 0.45 DPC preselecting 0.15 DPC utxo with SFFO")
         wallet.fundrawtransaction(hexstring=rawtx, options={"subtractFeeFromOutputs":[0]})
 
-        self.log.info("Attempt to send 0.15 BTC using only the 0.15 BTC preselected utxo")
+        self.log.info("Attempt to send 0.15 DPC using only the 0.15 DPC preselected utxo")
         rawtx = wallet.createrawtransaction(inputs=[{"txid": txid2, "vout": vout2}], outputs=[{default_wallet.getnewaddress(): 0.15}])
         assert_raises_rpc_error(-4, ERR_NOT_ENOUGH_PRESET_INPUTS, wallet.fundrawtransaction, rawtx, options={"fee_rate":1, "add_inputs":False})
-        self.log.info("Send 0.15 BTC using only the 0.15 BTC preselected utxo with SFFO")
+        self.log.info("Send 0.15 DPC using only the 0.15 DPC preselected utxo with SFFO")
         wallet.fundrawtransaction(hexstring=rawtx, options={"subtractFeeFromOutputs":[0], "add_inputs":False})
 
 

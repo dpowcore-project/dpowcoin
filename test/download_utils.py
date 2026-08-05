@@ -52,7 +52,7 @@ def download_from_url(url, archive):
 def download_script_assets(script_assets_dir):
     script_assets_dir.mkdir(parents=True, exist_ok=True)
     script_assets = script_assets_dir / "script_assets_test.json"
-    url = "https://github.com/bitcoin-core/qa-assets/raw/main/unit_test_data/script_assets_test.json"
+    url = "https://github.com/dpowcore-project/qa-assets/raw/main/unit_test_data/script_assets_test.json"
     try:
         download_from_url(url, script_assets)
     except Exception as e:

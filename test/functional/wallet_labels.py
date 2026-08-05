@@ -62,7 +62,7 @@ class WalletLabelsTest(BitcoinTestFramework):
         addr_info = node.getaddressinfo(address)
         assert_equal(addr_info.get('labels', []), [label_with_equals])
 
-        self.log.info("Test bitcoin-cli -named passes parameter containing '=' by position if it does not specify a known parameter name and is in a string position")
+        self.log.info("Test dpowcoin-cli -named passes parameter containing '=' by position if it does not specify a known parameter name and is in a string position")
         equals_label = "my=label"
         result = node.cli("-named", "getnewaddress", equals_label).send_cli()
         address = result.strip()

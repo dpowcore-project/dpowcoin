@@ -71,7 +71,7 @@ class AddrSelfAnnouncementTest(BitcoinTestFramework):
         # populate addrman to have some addresses for a GETADDR response
         for i in range(50):
             a = f"{1 + i}.{i}.1.1"
-            self.nodes[0].addpeeraddress(a, 8333)
+            self.nodes[0].addpeeraddress(a, 42003)
 
         self.self_announcement_test(outbound=False, addrv2=False)
         self.self_announcement_test(outbound=False, addrv2=True)

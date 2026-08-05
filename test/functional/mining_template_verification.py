@@ -32,6 +32,10 @@ from test_framework.wallet import (
     MiniWallet,
 )
 
+from test_framework.script import (
+    CScript,
+)
+
 def assert_template(node, block, expect, *, rehash=True, submit=True, solve=True, expect_submit=None):
     if rehash:
         block.hashMerkleRoot = block.calc_merkle_root()
@@ -97,6 +101,7 @@ class MiningTemplateVerificationTest(BitcoinTestFramework):
         bad_block = copy.deepcopy(block)
         bad_tx = copy.deepcopy(bad_block.vtx[0])
         bad_tx.vin[0].prevout.hash = 255
+        bad_tx.vin[0].scriptSig = CScript(bytes(bad_tx.vin[0].scriptSig) + b'\x00')  # avoid BIP53: pad to !=64 bytes
         bad_block.vtx.append(bad_tx)
         assert_template(node, bad_block, 'bad-txns-inputs-missingorspent')
 

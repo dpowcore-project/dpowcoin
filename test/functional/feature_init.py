@@ -57,7 +57,7 @@ class InitTest(BitcoinTestFramework):
             if platform.system() == 'Windows':
                 # Don't call Python's terminate() since it calls
                 # TerminateProcess(), which unlike SIGTERM doesn't allow
-                # bitcoind to perform any shutdown logic.
+                # dpowcoind to perform any shutdown logic.
                 os.kill(node.process.pid, signal.CTRL_BREAK_EVENT)
             else:
                 node.process.terminate()
@@ -245,7 +245,7 @@ class InitTest(BitcoinTestFramework):
                 shutil.move(node.chain_path / f"{dir}_bak", node.chain_path / dir)
 
     def init_pid_test(self):
-        BITCOIN_PID_FILENAME_CUSTOM = "my_fancy_bitcoin_pid_file.foobar"
+        BITCOIN_PID_FILENAME_CUSTOM = "my_fancy_dpowcoin_pid_file.foobar"
 
         self.log.info("Test specifying custom pid file via -pid command line option")
         custom_pidfile_relative = BITCOIN_PID_FILENAME_CUSTOM

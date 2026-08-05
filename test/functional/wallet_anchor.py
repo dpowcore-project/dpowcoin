@@ -5,7 +5,7 @@
 
 import time
 
-from test_framework.blocktools import MAX_FUTURE_BLOCK_TIME
+from test_framework.blocktools import TIMESTAMP_WINDOW
 from test_framework.descriptors import descsum_create
 from test_framework.messages import (
     COutPoint,
@@ -52,7 +52,7 @@ class WalletAnchorTest(BitcoinTestFramework):
         self.generateblock(self.nodes[0], sender.get_address(), [anchor_spend.serialize().hex()])
 
         # Mock time forward and generate some blocks to avoid rescanning of latest blocks
-        self.nodes[0].setmocktime(int(time.time()) + MAX_FUTURE_BLOCK_TIME + 1)
+        self.nodes[0].setmocktime(int(time.time()) + TIMESTAMP_WINDOW + 1)
         self.generate(self.nodes[0], 10)
 
         self.nodes[0].createwallet(wallet_name="anchor", disable_private_keys=True)

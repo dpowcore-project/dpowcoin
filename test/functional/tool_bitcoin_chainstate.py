@@ -2,12 +2,12 @@
 # Copyright (c) 2022-present The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Test bitcoin-chainstate tool functionality
+"""Test dpowcoin-chainstate tool functionality
 
-Test basic block processing via bitcoin-chainstate tool, including detecting
+Test basic block processing via dpowcoin-chainstate tool, including detecting
 duplicates and malformed input.
 
-Test that bitcoin-chainstate can load a datadir initialized with an assumeutxo
+Test that dpowcoin-chainstate can load a datadir initialized with an assumeutxo
 snapshot and extend the snapshot chain with new blocks.
 """
 
@@ -20,7 +20,7 @@ from test_framework.wallet import MiniWallet
 START_HEIGHT = 199
 # Hardcoded in regtest chainparams
 SNAPSHOT_BASE_BLOCK_HEIGHT = 299
-SNAPSHOT_BASE_BLOCK_HASH = "7cc695046fec709f8c9394b6f928f81e81fd3ac20977bb68760fa1faa7916ea2"
+SNAPSHOT_BASE_BLOCK_HASH = "c8ed3bb3540dd69c0f5caef1f037e59f8e7b5c3e6edba2ae006c6b8e609d90b5"
 
 
 class BitcoinChainstateTest(BitcoinTestFramework):

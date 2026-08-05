@@ -90,7 +90,7 @@ class MempoolAcceptanceTest(BitcoinTestFramework):
         assert_equal(node.getmempoolinfo()['size'], self.mempool_size)
 
         self.log.info("Check default settings")
-        # Settings are listed in BTC/kvB
+        # Settings are listed in DPC/kvB
         assert_equal(node.getmempoolinfo()['minrelaytxfee'], Decimal(DEFAULT_MIN_RELAY_TX_FEE) / COIN)
         assert_equal(node.getmempoolinfo()['incrementalrelayfee'], Decimal(DEFAULT_INCREMENTAL_RELAY_FEE) / COIN)
 
@@ -109,8 +109,8 @@ class MempoolAcceptanceTest(BitcoinTestFramework):
         txid_in_block = self.wallet.sendrawtransaction(from_node=node, tx_hex=raw_tx_in_block)
         self.generate(node, 1)
         self.mempool_size = 0
-        # Also check feerate. 1BTC/kvB fails
-        assert_raises_rpc_error(-8, "Fee rates larger than or equal to 1BTC/kvB are not accepted", lambda: self.check_mempool_result(
+        # Also check feerate. 1DPC/kvB fails
+        assert_raises_rpc_error(-8, "Fee rates larger than or equal to 1DPC/kvB are not accepted", lambda: self.check_mempool_result(
             result_expected=None,
             rawtxs=[raw_tx_in_block],
             maxfeerate=1,
@@ -414,11 +414,12 @@ class MempoolAcceptanceTest(BitcoinTestFramework):
         tx.vin.append(CTxIn(COutPoint(int(seed_tx["txid"], 16), seed_tx["sent_vout"]), b"", SEQUENCE_FINAL))
         tx.wit.vtxinwit = [CTxInWitness()]
         tx.wit.vtxinwit[0].scriptWitness.stack = [CScript([OP_TRUE])]
-        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 2)))))
+        # Dpowcoin Params
+        tx.vout.append(CTxOut(0, CScript([OP_RETURN] + ([OP_0] * (MIN_PADDING - 3))))) # Changed to 3 from 2 due BIP53 rule.
         # Note it's only non-witness size that matters!
-        assert_equal(len(tx.serialize_without_witness()), 64)
+        assert_equal(len(tx.serialize_without_witness()), 63) # Changed to 63 from 64 due BIP53 rule.
         assert_equal(MIN_STANDARD_TX_NONWITNESS_SIZE - 1, 64)
-        assert_greater_than(len(tx.serialize()), 64)
+        assert_greater_than(len(tx.serialize()), 63) # Changed to 63 from 64 due BIP53 rule.
 
         self.check_mempool_result(
             result_expected=[{'txid': tx.txid_hex, 'allowed': False, 'reject-reason': 'tx-size-small'}],

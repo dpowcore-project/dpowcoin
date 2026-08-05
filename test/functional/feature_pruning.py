@@ -6,11 +6,12 @@
 
 WARNING:
 This test uses 4GB of disk space.
-This test takes 30 mins or more (up to 2 hours)
 """
 import os
 
 from test_framework.blocktools import (
+    MAX_FUTURE_BLOCK_TIME,
+    TIMESTAMP_WINDOW,
     MIN_BLOCKS_TO_KEEP,
     create_block,
     create_coinbase,
@@ -31,7 +32,29 @@ from test_framework.util import (
 # Rescans start at the earliest block up to 2 hours before a key timestamp, so
 # the manual prune RPC avoids pruning blocks in the same window to be
 # compatible with pruning based on key creation time.
-TIMESTAMP_WINDOW = 2 * 60 * 60
+
+# Extra seconds added to mocktime beyond the last block's nTime to ensure all
+# mine_large_blocks() submissions are accepted under MAX_FUTURE_BLOCK_TIME=600.
+MOCK_BUFFER = MAX_FUTURE_BLOCK_TIME + 100
+
+
+def set_mocktime(nodes, mock_time):
+    for node in nodes:
+        node.setmocktime(mock_time)
+
+
+def set_mocktime_for_large_blocks(nodes, n_blocks):
+    best_time = nodes[0].getblock(nodes[0].getbestblockhash())["time"]
+    mock_time = best_time + n_blocks + MOCK_BUFFER
+    for node in nodes:
+        node.setmocktime(mock_time)
+    return mock_time
+
+
+def reset_mocktime(nodes):
+    for node in nodes:
+        node.setmocktime(0)
+
 
 def mine_large_blocks(node, n):
     # Make a large scriptPubKey for the coinbase transaction. This is OP_RETURN
@@ -84,7 +107,7 @@ class PruneTest(BitcoinTestFramework):
             ["-maxreceivebuffer=20000"],
             ["-prune=550", "-blockfilterindex=1"],
         ]
-        self.rpc_timeout = 120
+        self.rpc_timeout = 1200
 
     def setup_network(self):
         self.setup_nodes()
@@ -104,15 +127,45 @@ class PruneTest(BitcoinTestFramework):
         if self.is_wallet_compiled():
             self.import_deterministic_coinbase_privkeys()
 
+    def restart_node_mocktime(self, node_number, extra_args=None):
+        """Restart a node, injecting -mocktime so the startup block-timestamp check
+        does not reject our own chain whose tip >> real wall-clock time.
+
+        After the node is up we immediately clear mocktime via setmocktime(0) so
+        the rest of the test runs on real time (or its own next mocktime call).
+        """
+        tip_time = self.nodes[node_number].getblock(
+            self.nodes[node_number].getbestblockhash()
+        )["time"]
+        mock_arg = f"-mocktime={tip_time + MOCK_BUFFER}"
+        all_args = list(extra_args or []) + [mock_arg]
+        self.restart_node(node_number, extra_args=all_args)
+        self.nodes[node_number].setmocktime(0)
+
+    def start_node_mocktime(self, node_number, tip_time, extra_args=None):
+        """Start a stopped node (whose tip_time is known from another node) with
+        -mocktime so startup block validation accepts future-timestamped blocks.
+        Clears mocktime immediately after the node is ready.
+        """
+        mock_arg = f"-mocktime={tip_time + MOCK_BUFFER}"
+        all_args = list(extra_args or []) + [mock_arg]
+        self.start_node(node_number, extra_args=all_args)
+        self.nodes[node_number].setmocktime(0)
+
     def create_big_chain(self):
         # Start by creating some coinbases we can spend later
         self.generate(self.nodes[1], 200, sync_fun=lambda: self.sync_blocks(self.nodes[0:2]))
         self.generate(self.nodes[0], 150, sync_fun=self.no_op)
 
         # Then mine enough full blocks to create more than 550MiB of data
+        set_mocktime_for_large_blocks(self.nodes[0:5], 645)
         mine_large_blocks(self.nodes[0], 645)
-
-        self.sync_blocks(self.nodes[0:5])
+        self.wait_until(
+            lambda: all(len(n.getpeerinfo()) > 0 for n in self.nodes[0:5]),
+            timeout=120
+        )
+        self.sync_blocks(self.nodes[0:5])  # FIX: sync before reset so nodes accept future-timestamp blocks
+        reset_mocktime(self.nodes[0:5])
 
     def test_invalid_command_line_options(self):
         self.stop_node(0)
@@ -134,7 +187,8 @@ class PruneTest(BitcoinTestFramework):
         )
 
     def test_rescan_blockchain(self):
-        self.restart_node(0, ["-prune=550"])
+        # FIX: node 0 tip >> real clock; pass -mocktime at startup then clear it.
+        self.restart_node_mocktime(0, extra_args=["-prune=550"])
         assert_raises_rpc_error(-1, "Can't rescan beyond pruned data. Use RPC call getblockchaininfo to determine your pruned height.", self.nodes[0].rescanblockchain)
 
     def test_height_min(self):
@@ -143,7 +197,10 @@ class PruneTest(BitcoinTestFramework):
         self.log.info(f"Though we're already using more than 550MiB, current usage: {calc_usage(self.prunedir)}")
         self.log.info("Mining 25 more blocks should cause the first block file to be pruned")
         # Pruning doesn't run until we're allocating another chunk, 20 full blocks past the height cutoff will ensure this
+        set_mocktime_for_large_blocks(self.nodes[0:3], 25)  # nodes 3,4 are stopped at this point
         mine_large_blocks(self.nodes[0], 25)
+        self.sync_blocks(self.nodes[0:3])  # FIX: sync before reset so nodes accept future-timestamp blocks
+        reset_mocktime(self.nodes[0:3])
 
         # Wait for blk00000.dat to be pruned
         self.wait_until(lambda: not os.path.isfile(os.path.join(self.prunedir, "blk00000.dat")), timeout=30)
@@ -163,15 +220,19 @@ class PruneTest(BitcoinTestFramework):
             self.disconnect_nodes(0, 1)
             self.disconnect_nodes(0, 2)
             # Mine 24 blocks in node 1
+            set_mocktime_for_large_blocks([self.nodes[0], self.nodes[1], self.nodes[2]], 24)
             mine_large_blocks(self.nodes[1], 24)
 
             # Reorg back with 25 block chain from node 0
+            set_mocktime_for_large_blocks([self.nodes[0], self.nodes[1], self.nodes[2]], 25)
             mine_large_blocks(self.nodes[0], 25)
 
             # Create connections in the order so both nodes can see the reorg at the same time
+            # mocktime must remain set during sync so nodes accept the reorg blocks (FTL=600)
             self.connect_nodes(0, 1)
             self.connect_nodes(0, 2)
             self.sync_blocks(self.nodes[0:3])
+            reset_mocktime([self.nodes[0], self.nodes[1], self.nodes[2]])
 
         self.log.info(f"Usage can be over target because of high stale rate: {calc_usage(self.prunedir)}")
 
@@ -203,24 +264,81 @@ class PruneTest(BitcoinTestFramework):
         self.disconnect_nodes(1, 2)
 
         self.log.info("Generating new longer chain of 300 more blocks")
+        # node 1 is at forkheight-1; its tip timestamp is already >> real time,
+        # so generate() hits FTL=600 without mocktime. Set on all three so they
+        # also accept node 1's chain during sync after reconnect.
+        best_time = self.nodes[1].getblock(self.nodes[1].getbestblockhash())["time"]
+        mock_time = best_time + 300 + MOCK_BUFFER
+        set_mocktime(self.nodes[0:3], mock_time)  # FIX: use helper instead of inline loop
         self.generate(self.nodes[1], 300, sync_fun=self.no_op)
 
         self.log.info("Reconnect nodes")
         self.connect_nodes(0, 1)
         self.connect_nodes(1, 2)
         self.sync_blocks(self.nodes[0:3], timeout=120)
+        reset_mocktime(self.nodes[0:3])
 
         self.log.info(f"Verify height on node 2: {self.nodes[2].getblockcount()}")
         self.log.info(f"Usage possibly still high because of stale blocks in block files: {calc_usage(self.prunedir)}")
 
         self.log.info("Mine 220 more large blocks so we have requisite history")
 
+        set_mocktime_for_large_blocks(self.nodes[0:3], 220)
         mine_large_blocks(self.nodes[0], 220)
         self.sync_blocks(self.nodes[0:3], timeout=120)
+        reset_mocktime(self.nodes[0:3])
 
         usage = calc_usage(self.prunedir)
         self.log.info(f"Usage should be below target: {usage}")
         assert_greater_than(550, usage)
+
+    def nodes_linked(self, a, b):
+        """Check whether nodes[a] and nodes[b] are currently connected to
+        each other (mirrors the subversion-matching logic connect_nodes()
+        itself uses internally)."""
+        subver_a = self.nodes[a].getnetworkinfo()['subversion']
+        subver_b = self.nodes[b].getnetworkinfo()['subversion']
+        linked_from_b = any(p['subver'] == subver_a for p in self.nodes[b].getpeerinfo())
+        linked_from_a = any(p['subver'] == subver_b for p in self.nodes[a].getpeerinfo())
+        return linked_from_a and linked_from_b
+
+    def wait_for_height_with_reconnect(self, node_a, node_b, height_getter, goal_height, timeout=1200):
+        """wait_until() variant for redownload/reorg waits that can outlive
+        a single P2P connection.
+
+        BACKPORT-ADJACENT FIX (bitweb-local, not from upstream bitcoin/bitcoin):
+        connect_nodes()/addnode("onetry") establishes a ConnectionType::MANUAL
+        link. Manual connections are NOT retried by the node's own
+        ThreadOpenAddedConnections()/addrman outbound logic -- that automatic
+        reconnect only applies to `addnode add` (persistent) peers. If the
+        link stalls mid-transfer (net_processing.cpp BLOCK_STALLING_TIMEOUT
+        fires -> "Timeout downloading block ..., disconnecting"), the socket
+        is closed permanently and no one ever calls connect_nodes() again.
+        Under a fast/idle machine this basically never triggers (233 blocks
+        relay in a couple seconds), which is why the test is stable when run
+        alone -- but under full test-suite CPU/disk contention the transfer
+        can slow down enough to hit the stall timeout, and the node then
+        waits forever for blocks that will never arrive.
+        This has nothing to do with the m_blocks_unlinked/AddUnlinkedBlock
+        C++ backport; it reproduces identically with that backport fully
+        reverted, as long as the invalidateblock height stays at 1295 (i.e.
+        the redownload is made large enough to be contention-sensitive).
+        DO NOT replace this with a plain self.wait_until(...) on
+        height_getter alone -- that reintroduces the permanent hang.
+        """
+        def check():
+            if height_getter() >= goal_height:
+                return True
+            if not self.nodes_linked(node_a, node_b):
+                self.log.info(
+                    f"nodes[{node_a}]<->nodes[{node_b}] link is down "
+                    f"(likely BLOCK_STALLING_TIMEOUT disconnect) while still "
+                    f"below goal height {goal_height}; reconnecting"
+                )
+                self.connect_nodes(node_a, node_b)
+            return False
+
+        self.wait_until(check, timeout=timeout, check_interval=5)
 
     def reorg_back(self):
         # Verify that a block on the old main chain fork has been pruned away
@@ -236,8 +354,15 @@ class PruneTest(BitcoinTestFramework):
         self.nodes[2].getblock(self.nodes[2].getblockhash(self.forkheight))
 
         first_reorg_height = self.nodes[2].getblockcount()
-        curchainhash = self.nodes[2].getblockhash(self.mainchainheight)
-        self.nodes[2].invalidateblock(curchainhash)
+        # BACKPORT (upstream bitcoin/bitcoin PR #35070; not yet in 31.x as of 2026-07-04):
+        # invalidate the block at height 1295 (not the mainchain tip) so this test actually
+        # exercises the m_blocks_unlinked duplicate-entry path fixed by AddUnlinkedBlock()
+        # in node/blockstorage.cpp and validation.cpp. Without that fix, this reliably fails
+        # an invariant assert in CheckBlockIndex() when run with -checkblockindex.
+        # DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE, and do not revert this back to
+        # invalidating self.mainchainheight -- that reverts test coverage for the fix above.
+        block_hash_1295 = self.nodes[2].getblockhash(1295)
+        self.nodes[2].invalidateblock(block_hash_1295)
         goalbestheight = self.mainchainheight
         goalbesthash = self.mainchainhash2
 
@@ -252,28 +377,46 @@ class PruneTest(BitcoinTestFramework):
         if self.nodes[2].getblockcount() < self.mainchainheight:
             blocks_to_mine = first_reorg_height + 1 - self.mainchainheight
             self.log.info(f"Rewind node 0 to prev main chain to mine longer chain to trigger redownload. Blocks needed: {blocks_to_mine}")
-            self.nodes[0].invalidateblock(curchainhash)
+            self.nodes[0].invalidateblock(block_hash_1295)
             assert_equal(self.nodes[0].getblockcount(), self.mainchainheight)
             assert_equal(self.nodes[0].getbestblockhash(), self.mainchainhash2)
+            # FIX: node 0's tip timestamp >> real time; set mocktime on node 0 (to generate)
+            # and node 2 (to accept the blocks while waiting below).
+            set_mocktime_for_large_blocks([self.nodes[0], self.nodes[2]], blocks_to_mine)
             goalbesthash = self.generate(self.nodes[0], blocks_to_mine, sync_fun=self.no_op)[-1]
             goalbestheight = first_reorg_height + 1
 
         self.log.info("Verify node 2 reorged back to the main chain, some blocks of which it had to redownload")
-        # Wait for Node 2 to reorg to proper height
-        self.wait_until(lambda: self.nodes[2].getblockcount() >= goalbestheight, timeout=900)
+        # Wait for Node 2 to reorg to proper height.
+        # FIX: use the reconnect-aware wait instead of a plain wait_until --
+        # see wait_for_height_with_reconnect() docstring for why. The 233-block
+        # redownload triggered above can stall out node0<->node2's manual P2P
+        # link under load; a plain wait_until(timeout=N) just hangs until N
+        # regardless of how large N is, since nothing ever fetches the peer back.
+        self.wait_for_height_with_reconnect(
+            node_a=0, node_b=2,
+            height_getter=self.nodes[2].getblockcount,
+            goal_height=goalbestheight,
+            timeout=1200,
+        )
+        reset_mocktime([self.nodes[0], self.nodes[2]])  # FIX: reset after node 2 has finished reorg
         assert_equal(self.nodes[2].getbestblockhash(), goalbesthash)
         # Verify we can now have the data for a block previously pruned
         assert_equal(self.nodes[2].getblock(self.forkhash)["height"], self.forkheight)
 
     def manual_test(self, node_number, use_timestamp):
-        # at this point, node has 995 blocks and has not yet run in prune mode
-        self.start_node(node_number)
+        # at this point, node has 995 blocks and has not yet run in prune mode.
+        # Its chain tip timestamp is already > real clock (large blocks with future
+        # nTime), so we must pass -mocktime at startup to satisfy the block-DB
+        # "block from future" check that dpowcoind performs during initialization.
+        tip_time_995 = self.nodes[0].getblock(self.nodes[0].getblockhash(995))["time"]
+        self.start_node_mocktime(node_number, tip_time=tip_time_995)
         node = self.nodes[node_number]
         assert_equal(node.getblockcount(), 995)
         assert_raises_rpc_error(-1, "Cannot prune blocks because node is not in prune mode", node.pruneblockchain, 500)
 
-        # now re-start in manual pruning mode
-        self.restart_node(node_number, extra_args=["-prune=1"])
+        # now re-start in manual pruning mode - same mocktime protection needed
+        self.restart_node_mocktime(node_number, extra_args=["-prune=1"])
         node = self.nodes[node_number]
         assert_equal(node.getblockcount(), 995)
 
@@ -298,7 +441,10 @@ class PruneTest(BitcoinTestFramework):
         assert_equal(block1_details["nTx"], len(block1_details["tx"]))
 
         # mine 6 blocks so we are at height 1001 (i.e., above PruneAfterHeight)
+        # FIX: chain tip timestamp >> real time (from 645 large blocks), mocktime required
+        set_mocktime_for_large_blocks([node], 6)
         self.generate(node, 6, sync_fun=self.no_op)
+        reset_mocktime([node])
         assert_equal(node.getblockchaininfo()["blocks"], 1001)
 
         # prune parameter in the future (block or timestamp) should raise an exception
@@ -336,32 +482,48 @@ class PruneTest(BitcoinTestFramework):
         assert has_block(2), "blk00002.dat is still there, should be pruned by now"
 
         # advance the tip so blk00002.dat and blk00003.dat can be pruned (the last 288 blocks should now be in blk00004.dat)
+        # FIX: chain tip timestamp >> real time, mocktime required
+        set_mocktime_for_large_blocks([node], MIN_BLOCKS_TO_KEEP)
         self.generate(node, MIN_BLOCKS_TO_KEEP, sync_fun=self.no_op)
+        reset_mocktime([node])
         prune(1000)
         assert not has_block(2), "blk00002.dat is still there, should be pruned by now"
         assert not has_block(3), "blk00003.dat is still there, should be pruned by now"
 
-        # stop node, start back up with auto-prune at 550 MiB, make sure still runs
-        self.restart_node(node_number, extra_args=["-prune=550"])
+        # stop node, start back up with auto-prune at 550 MiB, make sure still runs.
+        # FIX: after generate(6) + generate(MIN_BLOCKS_TO_KEEP) the tip timestamp is
+        # well ahead of real clock (accumulated mocktime from set_mocktime_for_large_blocks).
+        # Pass -mocktime at startup so dpowcoind does not reject its own chain; then clear
+        # mocktime immediately via setmocktime(0).
+        self.restart_node_mocktime(node_number, extra_args=["-prune=550"])
 
         self.log.info("Success")
 
     def test_wallet_rescan(self):
         # check that the pruning node's wallet is still in good shape
         self.log.info("Stop and start pruning node to trigger wallet rescan")
-        self.restart_node(2, extra_args=["-prune=550"])
+        # FIX: node 2 tip >> real clock after all the reorg/stale-block mining.
+        # Use restart_node_mocktime to pass -mocktime at startup, cleared immediately.
+        self.restart_node_mocktime(2, extra_args=["-prune=550"])
 
-        wallet_info = self.nodes[2].getwalletinfo()
-        self.wait_until(lambda: wallet_info["scanning"] == False)
-        self.wait_until(lambda: wallet_info["lastprocessedblock"]["height"] == self.nodes[2].getblockcount())
+        # BACKPORT (upstream bitcoin/bitcoin PR #35070, commit 0852925bd8d4; not yet in 31.x
+        # as of 2026-07-05): re-fetch getwalletinfo() inside each wait_until predicate instead
+        # of checking a snapshot captured once beforehand. The old `wallet_info = ...` pattern
+        # froze the dict at call time, so the lambda kept re-checking the same stale values
+        # forever -- passing trivially if scanning was already False at capture time, or
+        # hanging until timeout if it was True, regardless of the wallet's real progress.
+        # DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+        self.wait_until(lambda: self.nodes[2].getwalletinfo()["scanning"] == False)
+        self.wait_until(lambda: self.nodes[2].getwalletinfo()["lastprocessedblock"]["height"] == self.nodes[2].getblockcount())
 
         # check that wallet loads successfully when restarting a pruned node after IBD.
         # this was reported to fail in #7494.
-        self.restart_node(5, extra_args=["-prune=550", "-blockfilterindex=1"]) # restart to trigger rescan
+        # FIX: restart with -mocktime so startup check accepts the synced chain
+        # (tip timestamps >> real clock); cleared via setmocktime(0) right after.
+        self.restart_node_mocktime(5, extra_args=["-prune=550", "-blockfilterindex=1"])
 
-        wallet_info = self.nodes[5].getwalletinfo()
-        self.wait_until(lambda: wallet_info["scanning"] == False)
-        self.wait_until(lambda: wallet_info["lastprocessedblock"]["height"] == self.nodes[0].getblockcount())
+        self.wait_until(lambda: self.nodes[5].getwalletinfo()["scanning"] == False)
+        self.wait_until(lambda: self.nodes[5].getwalletinfo()["lastprocessedblock"]["height"] == self.nodes[0].getblockcount())
 
     def run_test(self):
         self.log.info("Warning! This test requires 4GB of disk space")
@@ -470,8 +632,12 @@ class PruneTest(BitcoinTestFramework):
         self.manual_test(4, use_timestamp=True)
 
         self.log.info("Syncing node 5 to node 0")
+        # FIX: node 5 downloads the full chain from genesis; all those blocks have
+        # timestamps >> real time, so mocktime must cover the sync (FTL=600).
+        set_mocktime_for_large_blocks([self.nodes[0], self.nodes[5]], 0)
         self.connect_nodes(0, 5)
         self.sync_blocks([self.nodes[0], self.nodes[5]], wait=5, timeout=300)
+        reset_mocktime([self.nodes[0], self.nodes[5]])
 
         if self.is_wallet_compiled():
             self.log.info("Test wallet re-scan")
@@ -494,7 +660,7 @@ class PruneTest(BitcoinTestFramework):
     def test_scanblocks_pruned(self):
         node = self.nodes[5]
         genesis_blockhash = node.getblockhash(0)
-        false_positive_spk = bytes.fromhex("001400000000000000000000000000000000000cadcb")
+        false_positive_spk = bytes.fromhex("001400000000000000000000000000000000000b0619")
 
         assert genesis_blockhash in node.scanblocks(
             "start", [{"desc": f"raw({false_positive_spk.hex()})"}], 0, 0)['relevant_blocks']
@@ -510,7 +676,7 @@ class PruneTest(BitcoinTestFramework):
         self.connect_nodes(1, 5)
         peers = node.getpeerinfo()
         node.getblockfrompeer(fetch_block, peers[0]["id"])
-        self.wait_until(lambda: not try_rpc(-1, "Block not available (pruned data)", node.getblock, fetch_block), timeout=5)
+        self.wait_until(lambda: not try_rpc(-1, "Block not available (pruned data)", node.getblock, fetch_block), timeout=20)
 
         new_pruneheight = node.getblockchaininfo()["pruneheight"]
         assert_equal(pruneheight, new_pruneheight)

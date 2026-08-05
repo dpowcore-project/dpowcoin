@@ -10,7 +10,7 @@ The test does:
 * Add a bunch of IPv4 addresses to the node's addrman (they will be added without P2P_V2 flag).
 * Get them to report P2P_V2 in their service flags and connect to each one, so that the flags
   in addrman are updated to contain P2P_V2.
-* Get one successful connection to a Tor peer (.onion) so that bitcoind assumes the configured
+* Get one successful connection to a Tor peer (.onion) so that dpowcoind assumes the configured
   Tor proxy works and is indeed a proxy to the Tor network. This will make it open private
   broadcast connections also to IPv4 addresses via that proxy.
 * Start some private broadcast connections.
@@ -164,14 +164,14 @@ class P2PPrivateBroadcastRetryV1(BitcoinTestFramework):
         self.log.info("Waiting for all IPv4 addresses to get P2P_V2 as a result of peers advertising support")
         self.wait_until(lambda: all(a["services"] & NODE_P2P_V2 != 0 for a in node0.getnodeaddresses(count=0, network="ipv4")))
 
-        # The destinations behind the -proxy= don't actually support v2. When bitcoind runs with -v2transport=1
+        # The destinations behind the -proxy= don't actually support v2. When dpowcoind runs with -v2transport=1
         # and tries v2 on them they would print benign "magic byte mismatch" warnings.
         # Disable those since none of them are needed anymore.
         self.all_proxy.conf.destinations_factory = None
 
         self.restart_node(0, extra_args=self.extra_args[0] + ["-v2transport=1"])
 
-        self.log.info("Opening a connection to a Tor addresses, so bitcoind considers -onion= is a real Tor proxy")
+        self.log.info("Opening a connection to a Tor addresses, so dpowcoind considers -onion= is a real Tor proxy")
         node0.addnode(node="testonlyad777777777777777777777777777777777777777775b6qd.onion:1234", command="onetry", v2transport=False)
 
         self.log.info("Waiting for at least one Tor connection")

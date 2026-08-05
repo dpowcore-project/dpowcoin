@@ -4,11 +4,11 @@
 # Copyright (c) 2010-present The Bitcoin Core developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
-"""Bitcoin test framework primitive and message structures
+"""Dpowcoin test framework primitive and message structures
 
 CBlock, CTransaction, CBlockHeader, CTxIn, CTxOut, etc....:
     data structures that should map to corresponding structures in
-    bitcoin/primitives
+    dpowcoin/primitives
 
 msg_block, msg_tx, msg_headers, etc.:
     data structures that represent network messages
@@ -27,12 +27,38 @@ import random
 import socket
 import time
 import unittest
-
+import argon2
 from test_framework.crypto.siphash import siphash256
 from test_framework.util import (
     assert_equal,
     assert_not_equal,
 )
+
+def GetArgon2idPoWHash(header_bytes):
+    """Two-round Argon2id PoW hash — mirrors GetArgon2idPoWHash() in block.cpp.
+
+    Round 1:  t=2  m=4096   p=2   salt = SHA-512²(header)  → hash1 (32 bytes)
+    Round 2:  t=2  m=32768  p=2   salt = hash1             → hash2 (32 bytes)
+
+    SHA-512 double-round: sha512(sha512(header)) — same as CSHA512 two-pass in C++.
+    """
+    # Double SHA-512 salt (identical to C++: sha512.Write(...).Finalize → sha512.Reset().Write(...).Finalize)
+    salt_sha512 = hashlib.sha512(hashlib.sha512(header_bytes).digest()).digest()  # 64 bytes
+
+    # Round 1: t=2, m=4096 KiB, p=2
+    hash1 = argon2.low_level.hash_secret_raw(
+        secret=header_bytes, salt=salt_sha512,
+        time_cost=2, memory_cost=4096, parallelism=2,
+        hash_len=32, type=argon2.low_level.Type.ID,
+    )
+
+    # Round 2: t=2, m=32768 KiB, p=2  (salt = output of round 1)
+    hash2 = argon2.low_level.hash_secret_raw(
+        secret=header_bytes, salt=hash1,
+        time_cost=2, memory_cost=32768, parallelism=2,
+        hash_len=32, type=argon2.low_level.Type.ID,
+    )
+    return hash2
 
 MAX_LOCATOR_SZ = 101
 MAX_BLOCK_WEIGHT = 4000000
@@ -42,7 +68,7 @@ MAX_BLOOM_FILTER_SIZE = 36000
 MAX_BLOOM_HASH_FUNCS = 50
 
 COIN = 100000000  # 1 btc in satoshis
-MAX_MONEY = 21000000 * COIN
+MAX_MONEY = 42000000 * COIN
 
 MAX_BIP125_RBF_SEQUENCE = 0xfffffffd  # Sequence number that is rbf-opt-in (BIP 125) and csv-opt-out (BIP 68)
 MAX_SEQUENCE_NONFINAL = 0xfffffffe  # Sequence number that is csv-opt-out (BIP 68)
@@ -88,10 +114,11 @@ TX_MIN_STANDARD_VERSION = 1
 TX_MAX_STANDARD_VERSION = 3
 
 MAGIC_BYTES = {
-    "mainnet": b"\xf9\xbe\xb4\xd9",
-    "testnet4": b"\x1c\x16\x3f\x28",
-    "regtest": b"\xfa\xbf\xb5\xda",
-    "signet": b"\x0a\x03\xcf\x40",
+    "mainnet": b"\xf2\x9f\x4a\xfb",
+    "testnet3": b"\x3c\xda\x0b\xe8", # // Checkpoints restored
+    "testnet4": b"\x3c\x52\xdc\xf5",
+    "regtest": b"\xaf\xc0\x0c\x2e",
+    "signet": b"\xea\x64\xee\x7f",
 }
 
 def sha256(s):
@@ -465,7 +492,7 @@ class CBlockLocator:
 
     def serialize(self):
         r = b""
-        r += (0).to_bytes(4, "little", signed=True)  # Bitcoin Core ignores the version field. Set it to 0.
+        r += (0).to_bytes(4, "little", signed=True)  # Dpowcoin Core ignores the version field. Set it to 0.
         r += ser_uint256_vector(self.vHave)
         return r
 
@@ -708,7 +735,7 @@ class CTransaction:
 
     def is_valid(self):
         for tout in self.vout:
-            if tout.nValue < 0 or tout.nValue > 21000000 * COIN:
+            if tout.nValue < 0 or tout.nValue > 42000000 * COIN:
                 return False
         return True
 
@@ -781,6 +808,19 @@ class CBlockHeader:
         """Return block header hash as integer."""
         return uint256_from_str(hash256(self._serialize_header()))
 
+    @property
+    def argon2id(self):
+        """Two-round Argon2id PoW hash — mirrors GetArgon2idPoWHash() in block.cpp.
+
+        Salt chain (consensus-critical, must not be changed):
+          salt_sha512 = SHA-512(SHA-512(header))       — 64 bytes
+          hash1       = Argon2id(pwd=header, salt=salt_sha512, t=2, m=4096,   p=2)
+          hash2       = Argon2id(pwd=header, salt=hash1,       t=2, m=32768,  p=2)
+        Returns hash2 as uint256 (little-endian integer, same as C++ UintToArith256).
+        """
+        header_bytes = self._serialize_header()
+        return uint256_from_str(GetArgon2idPoWHash(header_bytes))
+
     def __repr__(self):
         return "CBlockHeader(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x)" \
             % (self.nVersion, self.hashPrevBlock, self.hashMerkleRoot,
@@ -839,7 +879,7 @@ class CBlock(CBlockHeader):
 
     def is_valid(self):
         target = uint256_from_compact(self.nBits)
-        if self.hash_int > target:
+        if self.argon2id > target:
             return False
         for tx in self.vtx:
             if not tx.is_valid():
@@ -850,7 +890,7 @@ class CBlock(CBlockHeader):
 
     def solve(self):
         target = uint256_from_compact(self.nBits)
-        while self.hash_int > target:
+        while self.argon2id > target:
             self.nNonce += 1
 
     # Calculate the block weight using witness and non-witness

@@ -62,11 +62,11 @@ from test_framework.wallet import MiniWallet
 
 
 HEIGHT = 200  # blocks mined
-TIME_RANGE_STEP = 600  # ten-minute steps
+TIME_RANGE_STEP = 300  # 5 minutes steps
 TIME_RANGE_MTP = TIME_GENESIS_BLOCK + (HEIGHT - 6) * TIME_RANGE_STEP
 TIME_RANGE_TIP = TIME_GENESIS_BLOCK + (HEIGHT - 1) * TIME_RANGE_STEP
 TIME_RANGE_END = TIME_GENESIS_BLOCK + HEIGHT * TIME_RANGE_STEP
-DIFFICULTY_ADJUSTMENT_INTERVAL = 144
+DIFFICULTY_ADJUSTMENT_INTERVAL = 1
 
 
 class BlockchainTest(BitcoinTestFramework):
@@ -328,7 +328,7 @@ class BlockchainTest(BitcoinTestFramework):
         chaintxstats = self.nodes[0].getchaintxstats(nblocks=1)
         # 200 txs plus genesis tx
         assert_equal(chaintxstats['txcount'], HEIGHT + 1)
-        # tx rate should be 1 per 10 minutes, or 1/600
+        # tx rate should be 1 per 5 minutes, or 1/300
         # we have to round because of binary math
         assert_equal(round(chaintxstats['txrate'] * TIME_RANGE_STEP, 10), Decimal(1))
 
@@ -531,9 +531,9 @@ class BlockchainTest(BitcoinTestFramework):
         hashes_per_second = self.nodes[0].getnetworkhashps(100, 0)
         assert_equal(hashes_per_second, 0)
 
-        # This should be 2 hashes every 10 minutes or 1/300
+        # This should be 2 hashes every 5 minutes or 1/150
         hashes_per_second = self.nodes[0].getnetworkhashps()
-        assert abs(hashes_per_second * 300 - 1) < 0.0001
+        assert abs(hashes_per_second * 150 - 1) < 0.0001
 
         # Test setting the first param of getnetworkhashps to -1 returns the average network
         # hashes per second from the last difficulty change.

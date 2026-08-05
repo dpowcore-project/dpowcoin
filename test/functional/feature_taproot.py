@@ -1448,6 +1448,9 @@ class TaprootTest(BitcoinTestFramework):
         self.lastblockheight = block['height']
         self.lastblocktime = block['time']
 
+        # Move the node's local time to match MAX_FUTURE_BLOCK_TIME = 600, some huge value to prevent reject.
+        node.setmocktime(self.lastblocktime + 9999)
+
     def test_spenders(self, node, spenders, input_counts):
         """Run randomized tests with a number of "spenders".
 

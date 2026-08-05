@@ -21,7 +21,7 @@ class VersionSender(P2PInterface):
 
 class P2PFeelerReceiver(P2PInterface):
     def on_version(self, message):
-        # The bitcoind node closes feeler connections as soon as a version
+        # The dpowcoind node closes feeler connections as soon as a version
         # message is received from the test framework. Don't send any responses
         # to the node's version message since the connection will already be
         # closed.
@@ -117,10 +117,10 @@ class P2PAddConnections(BitcoinTestFramework):
         self.log.info("Send version message early to node")
         # Normally the test framework would be shy and send the version message
         # only after it received one. See the on_version method. Check that
-        # bitcoind behaves properly when a version is sent unexpectedly (but
+        # dpowcoind behaves properly when a version is sent unexpectedly (but
         # tolerably) early.
         #
-        # This checks that bitcoind sends its own version prior to processing
+        # This checks that dpowcoind sends its own version prior to processing
         # the remote version (and replying with a verack). Otherwise it would
         # be violating its own rules, such as "non-version message before
         # version handshake".
