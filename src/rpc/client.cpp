@@ -12,7 +12,7 @@
 #include <string>
 #include <string_view>
 
-//! Specify whether parameter should be parsed by bitcoin-cli as a JSON value,
+//! Specify whether parameter should be parsed by dpowcoin-cli as a JSON value,
 //! or passed unchanged as a string, or a combination of both.
 enum ParamFormat { JSON, STRING, JSON_OR_STRING };
 
@@ -31,22 +31,22 @@ public:
  * argument and needs to be converted from JSON, or if it is a string argument
  * passed to a method that accepts '=' characters in any string arguments.
  *
- * JSON parameters need to be listed here to make bitcoin-cli parse command line
+ * JSON parameters need to be listed here to make dpowcoin-cli parse command line
  * arguments as JSON, instead of passing them as raw strings. `JSON` and
- * `JSON_OR_STRING` formats both make `bitcoin-cli` attempt to parse the
+ * `JSON_OR_STRING` formats both make `dpowcoin-cli` attempt to parse the
  * argument as JSON. But if parsing fails, the former triggers an error while
  * the latter falls back to passing the argument as a raw string. This is
  * useful for arguments like hash_or_height, allowing invocations such as
- * `bitcoin-cli getblockstats <hash>` without needing to quote the hash string
+ * `dpowcoin-cli getblockstats <hash>` without needing to quote the hash string
  * as JSON (`'"<hash>"'`).
  *
  * String parameters that may contain an '=' character (e.g. base64 strings,
  * filenames, or labels) need to be listed here with format `ParamFormat::STRING`
- * to make bitcoin-cli treat them as positional parameters when `-named` is used.
- * This prevents `bitcoin-cli` from splitting strings like "my=wallet" into a named
+ * to make dpowcoin-cli treat them as positional parameters when `-named` is used.
+ * This prevents `dpowcoin-cli` from splitting strings like "my=wallet" into a named
  * argument "my" and value "wallet" when the whole string is intended to be a
  * single positional argument. And if one string parameter is listed for a method,
- * other string parameters for that method need to be listed as well so bitcoin-cli
+ * other string parameters for that method need to be listed as well so dpowcoin-cli
  * does not make the opposite mistake and pass other arguments by position instead of
  * name because it does not recognize their names. See \ref RPCConvertNamedValues
  * for more information on how named and positional arguments are distinguished with
@@ -464,7 +464,7 @@ UniValue RPCConvertValues(const std::string &strMethod, const std::vector<std::s
  *   2. The case where NAME is not a known parameter name and the next
  *      positional parameter requires a string value. E.g. "my=wallet".
  *
- * For example, the command `bitcoin-cli -named createwallet "my=wallet"`,
+ * For example, the command `dpowcoin-cli -named createwallet "my=wallet"`,
  * the parser initially sees "my=wallet" and attempts to process it as a
  * parameter named "my". When it finds that "my" is not a valid named parameter
  * parameter for this method, it falls back to checking the rule for the
