@@ -110,27 +110,29 @@ struct Params {
     std::array<BIP9Deployment,MAX_VERSION_BITS_DEPLOYMENTS> vDeployments;
     /** Proof of work parameters */
     uint256 powLimit;
-    bool fPowAllowMinDifficultyBlocks;
+    // bool fPowAllowMinDifficultyBlocks; // Dpowcoin Params
     /**
       * Enforce BIP94 timewarp attack mitigation. On testnet4 this also enforces
       * the block storm mitigation.
       */
-    bool enforce_BIP94;
+    // bool enforce_BIP94; // Dpowcoin Params
     bool fPowNoRetargeting;
     int64_t nPowTargetSpacing;
-    int64_t nPowTargetTimespan;
+    // int64_t nPowTargetTimespan; // Dpowcoin Params
+    /** LWMA3 diff algo Dpowcoin Params */
+    int64_t lwmaAveragingWindow{576}; // Dpowcoin Params
     std::chrono::seconds PowTargetSpacing() const
     {
         return std::chrono::seconds{nPowTargetSpacing};
     }
-    int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
+    // int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; } // Dpowcoin Params
     /** The best chain should have at least this much work */
     uint256 nMinimumChainWork;
     /** By default assume that the signatures in ancestors of this block are valid */
     uint256 defaultAssumeValid;
 
     /**
-     * If true, witness commitments contain a payload equal to a Bitcoin Script solution
+     * If true, witness commitments contain a payload equal to a Dpowcoin Script solution
      * to the signet challenge. See BIP325.
      */
     bool signet_blocks{false};

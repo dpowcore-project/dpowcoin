@@ -95,10 +95,11 @@ public:
         consensus.SegwitHeight = 481824; // 0000000000000000001c8018d9cb3b742ef25114f27563e3fc4a1902167f9893
         consensus.MinBIP9WarningHeight = 483840; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256{"00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
-        consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-        consensus.nPowTargetSpacing = 10 * 60;
-        consensus.fPowAllowMinDifficultyBlocks = false;
-        consensus.enforce_BIP94 = false;
+        // consensus.nPowTargetTimespan = 5 * 60; // 5m
+        consensus.nPowTargetSpacing = 5 * 60;
+        consensus.lwmaAveragingWindow = 576;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.enforce_BIP94 = false;
         consensus.fPowNoRetargeting = false;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = Consensus::BIP9Deployment::NEVER_ACTIVE;
@@ -164,6 +165,17 @@ public:
         fDefaultConsistencyChecks = false;
         m_is_mockable_chain = false;
 
+        // Checkpoints restored
+        checkpointData = {
+            {
+                { 0, uint256{"d86f8a0582e779830f182befeaaabc8c73a159b6b06530910758daf17ce31e36"}},
+                { 700, uint256{"2005b7aa8f35f4f38677c11fb336b04c038835dc60b259246491e0652110da0e"}},
+                { 190000, uint256{"6765d4aa5d8858349ca8901046690079b8d38a034eaf8515d4479d0be98904fb"}},
+                { 226000, uint256{"f8b2437e54fe0e3bb5f005b87ad6933452447c1f43ee1e8d07ee70210d7aa2f8"}},
+            }
+        };
+        // Checkpoints restored
+
         m_assumeutxo_data = {
             {
                 .height = 840'000,
@@ -208,6 +220,7 @@ public:
 
 /**
  * Testnet (v3): public test network which is reset from time to time.
+ * Not for use, checkpoint tests require it.
  */
 class CTestNetParams : public CChainParams {
 public:
@@ -226,10 +239,11 @@ public:
         consensus.SegwitHeight = 834624; // 00000000002b980fcd729daaa248fd9316a5200e9b367f4ff2c42453e84201ca
         consensus.MinBIP9WarningHeight = 836640; // segwit activation height + miner confirmation window
         consensus.powLimit = uint256{"00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
-        consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-        consensus.nPowTargetSpacing = 10 * 60;
-        consensus.fPowAllowMinDifficultyBlocks = true;
-        consensus.enforce_BIP94 = false;
+        // consensus.nPowTargetTimespan = 5 * 60; // 5m
+        consensus.nPowTargetSpacing = 5 * 60;
+        consensus.lwmaAveragingWindow = 576;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.enforce_BIP94 = false;
         consensus.fPowNoRetargeting = false;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = Consensus::BIP9Deployment::NEVER_ACTIVE;
@@ -285,6 +299,15 @@ public:
         fDefaultConsistencyChecks = false;
         m_is_mockable_chain = false;
 
+        // Checkpoints restored
+        checkpointData = {
+            {
+                {0, uint256{"50b91b8074496181a7245d505f1e416a419b6ec9730c34dab78b3f8a277f66a9"}},
+                {580, uint256{"de050a29984d69914e700927eb05d6eb3cd5aef529ad52d21b4fc13d674a28d9"}},
+            }
+        };
+        // Checkpoints restored
+
         m_assumeutxo_data = {
             {
                 .height = 2'500'000,
@@ -333,10 +356,11 @@ public:
         consensus.SegwitHeight = 1;
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256{"00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
-        consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-        consensus.nPowTargetSpacing = 10 * 60;
-        consensus.fPowAllowMinDifficultyBlocks = true;
-        consensus.enforce_BIP94 = true;
+        // consensus.nPowTargetTimespan = 5 * 60; // 5m
+        consensus.nPowTargetSpacing = 5 * 60;
+        consensus.lwmaAveragingWindow = 288;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.enforce_BIP94 = true;
         consensus.fPowNoRetargeting = false;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -397,6 +421,14 @@ public:
 
         fDefaultConsistencyChecks = false;
         m_is_mockable_chain = false;
+
+        // Checkpoints restored
+        checkpointData = {
+            {
+                {0, uint256{"db7ef4db5286066d8ce9566f522a9d3167f490eb2cbdfbb36bbaeca25ab1d702"}},
+            }
+        };
+        // Checkpoints restored
 
         m_assumeutxo_data = {
             {
@@ -483,10 +515,11 @@ public:
         consensus.BIP66Height = 1;
         consensus.CSVHeight = 1;
         consensus.SegwitHeight = 1;
-        consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
-        consensus.nPowTargetSpacing = 10 * 60;
-        consensus.fPowAllowMinDifficultyBlocks = false;
-        consensus.enforce_BIP94 = false;
+        // consensus.nPowTargetTimespan = 5 * 60; // 5m
+        consensus.nPowTargetSpacing = 5 * 60;
+        consensus.lwmaAveragingWindow = 576;
+        // consensus.fPowAllowMinDifficultyBlocks = false;
+        // consensus.enforce_BIP94 = false;
         consensus.fPowNoRetargeting = false;
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256{"00000377ae000000000000000000000000000000000000000000000000000000"};
@@ -574,10 +607,11 @@ public:
         consensus.SegwitHeight = 0; // Always active unless overridden
         consensus.MinBIP9WarningHeight = 0;
         consensus.powLimit = uint256{"7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"};
-        consensus.nPowTargetTimespan = 24 * 60 * 60; // one day
-        consensus.nPowTargetSpacing = 10 * 60;
-        consensus.fPowAllowMinDifficultyBlocks = true;
-        consensus.enforce_BIP94 = opts.enforce_bip94;
+        // consensus.nPowTargetTimespan = 5 * 60; // 5m
+        consensus.nPowTargetSpacing = 5 * 60;
+        consensus.lwmaAveragingWindow = 144;
+        // consensus.fPowAllowMinDifficultyBlocks = true;
+        // consensus.enforce_BIP94 = opts.enforce_bip94;
         consensus.fPowNoRetargeting = true;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -643,6 +677,14 @@ public:
 
         fDefaultConsistencyChecks = true;
         m_is_mockable_chain = true;
+
+        // Checkpoints restored
+        checkpointData = {
+            {
+                {0, uint256{"3d96e9f00b7c9a8f9104393435b5f3fd597b5cdd95ae67d9251cfc622a575a22"}},
+            }
+        };
+        // Checkpoints restored
 
         m_assumeutxo_data = {
             {   // For use by unit tests

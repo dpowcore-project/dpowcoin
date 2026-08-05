@@ -167,7 +167,7 @@ public:
         std::unordered_map<Consensus::DeploymentPos, VersionBitsParameters> version_bits_parameters{};
         std::unordered_map<Consensus::BuriedDeployment, int> activation_heights{};
         bool fastprune{false};
-        bool enforce_bip94{false};
+        // bool enforce_bip94{false}; // Dpowcoin Params
     };
 
     static std::unique_ptr<const CChainParams> RegTest(const RegTestOptions& options);

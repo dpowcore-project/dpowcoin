@@ -4212,6 +4212,8 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
 
     // Testnet4 and regtest only: Check timestamp against prev for difficulty-adjustment
     // blocks to prevent timewarp attacks (see https://github.com/bitcoin/bitcoin/pull/15482).
+    // Dpowcoin Params we don't have min diff blocks.
+    /*
     if (consensusParams.enforce_BIP94) {
         // Check timestamp for the first block of each difficulty adjustment
         // interval, except the genesis block.
@@ -4221,6 +4223,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, BlockValidatio
             }
         }
     }
+    */
 
     // Check timestamp
     if (block.Time() > NodeClock::now() + std::chrono::seconds{MAX_FUTURE_BLOCK_TIME}) {
