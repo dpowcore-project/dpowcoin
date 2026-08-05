@@ -3224,8 +3224,13 @@ CBlockIndex* Chainstate::FindMostWorkChain()
                         // If we're missing data, then add back to m_blocks_unlinked,
                         // so that if the block arrives in the future we can try adding
                         // to setBlockIndexCandidates again.
-                        m_blockman.m_blocks_unlinked.insert(
-                            std::make_pair(pindexFailed->pprev, pindexFailed));
+                        // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): dedup via
+                        // AddUnlinkedBlock instead of raw insert. Avoids duplicate entries in
+                        // m_blocks_unlinked, which if the same entry is processed twice in
+                        // ReceivedBlockTransactions() could be re-added to setBlockIndexCandidates
+                        // with a modified nSequenceId, breaking ordering guarantees and leading to
+                        // undefined behavior. DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+                        m_blockman.AddUnlinkedBlock(pindexFailed);
                     }
                     setBlockIndexCandidates.erase(pindexFailed);
                     pindexFailed = pindexFailed->pprev;
@@ -3892,7 +3897,9 @@ void ChainstateManager::ReceivedBlockTransactions(const CBlock& block, CBlockInd
         }
     } else {
         if (pindexNew->pprev && pindexNew->pprev->IsValid(BLOCK_VALID_TREE)) {
-            m_blockman.m_blocks_unlinked.insert(std::make_pair(pindexNew->pprev, pindexNew));
+            // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): dedup via AddUnlinkedBlock
+            // instead of raw insert. DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+            m_blockman.AddUnlinkedBlock(pindexNew);
         }
     }
 }
@@ -5488,15 +5495,18 @@ void ChainstateManager::CheckBlockIndex() const
             }
         }
         // Check whether this block is in m_blocks_unlinked.
+        // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): keep scanning the full
+        // range (instead of an early `break`) so a duplicate entry is actually caught here in
+        // debug/-checkblockindex builds rather than silently masked by the old-first-hit logic.
+        // DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
         auto rangeUnlinked{m_blockman.m_blocks_unlinked.equal_range(pindex->pprev)};
         bool foundInUnlinked = false;
-        while (rangeUnlinked.first != rangeUnlinked.second) {
-            assert(rangeUnlinked.first->first == pindex->pprev);
-            if (rangeUnlinked.first->second == pindex) {
+        for (auto it = rangeUnlinked.first; it != rangeUnlinked.second; ++it) {
+            assert(it->first == pindex->pprev);
+            if (it->second == pindex) {
+                assert(!foundInUnlinked); // No duplicates in m_blocks_unlinked
                 foundInUnlinked = true;
-                break;
             }
-            rangeUnlinked.first++;
         }
         if (pindex->pprev && (pindex->nStatus & BLOCK_HAVE_DATA) && pindexFirstNeverProcessed != nullptr && pindexFirstInvalid == nullptr) {
             // If this block has block data available, some parent was never received, and has no invalid parents, it must be in m_blocks_unlinked.

@@ -268,6 +268,20 @@ CBlockIndex* BlockManager::AddToBlockIndex(const CBlockHeader& block, CBlockInde
     return pindexNew;
 }
 
+// BACKPORT (upstream bitcoin/bitcoin PR #35070, commits c787b3b99b/d6359937bf; not yet in 31.x
+// as of 2026-07-04): see declaration in blockstorage.h. DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+void BlockManager::AddUnlinkedBlock(CBlockIndex* block)
+{
+    AssertLockHeld(cs_main);
+    Assume(block != nullptr);
+    Assume(block->nStatus & BLOCK_HAVE_DATA);
+    auto range = m_blocks_unlinked.equal_range(block->pprev);
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second == block) return;  // don't insert duplicates
+    }
+    m_blocks_unlinked.emplace(block->pprev, block);
+}
+
 void BlockManager::PruneOneBlockFile(const int fileNumber)
 {
     AssertLockHeld(cs_main);
@@ -510,7 +524,11 @@ bool BlockManager::LoadBlockIndex(const std::optional<uint256>& snapshot_blockha
                     pindex->m_chain_tx_count = pindex->pprev->m_chain_tx_count + pindex->nTx;
                 } else {
                     pindex->m_chain_tx_count = 0;
-                    m_blocks_unlinked.insert(std::make_pair(pindex->pprev, pindex));
+                    // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): guard + dedup via
+                    // AddUnlinkedBlock instead of raw insert. DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+                    if (pindex->nStatus & BLOCK_HAVE_DATA) {
+                        AddUnlinkedBlock(pindex);
+                    }
                 }
             } else {
                 pindex->m_chain_tx_count = pindex->nTx;
