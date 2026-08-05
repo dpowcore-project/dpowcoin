@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+import hashlib
+import subprocess
+import sys
+
+def tree_sha512sum():
+    tree = subprocess.check_output(['git', 'write-tree']).decode().strip()
+    files = []
+    blob_by_name = {}
+    for line in subprocess.check_output(['git', 'ls-tree', '--full-tree', '-r', tree]).splitlines():
+        name_sep = line.index(b'\t')
+        metadata = line[:name_sep].split()
+        assert metadata[1] == b'blob'
+        name = line[name_sep + 1:]
+        files.append(name)
+        blob_by_name[name] = metadata[2]
+    files.sort()
+    p = subprocess.Popen(['git', 'cat-file', '--batch'],
+                         stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+    overall = hashlib.sha512()
+    for f in files:
+        blob = blob_by_name[f]
+        p.stdin.write(blob + b'\n')
+        p.stdin.flush()
+        reply = p.stdout.readline().split()
+        assert reply[0] == blob and reply[1] == b'blob'
+        size = int(reply[2])
+        intern_hash = hashlib.sha512()
+        ptr = 0
+        while ptr < size:
+            bs = min(65536, size - ptr)
+            piece = p.stdout.read(bs)
+            intern_hash.update(piece)
+            ptr += bs
+        assert p.stdout.read(1) == b'\n'
+        overall.update(intern_hash.hexdigest().encode('utf-8'))
+        overall.update(b'  ')
+        overall.update(f)
+        overall.update(b'\n')
+    p.stdin.close()
+    p.wait()
+    return overall.hexdigest()
+
+# Skip merge/squash/fixup
+if len(sys.argv) > 2 and sys.argv[2] in ('merge', 'squash', 'fixup'):
+    sys.exit(0)
+
+commit_msg_file = sys.argv[1]
+
+with open(commit_msg_file, 'r', encoding='utf-8') as f:
+    msg = f.read()
+
+if 'Tree-SHA512:' in msg:
+    sys.exit(0)
+
+tree_hash = tree_sha512sum()
+with open(commit_msg_file, 'a', encoding='utf-8') as f:
+    f.write(f'\nTree-SHA512: {tree_hash}\n')

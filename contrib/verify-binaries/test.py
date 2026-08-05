@@ -10,38 +10,38 @@ def main():
     """Tests ordered roughly from faster to slower."""
     expect_code(run_verify("", "pub", '0.32'), 4, "Nonexistent version should fail")
     expect_code(run_verify("", "pub", '0.32.awefa.12f9h'), 11, "Malformed version should fail")
-    expect_code(run_verify('--min-good-sigs 20', "pub", "22.0"), 9, "--min-good-sigs 20 should fail")
+    expect_code(run_verify('--min-good-sigs 20', "pub", "26.3.2"), 9, "--min-good-sigs 20 should fail")
 
-    print("- testing verification (22.0-x86_64-linux-gnu.tar.gz)", flush=True)
-    _220_x86_64_linux_gnu = run_verify("--json", "pub", "22.0-x86_64-linux-gnu.tar.gz")
+    print("- testing verification (26.3.2-x86_64-linux-gnu.tar.gz)", flush=True)
+    _220_x86_64_linux_gnu = run_verify("--json", "pub", "26.3.2-x86_64-linux-gnu.tar.gz")
     try:
         result = json.loads(_220_x86_64_linux_gnu.stdout.decode())
     except Exception:
-        print("failed on 22.0-x86_64-linux-gnu.tar.gz --json:")
+        print("failed on 26.3.2-x86_64-linux-gnu.tar.gz --json:")
         print_process_failure(_220_x86_64_linux_gnu)
         raise
 
-    expect_code(_220_x86_64_linux_gnu, 0, "22.0-x86_64-linux-gnu.tar.gz should succeed")
+    expect_code(_220_x86_64_linux_gnu, 0, "26.3.2-x86_64-linux-gnu.tar.gz should succeed")
     v = result['verified_binaries']
     assert result['good_trusted_sigs']
     assert len(v) == 1
-    assert v['bitcoin-22.0-x86_64-linux-gnu.tar.gz'] == '59ebd25dd82a51638b7a6bb914586201e67db67b919b2a1ff08925a7936d1b16'
+    assert v['dpowcoin-26.3.2-x86_64-linux-gnu.tar.gz'] == '98a000effaef1a4de27e935592413e9a81f6d4f6af95e6ed1dc6337643e5e534'
 
-    print("- testing verification (22.0)", flush=True)
-    _220 = run_verify("--json", "pub", "22.0")
+    print("- testing verification (26.3.2)", flush=True)
+    _220 = run_verify("--json", "pub", "26.3.2")
     try:
         result = json.loads(_220.stdout.decode())
     except Exception:
-        print("failed on 22.0 --json:")
+        print("failed on 26.3.2 --json:")
         print_process_failure(_220)
         raise
 
-    expect_code(_220, 0, "22.0 should succeed")
+    expect_code(_220, 0, "26.3.2 should succeed")
     v = result['verified_binaries']
     assert result['good_trusted_sigs']
-    assert v['bitcoin-22.0-aarch64-linux-gnu.tar.gz'] == 'ac718fed08570a81b3587587872ad85a25173afa5f9fbbd0c03ba4d1714cfa3e'
-    assert v['bitcoin-22.0-osx64.tar.gz'] == '2744d199c3343b2d94faffdfb2c94d75a630ba27301a70e47b0ad30a7e0155e9'
-    assert v['bitcoin-22.0-x86_64-linux-gnu.tar.gz'] == '59ebd25dd82a51638b7a6bb914586201e67db67b919b2a1ff08925a7936d1b16'
+    assert v['dpowcoin-26.3.2-aarch64-linux-gnu.tar.gz'] == '7f1c73a43545850b45ed32be64bc742b81b143d6719aea03f8038ed1941475a3'
+    assert v['dpowcoin-26.3.2-x86_64-apple-darwin.tar.gz'] == '5432f1a21be17b98421cef7a2e6471f80e4f9cd5032572d42612466442378526'
+    assert v['dpowcoin-26.3.2-x86_64-linux-gnu.tar.gz'] == '98a000effaef1a4de27e935592413e9a81f6d4f6af95e6ed1dc6337643e5e534'
 
 
 def run_verify(global_args: str, command: str, command_args: str) -> subprocess.CompletedProcess:

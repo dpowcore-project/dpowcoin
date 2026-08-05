@@ -248,7 +248,7 @@ def trivial_challenge(spkhex):
     return False
 
 class Generate:
-    INTERVAL = 600.0*2016/2015 # 10 minutes, adjusted for the off-by-one bug
+    INTERVAL = 300
 
 
     def __init__(self, multiminer=None, ultimate_target=None, poisson=False, max_interval=1800,
@@ -383,7 +383,7 @@ def do_generate(args):
         logging.info("Treating negative block time as current time (%d)" % (args.set_block_time))
 
     if args.min_nbits:
-        args.nbits = "1e0377ae"
+        args.nbits = "207fffff"
         logging.info("Using nbits=%s" % (args.nbits))
 
     if args.set_block_time is None:
@@ -499,7 +499,7 @@ def do_calibrate(args):
         sys.stderr.write("Must specify 8 hex digits for --nbits\n")
         return 1
 
-    TRIALS = 600 # gets variance down pretty low
+    TRIALS = 30 # gets variance down pretty low
     TRIAL_BITS = 0x1e3ea75f # takes about 5m to do 600 trials
 
     header = CBlockHeader()
@@ -527,9 +527,9 @@ def do_calibrate(args):
     print("nbits=%08x for %ds average mining time" % (target_to_nbits(want_targ), want_time))
     return 0
 
-def bitcoin_cli(basecmd, args, **kwargs):
+def dpowcoin_cli(basecmd, args, **kwargs):
     cmd = basecmd + ["-signet"] + args
-    logging.debug("Calling bitcoin-cli: %r", cmd)
+    logging.debug("Calling dpowcoin-cli: %r", cmd)
     out = subprocess.run(cmd, stdout=subprocess.PIPE, **kwargs, check=True).stdout
     if isinstance(out, bytes):
         out = out.decode('utf8')
@@ -537,7 +537,7 @@ def bitcoin_cli(basecmd, args, **kwargs):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cli", default="bitcoin-cli", type=str, help="bitcoin-cli command")
+    parser.add_argument("--cli", default="dpowcoin-cli", type=str, help="dpowcoin-cli command")
     parser.add_argument("--debug", action="store_true", help="Print debugging info")
     parser.add_argument("--quiet", action="store_true", help="Only print warnings/errors")
 
@@ -559,7 +559,7 @@ def main():
     nbit_target.add_argument("--min-nbits", action="store_true", help="Target minimum nBits (use min difficulty)")
     generate.add_argument("--poisson", action="store_true", help="Simulate randomised block times")
     generate.add_argument("--multiminer", default=None, type=str, help="Specify which set of blocks to mine (eg: 1-40/100 for the first 40%%, 2/3 for the second 3rd)")
-    generate.add_argument("--backup-delay", default=300, type=int, help="Seconds to delay before mining blocks reserved for other miners (default=300)")
+    generate.add_argument("--backup-delay", default=150, type=int, help="Seconds to delay before mining blocks reserved for other miners (default=150)")
     generate.add_argument("--standby-delay", default=0, type=int, help="Seconds to delay before mining blocks (default=0)")
     generate.add_argument("--max-interval", default=1800, type=int, help="Maximum interblock interval (seconds)")
 
@@ -582,7 +582,7 @@ def main():
 
     args = parser.parse_args(sys.argv[1:])
 
-    args.bcli = lambda *a, input=b"", **kwargs: bitcoin_cli(shlex.split(args.cli), list(a), input=input, **kwargs)
+    args.bcli = lambda *a, input=b"", **kwargs: dpowcoin_cli(shlex.split(args.cli), list(a), input=input, **kwargs)
 
     if hasattr(args, "address") and hasattr(args, "descriptor"):
         args.derived_addresses = {}

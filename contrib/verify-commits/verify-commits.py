@@ -17,7 +17,7 @@ GIT = os.getenv('GIT', 'git')
 def tree_sha512sum(commit='HEAD'):
     """Calculate the Tree-sha512 for the commit.
 
-    This is copied from github-merge.py. See https://github.com/bitcoin-core/bitcoin-maintainer-tools."""
+    This is copied from github-merge.py. See https://github.com/dpowcore-project/dpowcoin-maintainer-tools."""
 
     # request metadata for entire tree, recursively
     files = []
@@ -130,7 +130,7 @@ def main():
                     no_sha1 = False
 
 
-        os.environ['BITCOIN_VERIFY_COMMITS_ALLOW_SHA1'] = "0" if no_sha1 else "1"
+        os.environ['DPOWCOIN_VERIFY_COMMITS_ALLOW_SHA1'] = "0" if no_sha1 else "1"
         allow_revsig = current_commit in revsig_allowed
 
         # Check that the commit (and parents) was signed with a trusted key
