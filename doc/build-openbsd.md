@@ -2,7 +2,7 @@
 
 **Updated for OpenBSD [7.8](https://www.openbsd.org/78.html)**
 
-This guide describes how to build bitcoind, command-line utilities, and GUI on OpenBSD.
+This guide describes how to build dpowcoind, command-line utilities, and GUI on OpenBSD.
 
 ## Preparation
 
@@ -19,7 +19,7 @@ SQLite is required for the wallet:
 pkg_add sqlite3
 ```
 
-To build Bitcoin Core without the wallet, use `-DENABLE_WALLET=OFF`.
+To build Dpowcoin Core without the wallet, use `-DENABLE_WALLET=OFF`.
 
 Cap'n Proto is needed for IPC functionality (see [multiprocess.md](multiprocess.md)):
 
@@ -31,10 +31,10 @@ Compile with `-DENABLE_IPC=OFF` if you do not need IPC functionality.
 
 See [dependencies.md](dependencies.md) for a complete overview.
 
-### 2. Clone Bitcoin Repo
-Clone the Bitcoin Core repository to a directory. All build scripts and commands will run from this directory.
+### 2. Clone Dpowcoin Repo
+Clone the Dpowcoin Core repository to a directory. All build scripts and commands will run from this directory.
 ``` bash
-git clone https://github.com/bitcoin/bitcoin.git
+git clone https://github.com/dpowcore-project/dpowcoin.git
 ```
 
 ### 3. Install Optional Dependencies
@@ -42,7 +42,7 @@ git clone https://github.com/bitcoin/bitcoin.git
 #### GUI Dependencies
 ###### Qt6
 
-Bitcoin Core includes a GUI built with the cross-platform Qt Framework. To compile the GUI, we need to install
+Dpowcoin Core includes a GUI built with the cross-platform Qt Framework. To compile the GUI, we need to install
 the necessary parts of Qt, the libqrencode and pass `-DBUILD_GUI=ON`. Skip if you don't intend to use the GUI.
 
 ```bash
@@ -64,7 +64,7 @@ Otherwise, if you don't need QR encoding support, use the `-DWITH_QRENCODE=OFF` 
 #### Notifications
 ###### ZeroMQ
 
-Bitcoin Core can provide notifications via ZeroMQ. To compile ZMQ support, install the following dependency and pass `-DWITH_ZMQ=ON` when configuring.
+Dpowcoin Core can provide notifications via ZeroMQ. To compile ZMQ support, install the following dependency and pass `-DWITH_ZMQ=ON` when configuring.
 ```bash
 pkg_add zeromq
 ```
@@ -77,11 +77,11 @@ To run the test suite (recommended), you will need to have Python 3 installed:
 pkg_add python py3-zmq  # Select the newest version of the python package if necessary.
 ```
 
-## Building Bitcoin Core
+## Building Dpowcoin Core
 
 ### 1. Configuration
 
-There are many ways to configure Bitcoin Core, here are a few common examples:
+There are many ways to configure Dpowcoin Core, here are a few common examples:
 
 ##### Wallet and GUI:
 This enables wallet support and the GUI, assuming SQLite and Qt 6 are installed.
