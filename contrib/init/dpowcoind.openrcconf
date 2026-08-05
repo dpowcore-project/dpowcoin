@@ -1,0 +1,33 @@
+# /etc/conf.d/dpowcoind: config file for /etc/init.d/dpowcoind
+
+# Config file location
+#DPOWCOIND_CONFIGFILE="/etc/dpowcoin/dpowcoin.conf"
+
+# What directory to write pidfile to?  (created and owned by $DPOWCOIND_USER)
+#DPOWCOIND_PIDDIR="/var/run/dpowcoind"
+
+# What filename to give the pidfile
+#DPOWCOIND_PIDFILE="${DPOWCOIND_PIDDIR}/dpowcoind.pid"
+
+# Where to write dpowcoind data (be mindful that the blockchain is large)
+#DPOWCOIND_DATADIR="/var/lib/dpowcoind"
+
+# User and group to own dpowcoind process
+#DPOWCOIND_USER="dpowcoin"
+#DPOWCOIND_GROUP="dpowcoin"
+
+# Path to dpowcoind executable
+#DPOWCOIND_BIN="/usr/bin/dpowcoind"
+
+# Nice value to run dpowcoind under
+#DPOWCOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#DPOWCOIND_OPTS=""
+
+# The timeout in seconds OpenRC will wait for dpowcoind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+DPOWCOIND_SIGTERM_TIMEOUT=600

@@ -12,19 +12,19 @@ import random
 # Parameters:
 
 # Aim for still working fine at some point in the future. [datetime]
-TIME = datetime(2028, 10, 10)
+TIME = datetime(2029, 4, 1)
 
 # Expected block interval. [timedelta]
-BLOCK_INTERVAL = timedelta(seconds=600)
+BLOCK_INTERVAL = timedelta(seconds=300)
 
 # The number of headers corresponding to the minchainwork parameter. [headers]
-MINCHAINWORK_HEADERS = 938343
+MINCHAINWORK_HEADERS = 190000
 
 # Combined processing bandwidth from all attackers to one victim. [bit/s]
 # 6 Gbit/s is approximately the speed at which a single thread of a Ryzen 5950X CPU thread can hash
 # headers. In practice, the victim's network bandwidth and network processing overheads probably
 # impose a far lower number, but it's a useful upper bound.
-ATTACK_BANDWIDTH = 6000000000
+ATTACK_BANDWIDTH = 70000
 
 # How much additional permanent memory usage are attackers (jointly) allowed to cause in the victim,
 # expressed as fraction of the normal memory usage due to mainchain growth, for the duration the
@@ -118,7 +118,7 @@ HEADER_BATCH_COUNT = 2000
 RANDOMIZE_OFFSET = True
 
 # Timestamp of the genesis block
-GENESIS_TIME = datetime(2009, 1, 3)
+GENESIS_TIME = datetime(2024, 4, 19)
 
 # Derived values:
 

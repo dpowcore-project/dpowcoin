@@ -251,7 +251,7 @@ mkdir -p "$DISTSRC"
           ${CONFIGFLAGS} \
           "${CMAKE_EXE_LINKER_FLAGS}"
 
-    # Build Bitcoin Core
+    # Build Dpowcoin Core
     cmake --build build -j "$JOBS" ${V:+--verbose}
 
     mkdir -p "$OUTDIR"
@@ -260,16 +260,22 @@ mkdir -p "$DISTSRC"
     case "$HOST" in
         *mingw*)
             cmake --build build -j "$JOBS" -t deploy ${V:+--verbose}
-            mv build/bitcoin-win64-setup.exe "${OUTDIR}/${DISTNAME}-win64-setup-unsigned.exe"
+            mv build/dpowcoin-win64-setup.exe "${OUTDIR}/${DISTNAME}-win64-setup.exe"
+            ;;
+        *darwin*)
+            find build -name 'cmake_install.cmake' \
+                -exec sed -i 's| -u -r | |g' {} +
+            cmake --build build -j "$JOBS" -t deploy ${V:+--verbose}
+            mv build/dist/dpowcoin-macos-app.zip "${OUTDIR}/${DISTNAME}-${HOST}.zip"
             ;;
     esac
 
-    # Setup the directory where our Bitcoin Core build for HOST will be
+    # Setup the directory where our Dpowcoin Core build for HOST will be
     # installed. This directory will also later serve as the input for our
     # binary tarballs.
     INSTALLPATH="${PWD}/installed/${DISTNAME}"
     mkdir -p "${INSTALLPATH}"
-    # Install built Bitcoin Core to $INSTALLPATH
+    # Install built Dpowcoin Core to $INSTALLPATH
     case "$HOST" in
         *darwin*)
             # This workaround can be dropped for CMake >= 3.27.
@@ -312,9 +318,9 @@ mkdir -p "$DISTSRC"
                 ;;
         esac
 
-        # copy over the example bitcoin.conf file. if contrib/devtools/gen-bitcoin-conf.sh
+        # copy over the example dpowcoin.conf file. if contrib/devtools/gen-bitcoin-conf.sh
         # has not been run before buildling, this file will be a stub
-        cp "${DISTSRC}/share/examples/bitcoin.conf" "${DISTNAME}/"
+        cp "${DISTSRC}/share/examples/dpowcoin.conf" "${DISTNAME}/"
 
         cp -r "${DISTSRC}/share/rpcauth" "${DISTNAME}/share/"
 
@@ -326,8 +332,8 @@ mkdir -p "$DISTSRC"
                     | xargs -0r touch --no-dereference --date="@${SOURCE_DATE_EPOCH}"
                 find "${DISTNAME}" -not -name "*.dbg" \
                     | sort \
-                    | zip -X@ "${OUTDIR}/${DISTNAME}-${HOST//x86_64-w64-mingw32/win64}-unsigned.zip" \
-                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST//x86_64-w64-mingw32/win64}-unsigned.zip" && exit 1 )
+                    | zip -X@ "${OUTDIR}/${DISTNAME}-${HOST//x86_64-w64-mingw32/win64}.zip" \
+                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST//x86_64-w64-mingw32/win64}.zip" && exit 1 )
                 find "${DISTNAME}" -name "*.dbg" -print0 \
                     | xargs -0r touch --no-dereference --date="@${SOURCE_DATE_EPOCH}"
                 find "${DISTNAME}" -name "*.dbg" \
@@ -351,48 +357,48 @@ mkdir -p "$DISTSRC"
                 find "${DISTNAME}" -print0 \
                     | sort --zero-terminated \
                     | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
-                    | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.tar.gz" \
-                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.tar.gz" && exit 1 )
+                    | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}.tar.gz" \
+                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST}.tar.gz" && exit 1 )
                 ;;
         esac
     )  # $DISTSRC/installed
 
     # Finally make tarballs for codesigning
-    case "$HOST" in
-        *mingw*)
-            cp -rf --target-directory=. contrib/windeploy
-            (
-                cd ./windeploy
-                mkdir -p unsigned
-                cp --target-directory=unsigned/ "${OUTDIR}/${DISTNAME}-win64-setup-unsigned.exe"
-                cp -r --target-directory=unsigned/ "${INSTALLPATH}"
-                find unsigned/ -name "*.dbg" -print0 \
-                    | xargs -0r rm
-                find . -print0 \
-                    | sort --zero-terminated \
-                    | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
-                    | gzip -9n > "${OUTDIR}/${DISTNAME}-win64-codesigning.tar.gz" \
-                    || ( rm -f "${OUTDIR}/${DISTNAME}-win64-codesigning.tar.gz" && exit 1 )
-            )
-            ;;
-        *darwin*)
-            cmake --build build --target deploy ${V:+--verbose}
-            mv build/dist/bitcoin-macos-app.zip "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.zip"
-            mkdir -p "unsigned-app-${HOST}"
-            cp  --target-directory="unsigned-app-${HOST}" \
-                contrib/macdeploy/detached-sig-create.sh
-            mv --target-directory="unsigned-app-${HOST}" build/dist
-            cp -r --target-directory="unsigned-app-${HOST}" "${INSTALLPATH}"
-            (
-                cd "unsigned-app-${HOST}"
-                find . -print0 \
-                    | sort --zero-terminated \
-                    | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
-                    | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}-codesigning.tar.gz" \
-                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST}-codesigning.tar.gz" && exit 1 )
-            )
-            ;;
-    esac
+#    case "$HOST" in
+#        *mingw*)
+#            cp -rf --target-directory=. contrib/windeploy
+#            (
+#                cd ./windeploy
+#                mkdir -p unsigned
+#                cp --target-directory=unsigned/ "${OUTDIR}/${DISTNAME}-win64-setup-unsigned.exe"
+#                cp -r --target-directory=unsigned/ "${INSTALLPATH}"
+#                find unsigned/ -name "*.dbg" -print0 \
+#                    | xargs -0r rm
+#                find . -print0 \
+#                    | sort --zero-terminated \
+#                    | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
+#                    | gzip -9n > "${OUTDIR}/${DISTNAME}-win64-codesigning.tar.gz" \
+#                    || ( rm -f "${OUTDIR}/${DISTNAME}-win64-codesigning.tar.gz" && exit 1 )
+#            )
+#            ;;
+#        *darwin*)
+#            cmake --build build --target deploy ${V:+--verbose}
+#            mv build/dist/dpowcoin-macos-app.zip "${OUTDIR}/${DISTNAME}-${HOST}-unsigned.zip"
+#            mkdir -p "unsigned-app-${HOST}"
+#            cp  --target-directory="unsigned-app-${HOST}" \
+#                contrib/macdeploy/detached-sig-create.sh
+#            mv --target-directory="unsigned-app-${HOST}" build/dist
+#            cp -r --target-directory="unsigned-app-${HOST}" "${INSTALLPATH}"
+#            (
+#                cd "unsigned-app-${HOST}"
+#                find . -print0 \
+#                    | sort --zero-terminated \
+#                    | tar --create --no-recursion --mode='u+rw,go+r-w,a+X' --null --files-from=- \
+#                    | gzip -9n > "${OUTDIR}/${DISTNAME}-${HOST}-codesigning.tar.gz" \
+#                    || ( rm -f "${OUTDIR}/${DISTNAME}-${HOST}-codesigning.tar.gz" && exit 1 )
+#            )
+#            ;;
+#    esac
 )  # $DISTSRC
 
 rm -rf "$ACTUAL_OUTDIR"
