@@ -2,7 +2,7 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or https://opensource.org/license/mit/.
 
-add_executable(bench_bitcoin
+add_executable(bench_dpowcoin
   bench_bitcoin.cpp
   bench.cpp
   nanobench.cpp
@@ -20,6 +20,7 @@ add_executable(bench_bitcoin
   checkqueue.cpp
   cluster_linearize.cpp
   connectblock.cpp
+  crypto_argon2.cpp
   crypto_hash.cpp
   descriptors.cpp
   disconnected_transactions.cpp
@@ -56,14 +57,14 @@ add_executable(bench_bitcoin
   verify_script.cpp
 )
 
-add_windows_application_manifest(bench_bitcoin)
+add_windows_application_manifest(bench_dpowcoin)
 
 include(TargetDataSources)
-target_raw_data_sources(bench_bitcoin NAMESPACE benchmark::data
-  data/block413567.raw
+target_raw_data_sources(bench_dpowcoin NAMESPACE benchmark::data
+  data/block59769.raw
 )
 
-target_link_libraries(bench_bitcoin
+target_link_libraries(bench_dpowcoin
   core_interface
   test_util
   bitcoin_node
@@ -71,7 +72,7 @@ target_link_libraries(bench_bitcoin
 )
 
 if(ENABLE_WALLET)
-  target_sources(bench_bitcoin
+  target_sources(bench_dpowcoin
     PRIVATE
       coin_selection.cpp
       wallet_balance.cpp
@@ -81,7 +82,32 @@ if(ENABLE_WALLET)
       wallet_ismine.cpp
       wallet_migration.cpp
   )
-  target_link_libraries(bench_bitcoin bitcoin_wallet)
+  target_link_libraries(bench_dpowcoin bitcoin_wallet)
 endif()
 
-install_binary_component(bench_bitcoin INTERNAL)
+# Argon2id ISA availability - forward the same HAVE_ARGON2_* cache variables
+# that introspection.cmake sets to ENABLE_ARGON2_* compile definitions on
+# bench_dpowcoin, mirroring what test_dpowcoin does.  This ensures that
+# crypto_argon2.cpp only registers benchmark variants that were actually
+# compiled into the argon2 library and can run on the target CPU.
+if(HAVE_ARGON2_SSE2)
+  target_compile_definitions(bench_dpowcoin PRIVATE ENABLE_ARGON2_SSE2)
+endif()
+if(HAVE_ARGON2_SSSE3)
+  target_compile_definitions(bench_dpowcoin PRIVATE ENABLE_ARGON2_SSSE3)
+endif()
+if(HAVE_ARGON2_AVX2)
+  target_compile_definitions(bench_dpowcoin PRIVATE ENABLE_ARGON2_AVX2)
+endif()
+if(HAVE_ARGON2_AVX512)
+  target_compile_definitions(bench_dpowcoin PRIVATE ENABLE_ARGON2_AVX512)
+endif()
+if(HAVE_ARGON2_NEON)
+  target_compile_definitions(bench_dpowcoin PRIVATE ENABLE_ARGON2_NEON)
+endif()
+
+add_test(NAME bench_sanity_check
+  COMMAND bench_dpowcoin -sanity-check
+)
+
+install_binary_component(bench_dpowcoin INTERNAL)

@@ -33,7 +33,7 @@
       ]
     },
     "tests": {
-      "description": "Build test_bitcoin.exe executable",
+      "description": "Build test_dpowcoin.exe executable",
       "dependencies": [
         "boost-test"
       ]
