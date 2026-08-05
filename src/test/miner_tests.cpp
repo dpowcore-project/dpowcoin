@@ -28,6 +28,7 @@
 #include <test/util/common.h>
 #include <test/util/setup_common.h>
 
+#include <fstream>
 #include <memory>
 #include <vector>
 
@@ -80,25 +81,25 @@ static CFeeRate blockMinFeeRate = CFeeRate(DEFAULT_BLOCK_MIN_TX_FEE);
 constexpr static struct {
     unsigned int extranonce;
     unsigned int nonce;
-} BLOCKINFO[]{{0, 3552706918},   {500, 37506755},   {1000, 948987788}, {400, 524762339},  {800, 258510074},  {300, 102309278},
-              {1300, 54365202},  {600, 1107740426}, {1000, 203094491}, {900, 391178848},  {800, 381177271},  {600, 87188412},
-              {0, 66522866},     {800, 874942736},  {1000, 89200838},  {400, 312638088},  {400, 66263693},   {500, 924648304},
-              {400, 369913599},  {500, 47630099},   {500, 115045364},  {100, 277026602},  {1100, 809621409}, {700, 155345322},
-              {800, 943579953},  {400, 28200730},   {900, 77200495},   {0, 105935488},    {400, 698721821},  {500, 111098863},
-              {1300, 445389594}, {500, 621849894},  {1400, 56010046},  {1100, 370669776}, {1200, 380301940}, {1200, 110654905},
-              {400, 213771024},  {1500, 120014726}, {1200, 835019014}, {1500, 624817237}, {900, 1404297},    {400, 189414558},
-              {400, 293178348},  {1100, 15393789},  {600, 396764180},  {800, 1387046371}, {800, 199368303},  {700, 111496662},
-              {100, 129759616},  {200, 536577982},  {500, 125881300},  {500, 101053391},  {1200, 471590548}, {900, 86957729},
-              {1200, 179604104}, {600, 68658642},   {1000, 203295701}, {500, 139615361},  {900, 233693412},  {300, 153225163},
-              {0, 27616254},     {1200, 9856191},   {100, 220392722},  {200, 66257599},   {1100, 145489641}, {1300, 37859442},
-              {400, 5816075},    {1200, 215752117}, {1400, 32361482},  {1400, 6529223},   {500, 143332977},  {800, 878392},
-              {700, 159290408},  {400, 123197595},  {700, 43988693},   {300, 304224916},  {700, 214771621},  {1100, 274148273},
-              {400, 285632418},  {1100, 923451065}, {600, 12818092},   {1200, 736282054}, {1000, 246683167}, {600, 92950402},
-              {1400, 29223405},  {1000, 841327192}, {700, 174301283},  {1400, 214009854}, {1000, 6989517},   {1200, 278226956},
-              {700, 540219613},  {400, 93663104},   {1100, 152345635}, {1500, 464194499}, {1300, 333850111}, {600, 258311263},
-              {600, 90173162},   {1000, 33590797},  {1500, 332866027}, {100, 204704427},  {1000, 463153545}, {800, 303244785},
-              {600, 88096214},   {0, 137477892},    {1200, 195514506}, {300, 704114595},  {900, 292087369},  {1400, 758684870},
-              {1300, 163493028}, {1200, 53151293}};
+} BLOCKINFO[]{{8, 3604}, {0, 1978}, {2, 715},  {6, 12751}, {7, 4306}, {8, 179},
+              {8, 1687}, {2, 2442}, {4, 1530}, {1, 1520},  {8, 143},  {4, 1042},
+              {3, 2479}, {8, 2073}, {6, 5862}, {5, 1943},  {5, 494},  {4, 689},
+              {0, 998},  {5, 376},  {3, 846},  {2, 3847},  {2, 1727}, {7, 811},
+              {2, 2893}, {0, 2674}, {1, 3064}, {6, 4659},  {7, 7691}, {4, 2645},
+              {7, 1838}, {6, 2391}, {3, 3730}, {2, 1880},  {3, 94},   {8, 431},
+              {5, 5676}, {3, 488},  {0, 2878}, {3, 1766},  {0, 167},  {2, 531},
+              {3, 1867}, {2, 864},  {8, 2624}, {2, 1741},  {4, 358},  {8, 4183},
+              {7, 764},  {3, 1573}, {8, 2220}, {4, 1989},  {1, 1405}, {6, 3395},
+              {5, 2289}, {3, 373},  {3, 1899}, {0, 155},   {8, 604},  {5, 1459},
+              {0, 154},  {6, 76},   {6, 1611}, {6, 108},   {6, 844},  {5, 649},
+              {0, 692},  {6, 47},   {4, 16},   {8, 982},   {6, 1881}, {6, 6330},
+              {6, 123},  {5, 764},  {8, 494},  {7, 330},   {3, 398},  {5, 2341},
+              {2, 1131}, {2, 6272}, {6, 3158}, {7, 1177},  {4, 5883}, {3, 212},
+              {4, 2536}, {0, 823},  {6, 2476}, {3, 7417},  {5, 1006}, {8, 1412},
+              {4, 4613}, {8, 3049}, {6, 3589}, {0, 86},    {7, 3393}, {7, 3696},
+              {2, 5173}, {6, 470},  {7, 1813}, {7, 4068},  {4, 334},  {1, 1452},
+              {0, 726},  {6, 5572}, {6, 2360}, {5, 826},   {6, 44},   {7, 745},
+              {8, 2451}, {0, 419}};
 
 static std::unique_ptr<CBlockIndex> CreateBlockIndex(int nHeight, CBlockIndex* active_chain_tip) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
 {
@@ -488,8 +489,8 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
 
         // subsidy changing
         int nHeight = m_node.chainman->ActiveChain().Height();
-        // Create an actual 209999-long block chain (without valid blocks).
-        while (m_node.chainman->ActiveChain().Tip()->nHeight < 209999) {
+        // Create an actual 419999-long block chain (without valid blocks).
+        while (m_node.chainman->ActiveChain().Tip()->nHeight < 419999) {
             CBlockIndex* prev = m_node.chainman->ActiveChain().Tip();
             CBlockIndex* next = new CBlockIndex();
             next->phashBlock = new uint256(m_rng.rand256());
@@ -500,8 +501,8 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
             m_node.chainman->ActiveChain().SetTip(*next);
         }
         BOOST_REQUIRE(mining->createNewBlock(options, /*cooldown=*/false));
-        // Extend to a 210000-long block chain.
-        while (m_node.chainman->ActiveChain().Tip()->nHeight < 210000) {
+        // Extend to a 420000-long block chain.
+        while (m_node.chainman->ActiveChain().Tip()->nHeight < 420000) {
             CBlockIndex* prev = m_node.chainman->ActiveChain().Tip();
             CBlockIndex* next = new CBlockIndex();
             next->phashBlock = new uint256(m_rng.rand256());
@@ -633,21 +634,42 @@ void MinerTestingSetup::TestBasicMining(const CScript& scriptPubKey, const std::
     tx.vin[0].nSequence = CTxIn::SEQUENCE_LOCKTIME_TYPE_FLAG | 1;
     BOOST_CHECK(!TestSequenceLocks(CTransaction{tx}, tx_mempool)); // Sequence locks fail
 
-    auto block_template = mining->createNewBlock(options, /*cooldown=*/false);
-    BOOST_REQUIRE(block_template);
+    std::unique_ptr<BlockTemplate> block_template;
+    CBlock block;
 
-    // None of the of the absolute height/time locked tx should have made
-    // it into the template because we still check IsFinalTx in CreateNewBlock,
-    // but relative locked txs will if inconsistently added to mempool.
-    // For now these will still generate a valid template until BIP68 soft fork
-    CBlock block{block_template->getBlock()};
-    BOOST_CHECK_EQUAL(block.vtx.size(), 3U);
+    // Whether the relative-locked txs above are actually consensus-final at the next
+    // block depends on whether BIP68/CSV is active there. They were inserted via
+    // TryAddToMempool, which bypasses CheckSequenceLocksAtTip (the normal mempool
+    // acceptance gate), so the mempool itself never validated their sequence locks.
+    // - Pre-activation (e.g. real Bitcoin mainnet params, where CSVHeight is far in
+    //   the future): BIP68 imposes no constraint yet, so CreateNewBlock() legitimately
+    //   includes them, and the resulting template is valid as-is.
+    // - Once CSV is active (e.g. CSVHeight=1, as configured for this chain's mainnet
+    //   params, where it is active for every block): ConnectBlock's SequenceLocks()
+    //   check inside CreateNewBlock's internal TestBlockValidity call correctly
+    //   rejects the non-final tx, and CreateNewBlock() throws bad-txns-nonfinal.
+    // Querying the actual deployment status (instead of assuming one or the other)
+    // keeps this test correct regardless of CSVHeight.
+    if (DeploymentActiveAfter(m_node.chainman->ActiveChain().Tip(), *m_node.chainman, Consensus::DEPLOYMENT_CSV)) {
+        BOOST_CHECK_EXCEPTION(mining->createNewBlock(options, /*cooldown=*/false), std::runtime_error, HasReason("bad-txns-nonfinal"));
+    } else {
+        block_template = mining->createNewBlock(options, /*cooldown=*/false);
+        BOOST_REQUIRE(block_template);
+
+        // None of the of the absolute height/time locked tx should have made
+        // it into the template because we still check IsFinalTx in CreateNewBlock,
+        // but relative locked txs will if inconsistently added to mempool.
+        // For now these will still generate a valid template until BIP68 soft fork
+        block = block_template->getBlock();
+        BOOST_CHECK_EQUAL(block.vtx.size(), 3U);
+    }
     // However if we advance height by 1 and time by SEQUENCE_LOCK_TIME, all of them should be mined
     for (int i = 0; i < CBlockIndex::nMedianTimeSpan; ++i) {
         CBlockIndex* ancestor{Assert(m_node.chainman->ActiveChain().Tip()->GetAncestor(m_node.chainman->ActiveChain().Tip()->nHeight - i))};
         ancestor->nTime += SEQUENCE_LOCK_TIME; // Trick the MedianTimePast
     }
     m_node.chainman->ActiveChain().Tip()->nHeight++;
+    m_node.chainman->ActiveChain().Tip()->BuildSkip(); // resync pskip with the faked height, otherwise GetAncestor() can desync and assert past genesis
     SetMockTime(m_node.chainman->ActiveChain().Tip()->GetMedianTimePast() + 1);
 
     block_template = mining->createNewBlock(options, /*cooldown=*/false);
@@ -781,7 +803,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
         {
             // A block template does not have proof-of-work, but it might pass
             // verification by coincidence. Grind the nonce if needed:
-            while (CheckProofOfWork(block.GetHash(), block.nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
+            while (CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
                 block.nNonce++;
             }
 
@@ -820,6 +842,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             txCoinbase.version = 1;
             txCoinbase.vin[0].scriptSig = CScript{} << (current_height + 1) << bi.extranonce;
             txCoinbase.vout.resize(1); // Ignore the (optional) segwit commitment added by CreateNewBlock (as the hardcoded nonces don't account for this)
+            txCoinbase.vin[0].scriptWitness.SetNull(); // ...and the witness reserved value CreateNewBlock attaches whenever segwit is active at this height (always, on this chain) - it has no commitment output to match once vout is truncated above
             txCoinbase.vout[0].scriptPubKey = CScript();
             block.vtx[0] = MakeTransactionRef(txCoinbase);
             if (txFirst.size() == 0)
@@ -828,6 +851,14 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
                 txFirst.push_back(block.vtx[0]);
             block.hashMerkleRoot = BlockMerkleRoot(block);
             block.nNonce = bi.nonce;
+            // code for regenerate BLOCKINFO
+            /*
+            while (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, Assert(m_node.chainman)->GetParams().GetConsensus())) {
+               ++block.nNonce;
+            }
+            std::ofstream f("/tmp/blockinfo.txt", std::ios::app);
+            f << "{" << bi.extranonce << ", " << block.nNonce << "},\n";
+            */
         }
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(block);
         // Alternate calls between Chainman's ProcessNewBlock and submitSolution
@@ -859,11 +890,13 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     TestBasicMining(scriptPubKey, txFirst, baseheight);
 
     m_node.chainman->ActiveChain().Tip()->nHeight--;
+    m_node.chainman->ActiveChain().Tip()->BuildSkip(); // resync pskip with the faked height
     SetMockTime(0);
 
     TestPackageSelection(scriptPubKey, txFirst);
 
     m_node.chainman->ActiveChain().Tip()->nHeight--;
+    m_node.chainman->ActiveChain().Tip()->BuildSkip(); // resync pskip with the faked height
     SetMockTime(0);
 
     TestPrioritisedMining(scriptPubKey, txFirst);

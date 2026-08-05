@@ -89,7 +89,7 @@ CBlock BuildChainTestingSetup::CreateBlock(const CBlockIndex* prev,
         block.hashMerkleRoot = BlockMerkleRoot(block);
     }
 
-    while (!CheckProofOfWork(block.GetHash(), block.nBits, m_node.chainman->GetConsensus())) ++block.nNonce;
+    while (!CheckProofOfWork(block.GetArgon2idPoWHash(), block.nBits, m_node.chainman->GetConsensus())) ++block.nNonce;
 
     return block;
 }
@@ -366,7 +366,7 @@ BOOST_FIXTURE_TEST_CASE(index_reorg_crash, BuildChainTestingSetup)
     };
 
     // Wait until the index is one block before the fork point
-    func_wait_until(blocking_height - 1, /*timeout=*/5s);
+    func_wait_until(blocking_height - 1, /*timeout=*/600s);
 
     // Create a fork to trigger the reorg
     std::vector<std::shared_ptr<CBlock>> fork;
@@ -380,7 +380,7 @@ BOOST_FIXTURE_TEST_CASE(index_reorg_crash, BuildChainTestingSetup)
     // Unblock the index thread so it can process the reorg
     promise.set_value();
     // Wait for the index to reach the new tip
-    func_wait_until(blocking_height + 2, 5s);
+    func_wait_until(blocking_height + 2, 600s);
     index.Stop();
 }
 

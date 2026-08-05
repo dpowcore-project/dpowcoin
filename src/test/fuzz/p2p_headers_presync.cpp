@@ -109,15 +109,15 @@ CBlockHeader ConsumeHeader(FuzzedDataProvider& fuzzed_data_provider, const uint2
     // target comes from the bits value of mainnet block 840000, which is 0x17034219.
     // Calling lower_target.SetCompact(0x17034219) and upper_target.SetCompact(0x1d00ffff)
     // should return the values below.
-    //
+    // Dpowcoin use genesis block 0 and 100000.
     // RPC commands to verify:
-    // getblockheader 000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
-    // getblockheader 0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5
+    // getblockheader d86f8a0582e779830f182befeaaabc8c73a159b6b06530910758daf17ce31e36
+    // getblockheader f87bbd3f66694149fc6e692a89de88b69b56a7407608a8b61021e54069cab3c7
     if (fuzzed_data_provider.ConsumeBool()) {
         header.nBits = prev_nbits;
     } else {
-        arith_uint256 lower_target = UintToArith256(uint256{"0000000000000000000342190000000000000000000000000000000000000000"});
-        arith_uint256 upper_target = UintToArith256(uint256{"00000000ffff0000000000000000000000000000000000000000000000000000"});
+        arith_uint256 lower_target = UintToArith256(uint256{"0011711800000000000000000000000000000000000000000000000000000000"});
+        arith_uint256 upper_target = UintToArith256(uint256{"001fffff00000000000000000000000000000000000000000000000000000000"});
         arith_uint256 target = ConsumeArithUInt256InRange(fuzzed_data_provider, lower_target, upper_target);
         header.nBits = target.GetCompact();
     }
@@ -145,7 +145,7 @@ CBlock ConsumeBlock(FuzzedDataProvider& fuzzed_data_provider, const uint256& pre
 
 void FinalizeHeader(CBlockHeader& header, const ChainstateManager& chainman)
 {
-    while (!CheckProofOfWork(header.GetHash(), header.nBits, chainman.GetParams().GetConsensus())) {
+    while (!CheckProofOfWork(header.GetArgon2idPoWHash(), header.nBits, chainman.GetParams().GetConsensus())) {
         ++(header.nNonce);
     }
 }
@@ -159,6 +159,7 @@ void initialize()
     static auto setup{
         MakeNoLogFileContext<HeadersSyncSetup>(ChainType::MAIN,
                                                {
+                                                   .extra_args = {"-checkpoints=0"},  // Checkpoints restored
                                                    .setup_validation_interface = false,
                                                }),
     };

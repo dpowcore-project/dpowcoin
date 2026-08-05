@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(init_test)
     LogInstance().DisconnectTestLogger();
     m_node.args->SetConfigFilePath({});
 
-    // Prevent the test from trying to listen on ports 8332 and 8333.
+    // Prevent the test from trying to listen on ports 42002 and 42003.
     m_node.args->ForceSetArg("-server", "0");
     m_node.args->ForceSetArg("-listen", "0");
 
