@@ -33,7 +33,7 @@
 namespace ipc {
 namespace capnp {
 //! Construct a ParamStream wrapping a data stream with serialization parameters
-//! needed to pass transaction objects between bitcoin processes.
+//! needed to pass transaction objects between dpowcoin processes.
 //! In the future, more params may be added here to serialize other objects that
 //! require serialization parameters. Params should just be chosen to serialize
 //! objects completely and ensure that serializing and deserializing objects
@@ -53,7 +53,7 @@ concept Deserializable = std::is_constructible_v<T, ::deserialize_type, ::DataSt
 } // namespace capnp
 } // namespace ipc
 
-//! Functions to serialize / deserialize common bitcoin types.
+//! Functions to serialize / deserialize common dpowcoin types.
 namespace mp {
 //! Overload multiprocess library's CustomBuildField hook to allow any
 //! serializable object to be stored in a capnproto Data field or passed to a

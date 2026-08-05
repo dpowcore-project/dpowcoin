@@ -46,9 +46,11 @@
 #include <cstddef>
 #include <cstdio>
 #include <exception>
+#include <iterator>
 #include <map>
 #include <optional>
 #include <ostream>
+#include <ranges> // Checkpoints restored
 #include <span>
 #include <stdexcept>
 #include <system_error>
@@ -430,6 +432,22 @@ CBlockIndex* BlockManager::InsertBlockIndex(const uint256& hash)
     }
     return pindex;
 }
+
+// Checkpoints restored
+const CBlockIndex* BlockManager::GetLastCheckpoint(const CCheckpointData& data)
+{
+    const MapCheckpoints& checkpoints = data.mapCheckpoints;
+
+    for (const MapCheckpoints::value_type& i : checkpoints | std::views::reverse) {
+        const uint256& hash = i.second;
+        const CBlockIndex* pindex = LookupBlockIndex(hash);
+        if (pindex) {
+            return pindex;
+        }
+    }
+    return nullptr;
+}
+// Checkpoints restored
 
 bool BlockManager::LoadBlockIndex(const std::optional<uint256>& snapshot_blockhash)
 {

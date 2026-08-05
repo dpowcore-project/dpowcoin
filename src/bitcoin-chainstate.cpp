@@ -2,12 +2,12 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 //
-// The bitcoin-chainstate executable serves to surface the dependencies required
+// The dpowcoin-chainstate executable serves to surface the dependencies required
 // by a program wishing to use Bitcoin Core's consensus engine as it is right
 // now.
 //
 // DEVELOPER NOTE: Since this is a "demo-only", experimental, etc. executable,
-//                 it may diverge from Bitcoin Core's coding style.
+//                 it may diverge from Dpowcoin or Bitcoin Core's coding style.
 //
 // It is part of the libbitcoinkernel project.
 
@@ -94,8 +94,14 @@ public:
                 std::cout << "A block this one builds on is invalid" << std::endl;
                 break;
             case BlockValidationResult::TIME_FUTURE:
-                std::cout << "block timestamp was > 2 hours in the future (or our clock is bad)" << std::endl;
+                // Dpowcoin Params
+                std::cout << "block timestamp was > 10 Minutes in the future (or our clock is bad)" << std::endl;
                 break;
+            // Checkpoints restored
+            case BlockValidationResult::CHECKPOINT:
+                std::cerr << "the block failed to meet one of our checkpoints" << std::endl;
+                 break;
+            // Checkpoints restored
             }
             return;
         }

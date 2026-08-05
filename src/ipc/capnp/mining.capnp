@@ -65,3 +65,11 @@ struct CoinbaseTx $Proxy.wrap("node::CoinbaseTx") {
     requiredOutputs @5 :List(Data) $Proxy.name("required_outputs");
     lockTime @6 :UInt32 $Proxy.name("lock_time");
 }
+
+# // Checkpoints restored
+struct BlockValidationState {
+    mode         @0 :Int32;
+    result       @1 :Int32;
+    rejectReason @2 :Text;
+    debugMessage @3 :Text;
+}
