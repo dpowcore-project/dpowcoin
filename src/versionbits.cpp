@@ -296,6 +296,7 @@ namespace {
 /**
  * Threshold condition checker that triggers when unknown versionbits are seen on the network.
  */
+/*
 class WarningBitsConditionChecker : public AbstractThresholdConditionChecker
 {
 private:
@@ -312,6 +313,26 @@ public:
         if (chainparams.IsTestChain()) {
             period = chainparams.GetConsensus().DifficultyAdjustmentInterval();
             threshold = period * 3 / 4; // 75% for test nets per BIP9 suggestion
+        }
+    }
+*/
+
+class WarningBitsConditionChecker : public AbstractThresholdConditionChecker
+{
+private:
+    const Consensus::Params& m_params;
+    std::array<ThresholdConditionCache, Consensus::MAX_VERSION_BITS_DEPLOYMENTS>& m_caches;
+    int m_bit;
+    int period{4032}; /* Dpowcoin Params*/
+    int threshold{3024}; // 75% threshold used in BIP 341 /* Dpowcoin Params*/
+
+public:
+    explicit WarningBitsConditionChecker(const CChainParams& chainparams, std::array<ThresholdConditionCache, Consensus::MAX_VERSION_BITS_DEPLOYMENTS>& caches, int bit)
+    : m_params{chainparams.GetConsensus()}, m_caches{caches}, m_bit(bit)
+    {
+        if (chainparams.IsRegTestChain()) {
+            period = 144; /* Dpowcoin Params*/
+            threshold = 108; // 75% of 144 RegTest /* Dpowcoin Params*/
         }
     }
 

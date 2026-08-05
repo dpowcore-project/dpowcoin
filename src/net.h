@@ -1491,7 +1491,7 @@ private:
      * Determine whether we're already connected to a given "host:port".
      * Note that for inbound connections, the peer is likely using a random outbound
      * port on their side, so this will likely not match any inbound connections.
-     * @param[in] host String of the form "host[:port]", e.g. "localhost" or "localhost:8333" or "1.2.3.4:8333".
+     * @param[in] host String of the form "host[:port]", e.g. "localhost" or "localhost:42003" or "1.2.3.4:42003".
      * @return true if connected to `host`.
      */
     bool AlreadyConnectedToHost(std::string_view host) const;

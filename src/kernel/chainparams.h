@@ -111,6 +111,8 @@ public:
     bool DefaultConsistencyChecks() const { return fDefaultConsistencyChecks; }
     /** If this chain is exclusively used for testing */
     bool IsTestChain() const { return m_chain_type != ChainType::MAIN; }
+    /** If this chain is exclusively used for regtest testing */
+    bool IsRegTestChain() const { return m_chain_type == ChainType::REGTEST; } // Dpowcoin Params
     /** If this chain allows time to be mocked */
     bool IsMockableChain() const { return m_is_mockable_chain; }
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }

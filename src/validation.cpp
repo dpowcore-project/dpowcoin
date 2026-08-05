@@ -1850,7 +1850,7 @@ CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
         return 0;
 
     CAmount nSubsidy = 50 * COIN;
-    // Subsidy is cut in half every 210,000 blocks which will occur approximately every 4 years.
+    // Subsidy is cut in half every 420,000 blocks which will occur approximately every 4 years.
     nSubsidy >>= halvings;
     return nSubsidy;
 }
@@ -2204,15 +2204,22 @@ DisconnectResult Chainstate::DisconnectBlock(const CBlock& block, const CBlockIn
     // Note: the blocks specified here are different than the ones used in ConnectBlock because DisconnectBlock
     // unwinds the blocks in reverse. As a result, the inconsistency is not discovered until the earlier
     // blocks with the duplicate coinbase transactions are disconnected.
+    // Dpowcoin Params
+    // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+    /*
     bool fEnforceBIP30 = !((pindex->nHeight==91722 && pindex->GetBlockHash() == uint256{"00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"}) ||
                            (pindex->nHeight==91812 && pindex->GetBlockHash() == uint256{"00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"}));
-
+    */
     // undo transactions in reverse order
     for (int i = block.vtx.size() - 1; i >= 0; i--) {
         const CTransaction &tx = *(block.vtx[i]);
         Txid hash = tx.GetHash();
         bool is_coinbase = tx.IsCoinBase();
+        // Dpowcoin Params
+        // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+        /*
         bool is_bip30_exception = (is_coinbase && !fEnforceBIP30);
+        */
 
         // Check that all outputs are available and match the outputs in the block itself
         // exactly.
@@ -2222,9 +2229,14 @@ DisconnectResult Chainstate::DisconnectBlock(const CBlock& block, const CBlockIn
                 Coin coin;
                 bool is_spent = view.SpendCoin(out, &coin);
                 if (!is_spent || tx.vout[o] != coin.out || pindex->nHeight != coin.nHeight || is_coinbase != coin.fCoinBase) {
+                    // Dpowcoin Params
+                    // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+                    /*
                     if (!is_bip30_exception) {
                         fClean = false; // transaction output mismatch
                     }
+                    */
+                    fClean = false; // transaction output mismatch
                 }
             }
         }
@@ -2405,7 +2417,10 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // Now that the whole chain is irreversibly beyond that time it is applied to all blocks except the
     // two in the chain that violate it. This prevents exploiting the issue against nodes during their
     // initial block download.
-    bool fEnforceBIP30 = !IsBIP30Repeat(*pindex);
+    // Dpowcoin Params
+    // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+    //bool fEnforceBIP30 = !IsBIP30Repeat(*pindex);
+    bool fEnforceBIP30 = true;
 
     // Once BIP34 activated it was not possible to create new duplicate coinbases and thus other than starting
     // with the 2 existing duplicate coinbase pairs, not possible to create overwriting txs.  But by the
@@ -2433,7 +2448,9 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // future consensus change to do a new and improved version of BIP34 that
     // will actually prevent ever creating any duplicate coinbases in the
     // future.
-    static constexpr int BIP34_IMPLIES_BIP30_LIMIT = 1983702;
+    // Dpowcoin Params
+    // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+    //static constexpr int BIP34_IMPLIES_BIP30_LIMIT = 1983702;
 
     // There is no potential to create a duplicate coinbase at block 209,921
     // because this is still before the BIP34 height and so explicit BIP30
@@ -2470,7 +2487,12 @@ bool Chainstate::ConnectBlock(const CBlock& block, BlockValidationState& state, 
     // TODO: Remove BIP30 checking from block height 1,983,702 on, once we have a
     // consensus change that ensures coinbases at those heights cannot
     // duplicate earlier coinbases.
+    // Dpowcoin Params
+    // remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+    /*
     if (fEnforceBIP30 || pindex->nHeight >= BIP34_IMPLIES_BIP30_LIMIT) {
+    */
+    if (fEnforceBIP30) {
         for (const auto& tx : block.vtx) {
             for (size_t o = 0; o < tx->vout.size(); o++) {
                 if (view.HaveCoin(COutPoint(tx->GetHash(), o))) {
@@ -6295,6 +6317,9 @@ Chainstate& ChainstateManager::AddChainstate(std::unique_ptr<Chainstate> chainst
     return curr_chainstate;
 }
 
+// Dpowcoin Params
+// remove BIP30 exceptions - we don't have those blocks so we skip BIP30 tx's
+/*
 bool IsBIP30Repeat(const CBlockIndex& block_index)
 {
     return (block_index.nHeight==91842 && block_index.GetBlockHash() == uint256{"00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec"}) ||
@@ -6306,6 +6331,7 @@ bool IsBIP30Unspendable(const uint256& block_hash, int block_height)
     return (block_height==91722 && block_hash == uint256{"00000000000271a2dc26e7667f8419f2e15416dc6955e5a6c6cdf3f2574dd08e"}) ||
            (block_height==91812 && block_hash == uint256{"00000000000af0aed4792b1acee3d966af36cf5def14935db8de83d6f9306f2f"});
 }
+*/
 
 util::Result<void> Chainstate::InvalidateCoinsDBOnDisk()
 {
