@@ -5,10 +5,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## This issue tracker is only for technical issues related to Bitcoin Core.
+        ## This issue tracker is only for technical issues related to Dpowcoin Core.
 
-        * General bitcoin questions and/or support requests should use Bitcoin StackExchange at https://bitcoin.stackexchange.com.
-        * For reporting security issues, please read instructions at https://bitcoincore.org/en/contact/.
+        * General Dpowcoin questions and/or support requests should use Dpowcoin telegram https://t.me/dpowcoin or discord https://discord.gg/b9zkzAgUpH.
+        * For reporting security issues, please read instructions at https://dpowcore.org/en/about/.
         * If the node is "stuck" during sync or giving "block checksum mismatch" errors, please ensure your hardware is stable by running `memtest` and observe CPU temperature with a load-test tool such as `linpack` before creating an issue.
 
         ----
@@ -50,14 +50,14 @@ body:
       description: |
         Please copy and paste any relevant log output or attach a debug log file.
 
-        You can find the debug.log in your [data dir.](https://github.com/bitcoin/bitcoin/blob/master/doc/files.md#data-directory-location)
+        You can find the debug.log in your [data dir.](https://github.com/dpowcore-project/dpowcoin/blob/master/doc/files.md#data-directory-location)
 
         Please be aware that the debug log might contain personally identifying information.
     validations:
       required: false
   - type: dropdown
     attributes:
-      label: How did you obtain Bitcoin Core
+      label: How did you obtain Dpowcoin Core
       multiple: false
       options:
         - Compiled from source
@@ -69,8 +69,8 @@ body:
   - type: input
     id: core-version
     attributes:
-      label: What version of Bitcoin Core are you using?
-      description: Run `bitcoind --version` or in Bitcoin-QT use `Help > About Bitcoin Core`
+      label: What version of Dpowcoin Core are you using?
+      description: Run `dpowcoind --version` or in Dpowcoin-QT use `Help > About Dpowcoin Core`
       placeholder: e.g. v24.0.1 or master@e1bf547
     validations:
       required: true
@@ -78,7 +78,7 @@ body:
     id: os
     attributes:
       label: Operating system and version
-      placeholder: e.g. "MacOS 26.0" or "Ubuntu 26.04 LTS"
+      placeholder: e.g. "MacOS Ventura 13.2" or "MacOS 26.0" or "Ubuntu 26.04 LTS"
     validations:
       required: true
   - type: textarea
