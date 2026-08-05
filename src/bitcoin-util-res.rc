@@ -15,13 +15,13 @@ BEGIN
         BLOCK "040904E4" // U.S. English - multilingual (hex)
         BEGIN
             VALUE "CompanyName",        CLIENT_NAME " project"
-            VALUE "FileDescription",    "bitcoin-util (CLI Bitcoin utility)"
+            VALUE "FileDescription",    "dpowcoin-util (CLI Dpowcoin utility)"
             VALUE "FileVersion",        CLIENT_VERSION_STRING
-            VALUE "InternalName",       "bitcoin-util"
+            VALUE "InternalName",       "dpowcoin-util"
             VALUE "LegalCopyright",     COPYRIGHT_STR
             VALUE "LegalTrademarks1",   "Distributed under the MIT software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php."
-            VALUE "OriginalFilename",   "bitcoin-util.exe"
-            VALUE "ProductName",        "bitcoin-util"
+            VALUE "OriginalFilename",   "dpowcoin-util.exe"
+            VALUE "ProductName",        "dpowcoin-util"
             VALUE "ProductVersion",     CLIENT_VERSION_STRING
         END
     END

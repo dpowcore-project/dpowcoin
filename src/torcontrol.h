@@ -99,7 +99,7 @@ private:
     static void eventcb(struct bufferevent *bev, short what, void *ctx);
 };
 
-/****** Bitcoin specific TorController implementation ********/
+/****** Dpowcoin specific TorController implementation ********/
 
 /** Controller that connects to Tor control socket, authenticate, then create
  * and maintain an ephemeral onion service.

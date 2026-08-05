@@ -14,8 +14,8 @@
 class ArgsManager;
 
 /**
- * CBaseChainParams defines the base parameters (shared between bitcoin-cli and bitcoind)
- * of a given instance of the Bitcoin system.
+ * CBaseChainParams defines the base parameters (shared between dpowcoin-cli and dpowcoind)
+ * of a given instance of the Dpowcoin system.
  */
 class CBaseChainParams
 {
