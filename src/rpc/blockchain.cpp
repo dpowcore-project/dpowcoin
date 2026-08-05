@@ -596,6 +596,37 @@ static RPCHelpMan getblockhash()
     };
 }
 
+/* Dpowcoin Params */
+static RPCHelpMan getargon2idpowblockhash()
+{
+    return RPCHelpMan{"getargon2idpowblockhash",
+                "Returns argon2id hash of block in best-block-chain at height provided.\n",
+                {
+                    {"height", RPCArg::Type::NUM, RPCArg::Optional::NO, "The height index"},
+                },
+                RPCResult{
+                    RPCResult::Type::STR_HEX, "", "The argon2id block pow hash"},
+                RPCExamples{
+                    HelpExampleCli("getargon2idpowblockhash", "1000")
+            + HelpExampleRpc("getargon2idpowblockhash", "1000")
+                },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    ChainstateManager& chainman = EnsureAnyChainman(request.context);
+    LOCK(cs_main);
+    const CChain& active_chain = chainman.ActiveChain();
+
+    int nHeight = request.params[0].getInt<int>();
+    if (nHeight < 0 || nHeight > active_chain.Height())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Block height out of range");
+
+    const CBlockIndex* pblockindex = active_chain[nHeight];
+    return pblockindex->GetBlockArgon2idPoWHash().GetHex();
+},
+    };
+}
+/* Dpowcoin Params */
+
 static RPCHelpMan getblockheader()
 {
     return RPCHelpMan{
@@ -3510,6 +3541,7 @@ void RegisterBlockchainRPCCommands(CRPCTable& t)
         {"blockchain", &getblock},
         {"blockchain", &getblockfrompeer},
         {"blockchain", &getblockhash},
+        {"blockchain", &getargon2idpowblockhash}, /* Dpowcoin Params */
         {"blockchain", &getblockheader},
         {"blockchain", &getchaintips},
         {"blockchain", &getdifficulty},

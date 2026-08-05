@@ -1,6 +1,7 @@
 Checks: '
 -*,
 bitcoin-*,
+dpowcoin-*,
 bugprone-argument-comment,
 bugprone-move-forwarding-reference,
 bugprone-string-constructor,
