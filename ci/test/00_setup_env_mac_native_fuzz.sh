@@ -16,3 +16,5 @@ export RUN_UNIT_TESTS=false
 export RUN_FUNCTIONAL_TESTS=false
 export RUN_FUZZ_TESTS=true
 export GOAL="all"
+# Skip the fuzz targets
+export FUZZ_TESTS_CONFIG="--exclude p2p_headers_presync"

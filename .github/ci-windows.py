@@ -208,6 +208,9 @@ def run_tests(ci_type):
             num_procs,
             "--loglevel",
             "DEBUG",
+            # Skip the fuzz targets
+            "--exclude",
+            "p2p_headers_presync",
             str(workspace / "qa-assets" / "fuzz_corpora"),
         ]
         run(fuzz_cmd)

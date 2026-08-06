@@ -29,7 +29,7 @@
 // the two paths meet.
 //
 // Deliberately expensive (real Argon2id per iteration, roughly
-// 300-1500 hashes/sec on a slow CPU) and deliberately narrow in scope:
+// 20-30 hashes/sec on a slow CPU) and deliberately narrow in scope:
 // there are only a handful of branches to reach at all (cache hit / cache
 // miss+pass / cache miss+fail), so depth of search matters far less here
 // than in a wide parser -- a modest corpus grown over a short time window
