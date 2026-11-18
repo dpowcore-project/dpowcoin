@@ -21,7 +21,7 @@ DPOWCOIND_OPTS="${DPOWCOIND_OPTS:-${DPOWCOIN_OPTS}}"
 name="Dpowcoin Core Daemon"
 description="Dpowcoin cryptocurrency P2P network daemon"
 
-command="/usr/bin/dpowcoind"
+command="${DPOWCOIND_BIN}"
 command_args="-pid=\"${DPOWCOIND_PIDFILE}\" \
 		-conf=\"${DPOWCOIND_CONFIGFILE}\" \
 		-datadir=\"${DPOWCOIND_DATADIR}\" \
@@ -30,6 +30,7 @@ command_args="-pid=\"${DPOWCOIND_PIDFILE}\" \
 
 required_files="${DPOWCOIND_CONFIGFILE}"
 start_stop_daemon_args="-u ${DPOWCOIND_USER} \
+			-g ${DPOWCOIND_GROUP} \
 			-N ${DPOWCOIND_NICE} -w 2000"
 pidfile="${DPOWCOIND_PIDFILE}"
 

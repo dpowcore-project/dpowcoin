@@ -132,6 +132,7 @@ BASE_SCRIPTS = [
     'p2p_node_network_limited.py --v1transport',
     'rpc_psbt.py',
     'feature_remove_pruned_files_on_startup.py',
+    'feature_prune_stale_fork.py',
     'mempool_updatefromblock.py',
     'feature_maxuploadtarget.py',
     'mining_getblocktemplate_longpoll.py',

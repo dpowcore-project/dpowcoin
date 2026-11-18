@@ -57,6 +57,7 @@
 #include <txmempool.h>
 #include <uint256.h>
 #include <util/check.h>
+#include <util/hasher.h>
 #include <util/strencodings.h>
 #include <util/time.h>
 #include <util/trace.h>
@@ -84,6 +85,7 @@
 #include <set>
 #include <span>
 #include <typeinfo>
+#include <unordered_set>
 #include <utility>
 
 using kernel::ChainstateRole;
@@ -758,6 +760,8 @@ private:
 
     FastRandomContext m_rng GUARDED_BY(NetEventsInterface::g_msgproc_mutex);
 
+    /** Copied into short-lived tx INV deduplication sets to avoid generating salts per message. */
+    const SaltedUint256Hasher m_txhash_hasher;
     FeeFilterRounder m_fee_filter_rounder GUARDED_BY(NetEventsInterface::g_msgproc_mutex);
 
     const CChainParams& m_chainparams;
@@ -4161,6 +4165,8 @@ void PeerManagerImpl::ProcessMessage(Peer& peer, CNode& pfrom, const std::string
         }
 
         const bool reject_tx_invs{RejectIncomingTxs(pfrom)};
+        std::unordered_set<uint256, SaltedUint256Hasher> seen_txids{0, m_txhash_hasher};
+        std::unordered_set<uint256, SaltedUint256Hasher> seen_wtxids{0, m_txhash_hasher};
 
         LOCK2(cs_main, m_tx_download_mutex);
 
@@ -4199,6 +4205,9 @@ void PeerManagerImpl::ProcessMessage(Peer& peer, CNode& pfrom, const std::string
                     pfrom.fDisconnect = true;
                     return;
                 }
+                // MSG_WITNESS_TX is treated as a txid, despite only being specified for getdata.
+                auto& seen_hashes{inv.IsMsgWtx() ? seen_wtxids : seen_txids};
+                if (!seen_hashes.insert(inv.hash).second) continue;
                 const GenTxid gtxid = ToGenTxid(inv);
                 AddKnownTx(peer, inv.hash);
 
@@ -5220,6 +5229,12 @@ bool PeerManagerImpl::MaybeDiscourageAndDisconnect(CNode& pnode, Peer& peer)
         return false;
     }
 
+    if (pnode.IsPrivateBroadcastConn()) {
+        LogDebug(BCLog::PRIVBROADCAST, "Disconnecting misbehaving private broadcast peer=%d", peer.m_id);
+        pnode.fDisconnect = true;
+        return true;
+    }
+
     if (pnode.addr.IsLocal()) {
         // We disconnect local peers for bad behavior but don't discourage (since that would discourage
         // all peers on the same local address)
@@ -5232,7 +5247,7 @@ bool PeerManagerImpl::MaybeDiscourageAndDisconnect(CNode& pnode, Peer& peer)
     // Normal case: Disconnect the peer and discourage all nodes sharing the address
     LogDebug(BCLog::NET, "Disconnecting and discouraging peer %d!\n", peer.m_id);
     if (m_banman) m_banman->Discourage(pnode.addr);
-    m_connman.DisconnectNode(pnode.addr);
+    m_connman.DisconnectNode(CSubNet{pnode.addr}, /*disconnect_private_broadcast=*/false);
     return true;
 }
 
