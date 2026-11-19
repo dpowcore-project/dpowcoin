@@ -524,8 +524,9 @@ bool BlockManager::LoadBlockIndex(const std::optional<uint256>& snapshot_blockha
                     pindex->m_chain_tx_count = pindex->pprev->m_chain_tx_count + pindex->nTx;
                 } else {
                     pindex->m_chain_tx_count = 0;
-                    // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): guard + dedup via
-                    // AddUnlinkedBlock instead of raw insert. DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
+                    // BACKPORT (upstream #35070; not yet in 31.x as of 2026-07-04): dedup via
+                    // AddUnlinkedBlock instead of raw insert. (The BLOCK_HAVE_DATA guard is already
+                    // in upstream 31.x via #35168.) DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
                     if (pindex->nStatus & BLOCK_HAVE_DATA) {
                         AddUnlinkedBlock(pindex);
                     }

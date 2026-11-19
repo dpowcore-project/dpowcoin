@@ -37,7 +37,7 @@ public:
 /// Helper to initialize the global NodeClock mocktime for the duration of a test,
 /// and reset it afterwards.
 // BACKPORT (adapted from upstream bitcoin/bitcoin's FakeNodeClock/NodeClockContext; that
-// class isn't in 31.x this reimplements just what our fuzz harness needs, using 31.x's
+// class isn't in 31.x, so this reimplements just what our fuzz harness needs, using 31.x's
 // own SetMockTime()/NodeSeconds, without master's later LimitOne<> CRTP wrapper).
 // DO NOT DROP ON NEXT UPSTREAM MERGE/REBASE.
 class FakeNodeClock
