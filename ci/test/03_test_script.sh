@@ -95,6 +95,14 @@ BASE_BUILD_DIR=${BASE_BUILD_DIR:-$BASE_SCRATCH_DIR/build-$HOST}
 
 BITCOIN_CONFIG_ALL="$BITCOIN_CONFIG_ALL -DCMAKE_INSTALL_PREFIX=$BASE_OUTDIR -Werror=dev"
 
+# CMake >= 4.5 has the `non-target-directive` warning category, which -Werror=dev
+# turns into errors (subtree secp256k1 etc.). The flag is unknown (fatal) on older
+# CMake, so add it only when supported, and after -Werror=dev.
+read -r CMAKE_MAJOR CMAKE_MINOR < <(cmake --version | sed -n '1s/^cmake version \([0-9][0-9]*\)\.\([0-9][0-9]*\).*/\1 \2/p')
+if (( CMAKE_MAJOR > 4 || (CMAKE_MAJOR == 4 && CMAKE_MINOR >= 5) )); then
+  BITCOIN_CONFIG_ALL="$BITCOIN_CONFIG_ALL -Wno-error=non-target-directive"
+fi
+
 if [[ "${RUN_IWYU}" == true || "${RUN_TIDY}" == true ]]; then
   BITCOIN_CONFIG_ALL="$BITCOIN_CONFIG_ALL -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 fi
