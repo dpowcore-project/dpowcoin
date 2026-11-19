@@ -5,7 +5,6 @@
 
 import argparse
 import os
-import re
 import shlex
 import subprocess
 import sys
@@ -66,29 +65,12 @@ def github_import_vs_env(_ci_type):
             env_file.write(f"{name}={value}\n")
 
 
-def cmake_supports_non_target_directive():
-    """CMake >= 4.5 knows the `non-target-directive` warning category.
-
-    On older CMake the flag -Wno-error=non-target-directive is itself a fatal
-    error ("The warning category ... is not known"), so it must be added
-    only when the running CMake is new enough.
-    """
-    out = subprocess.run(["cmake", "--version"], capture_output=True, text=True, check=True).stdout
-    m = re.search(r"cmake version (\d+)\.(\d+)", out)
-    return bool(m) and (int(m.group(1)), int(m.group(2))) >= (4, 5)
-
-
 def generate(ci_type):
     command = [
         "cmake",
         "-B",
         "build",
         "-Werror=dev",
-    ]
-    if cmake_supports_non_target_directive():
-        # Must come AFTER -Werror=dev, otherwise -Werror=dev overrides it.
-        command.append("-Wno-error=non-target-directive")
-    command += [
         "--preset",
         "vs2026",
     ] + GENERATE_OPTIONS[ci_type]
